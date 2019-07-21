@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import Items from './components/items';
 
 class App extends Component {
@@ -13,7 +13,7 @@ class App extends Component {
     };
 
     componentDidMount() {
-        fetch('http://192.168.109.161:8089/item/all')
+        fetch('http://localhost:8089/item/all')
             .then(res => res.json())
             .then((data) => {
                 this.setState({ items: data })
