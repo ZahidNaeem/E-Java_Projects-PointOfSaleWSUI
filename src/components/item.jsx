@@ -12,27 +12,14 @@ class Item extends Component {
     }
 
     componentDidMount() {
-        fetch('http://localhost:8089/item/first')
-            .then(res => res.json())
-            .then((data) => {
-                const { item, navigationDtl } = data;
+        const axios = require('axios');
+        axios.get('http://localhost:8089/item/first')
+            .then(res => {
+                const { item, navigationDtl } = res.data;
                 this.setState({ item, navigationDtl })
             })
             .catch(console.log)
     }
-
-    // handleItemDescChange = (event) => {
-    //     console.log(event.target.value);
-    //     let item = this.state.item;
-    //     item[event.target.name] = event.target.value;
-    //     this.setState({ item });
-    // }
-
-    // handleItemUomChange = (event) => {
-    //     console.log(event.target.value);
-    //     let item = { itemUom: event.target.value, itemDesc: this.state.item.itemDesc }
-    //     this.setState({ item });
-    // }
 
     handleItemChange = (event) => {
         console.log(event.target.value);
@@ -42,8 +29,8 @@ class Item extends Component {
     }
 
     handleSubmit = (event) => {
-        alert('An Item was submitted: ' + this.state.item.itemDesc);
         event.preventDefault();
+
     }
 
 
@@ -54,6 +41,32 @@ class Item extends Component {
                 <center><h1>Item Registrtion Form</h1></center>
                 <div>
                     <Form onSubmit={this.handleSubmit}>
+                        <InputGroup className="mb-3">
+                            <InputGroup.Prepend>
+                                <InputGroup.Text id="basic-addon1">Item Code</InputGroup.Text>
+                            </InputGroup.Prepend>
+                            <FormControl
+                                placeholder="Item Code"
+                                aria-label="Item Code"
+                                aria-describedby="basic-addon1"
+                                defaultValue={obj.itemCode}
+                                onChange={this.handleItemChange}
+                            />
+                        </InputGroup>
+
+                        <InputGroup className="mb-3">
+                            <InputGroup.Prepend>
+                                <InputGroup.Text id="basic-addon2">Item Barcode</InputGroup.Text>
+                            </InputGroup.Prepend>
+                            <FormControl
+                                placeholder="Item Barcode"
+                                aria-label="Item Barcode"
+                                aria-describedby="basic-addon2"
+                                defaultValue={obj.itemBarcode}
+                                onChange={this.handleItemChange}
+                            />
+                        </InputGroup>
+
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
                                 <InputGroup.Text id="basic-addon1">Item Desc.</InputGroup.Text>
@@ -69,45 +82,106 @@ class Item extends Component {
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text id="basic-addon2">Item U.O.M</InputGroup.Text>
+                                <InputGroup.Text id="basic-addon1">Item Category</InputGroup.Text>
+                            </InputGroup.Prepend>
+                            <FormControl
+                                placeholder="Item Category"
+                                aria-label="Item Category"
+                                aria-describedby="basic-addon1"
+                                defaultValue={obj.itemCategory}
+                                onChange={this.handleItemChange}
+                            />
+                        </InputGroup>
+
+                        <InputGroup className="mb-3">
+                            <InputGroup.Prepend>
+                                <InputGroup.Text id="basic-addon1">Item U.O.M</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 placeholder="Item U.O.M"
                                 aria-label="Item U.O.M"
-                                aria-describedby="basic-addon2"
+                                aria-describedby="basic-addon1"
                                 defaultValue={obj.itemUom}
                                 onChange={this.handleItemChange}
                             />
-                            {/* <InputGroup.Append>
-                                <InputGroup.Text id="basic-addon2">@example.com</InputGroup.Text>
-                            </InputGroup.Append> */}
-                        </InputGroup>
-
-                        <label htmlFor="basic-url">Your vanity URL</label>
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text id="basic-addon3">
-                                    https://example.com/users/
-                        </InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl id="basic-url" aria-describedby="basic-addon3" />
                         </InputGroup>
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text>$</InputGroup.Text>
+                                <InputGroup.Text id="basic-addon1">Purchase Price</InputGroup.Text>
                             </InputGroup.Prepend>
-                            <FormControl aria-label="Amount (to the nearest dollar)" />
-                            <InputGroup.Append>
-                                <InputGroup.Text>.00</InputGroup.Text>
-                            </InputGroup.Append>
+                            <FormControl
+                                placeholder="Purchase Price"
+                                aria-label="Purchase Price"
+                                aria-describedby="basic-addon1"
+                                defaultValue={obj.purchasePrice}
+                                onChange={this.handleItemChange}
+                            />
                         </InputGroup>
 
-                        <InputGroup>
+                        <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text>With textarea</InputGroup.Text>
+                                <InputGroup.Text id="basic-addon1">Sale Price</InputGroup.Text>
                             </InputGroup.Prepend>
-                            <FormControl as="textarea" aria-label="With textarea" />
+                            <FormControl
+                                placeholder="Sale Price"
+                                aria-label="Sale Price"
+                                aria-describedby="basic-addon1"
+                                defaultValue={obj.salePrice}
+                                onChange={this.handleItemChange}
+                            />
+                        </InputGroup>
+
+                        <InputGroup className="mb-3">
+                            <InputGroup.Prepend>
+                                <InputGroup.Text id="basic-addon1">Max. Stock</InputGroup.Text>
+                            </InputGroup.Prepend>
+                            <FormControl
+                                placeholder="Max. Stock"
+                                aria-label="Max. Stock"
+                                aria-describedby="basic-addon1"
+                                defaultValue={obj.maxStock}
+                                onChange={this.handleItemChange}
+                            />
+                        </InputGroup>
+
+                        <InputGroup className="mb-3">
+                            <InputGroup.Prepend>
+                                <InputGroup.Text id="basic-addon1">Min. Stock</InputGroup.Text>
+                            </InputGroup.Prepend>
+                            <FormControl
+                                placeholder="Min. Stock"
+                                aria-label="Min. Stock"
+                                aria-describedby="basic-addon1"
+                                defaultValue={obj.minStock}
+                                onChange={this.handleItemChange}
+                            />
+                        </InputGroup>
+
+                        <InputGroup className="mb-3">
+                            <InputGroup.Prepend>
+                                <InputGroup.Text id="basic-addon1">Effective Start Date</InputGroup.Text>
+                            </InputGroup.Prepend>
+                            <FormControl
+                                placeholder="Effective Start Date"
+                                aria-label="Effective Start Date"
+                                aria-describedby="basic-addon1"
+                                defaultValue={obj.effectiveStartDate}
+                                onChange={this.handleItemChange}
+                            />
+                        </InputGroup>
+
+                        <InputGroup className="mb-3">
+                            <InputGroup.Prepend>
+                                <InputGroup.Text id="basic-addon1">Effective End Date</InputGroup.Text>
+                            </InputGroup.Prepend>
+                            <FormControl
+                                placeholder="Effective End Date"
+                                aria-label="Effective End Date"
+                                aria-describedby="basic-addon1"
+                                defaultValue={obj.effectiveEndDate}
+                                onChange={this.handleItemChange}
+                            />
                         </InputGroup>
                         <Button type="submit" variant="primary" size="lg" block active>Submit</Button>
                     </Form>
