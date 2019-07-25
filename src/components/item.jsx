@@ -6,30 +6,38 @@ import Form from 'react-bootstrap/Form'
 
 class Item extends Component {
 
-        state = {
-            item: {},
-            navigationDtl: {}
-        }
-        
-        componentDidMount() {
-            fetch('http://localhost:8089/item/first')
-                .then(res => res.json())
-                .then((data) => {
-                    const {item, navigationDtl} = data;
-                    this.setState({ item, navigationDtl })
-                })
-                .catch(console.log)
-        }
-
-    handleItemDescChange = (event) => {
-        console.log(event.target.value);
-        //let item = this.state.item;
-        this.setState({ itemDesc: event.target.value });
+    state = {
+        item: {},
+        navigationDtl: {}
     }
 
-    handleItemUomChange = (event) => {
+    componentDidMount() {
+        fetch('http://localhost:8089/item/first')
+            .then(res => res.json())
+            .then((data) => {
+                const { item, navigationDtl } = data;
+                this.setState({ item, navigationDtl })
+            })
+            .catch(console.log)
+    }
+
+    // handleItemDescChange = (event) => {
+    //     console.log(event.target.value);
+    //     let item = this.state.item;
+    //     item[event.target.name] = event.target.value;
+    //     this.setState({ item });
+    // }
+
+    // handleItemUomChange = (event) => {
+    //     console.log(event.target.value);
+    //     let item = { itemUom: event.target.value, itemDesc: this.state.item.itemDesc }
+    //     this.setState({ item });
+    // }
+
+    handleItemChange = (event) => {
         console.log(event.target.value);
-        let item = {itemUom: event.target.value}
+        let item = this.state.item;
+        item[event.target.name] = event.target.value;
         this.setState({ item });
     }
 
@@ -40,6 +48,7 @@ class Item extends Component {
 
 
     render() {
+        let obj = this.state.item;
         return (
             <>
                 <center><h1>Item Registrtion Form</h1></center>
@@ -54,7 +63,7 @@ class Item extends Component {
                                 aria-label="Item Desc."
                                 aria-describedby="basic-addon1"
                                 defaultValue={obj.itemDesc}
-                                onChange={this.handleItemDescChange}
+                                onChange={this.handleItemChange}
                             />
                         </InputGroup>
 
@@ -67,7 +76,7 @@ class Item extends Component {
                                 aria-label="Item U.O.M"
                                 aria-describedby="basic-addon2"
                                 defaultValue={obj.itemUom}
-                                onChange={this.handleItemUomChange}
+                                onChange={this.handleItemChange}
                             />
                             {/* <InputGroup.Append>
                                 <InputGroup.Text id="basic-addon2">@example.com</InputGroup.Text>
