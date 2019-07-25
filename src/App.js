@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import Item from './components/items';
-
+import Item from './components/item'
 class App extends Component {
 
     render() {

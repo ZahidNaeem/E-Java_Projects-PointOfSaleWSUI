@@ -1,51 +1,50 @@
-import React from 'react'
+import React, { Component } from 'react';
 import InputGroup from 'react-bootstrap/InputGroup'
 import FormControl from 'react-bootstrap/FormControl'
 import Button from 'react-bootstrap/Button'
+import Form from 'react-bootstrap/Form'
 
-class Item extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            item: { itemDesc: '', itemUom: '' },
-            navigation: {}
-        };
-        this.handleItemDescChange = this.handleItemDescChange.bind(this);
-        this.handleItemUomChange = this.handleItemUomChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-    }
+class Item extends Component {
 
-    handleItemDescChange(event) {
+        state = {
+            item: {},
+            navigationDtl: {}
+        }
+        
+        componentDidMount() {
+            fetch('http://localhost:8089/item/first')
+                .then(res => res.json())
+                .then((data) => {
+                    const {item, navigationDtl} = data;
+                    this.setState({ item, navigationDtl })
+                })
+                .catch(console.log)
+        }
+
+    handleItemDescChange = (event) => {
         console.log(event.target.value);
+        //let item = this.state.item;
         this.setState({ itemDesc: event.target.value });
     }
 
-    handleItemUomChange(event) {
+    handleItemUomChange = (event) => {
         console.log(event.target.value);
-        this.setState({ itemUom: event.target.value });
+        let item = {itemUom: event.target.value}
+        this.setState({ item });
     }
 
-    handleSubmit(event) {
-        alert('An Item was submitted: ' + this.state.itemDesc);
+    handleSubmit = (event) => {
+        alert('An Item was submitted: ' + this.state.item.itemDesc);
         event.preventDefault();
     }
 
-    componentDidMount() {
-        fetch('http://localhost:8089/item/first')
-            .then(res => res.json())
-            .then((data) => {
-                this.setState({ item: data.item, navigation: data.navigationDtl })
-            })
-            .catch(console.log)
-    }
 
     render() {
-        let obj = this.state.item;
         return (
-            < div >
+            <>
                 <center><h1>Item Registrtion Form</h1></center>
                 <div>
-                    <form onSubmit={this.handleSubmit}>
+                    <Form onSubmit={this.handleSubmit}>
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
                                 <InputGroup.Text id="basic-addon1">Item Desc.</InputGroup.Text>
@@ -80,7 +79,7 @@ class Item extends React.Component {
                             <InputGroup.Prepend>
                                 <InputGroup.Text id="basic-addon3">
                                     https://example.com/users/
-                </InputGroup.Text>
+                        </InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl id="basic-url" aria-describedby="basic-addon3" />
                         </InputGroup>
@@ -102,9 +101,9 @@ class Item extends React.Component {
                             <FormControl as="textarea" aria-label="With textarea" />
                         </InputGroup>
                         <Button type="submit" variant="primary" size="lg" block active>Submit</Button>
-                    </form>
+                    </Form>
                 </div>
-            </div >
+            </>
         );
     }
 }
