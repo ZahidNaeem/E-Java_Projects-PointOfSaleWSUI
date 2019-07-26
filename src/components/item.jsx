@@ -3,7 +3,7 @@ import InputGroup from 'react-bootstrap/InputGroup'
 import FormControl from 'react-bootstrap/FormControl'
 import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
-
+import axios from 'axios'
 class Item extends Component {
 
     state = {
@@ -12,16 +12,18 @@ class Item extends Component {
     }
 
     componentDidMount() {
-        const axios = require('axios');
         axios.get('http://localhost:8089/item/first')
             .then(res => {
                 const { item, navigationDtl } = res.data;
                 this.setState({ item, navigationDtl })
             })
-            .catch(console.log)
+            .catch(err => {
+                console.log(err);
+            });
     }
 
     handleItemChange = (event) => {
+        console.log("Target name", event.target.name);
         console.log(event.target.value);
         let item = this.state.item;
         item[event.target.name] = event.target.value;
@@ -29,13 +31,19 @@ class Item extends Component {
     }
 
     handleSubmit = (event) => {
+        console.log("Object sent: ",this.state.item);
+        axios.put('http://localhost:8089/item', this.state.item)
+        .then(res => {
+            console.log("Object received: ", res)
+        })
+        .catch(err => {
+            console.log(err);
+        });
         event.preventDefault();
-
     }
 
 
     render() {
-        let obj = this.state.item;
         return (
             <>
                 <center><h1>Item Registrtion Form</h1></center>
@@ -46,10 +54,12 @@ class Item extends Component {
                                 <InputGroup.Text id="basic-addon1">Item Code</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
-                                placeholder="Item Code"
+                                name="itemCode"
+placeholder="Item Code"
                                 aria-label="Item Code"
                                 aria-describedby="basic-addon1"
-                                defaultValue={obj.itemCode}
+                                readOnly
+                                defaultValue={this.state.item.itemCode}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -59,10 +69,11 @@ class Item extends Component {
                                 <InputGroup.Text id="basic-addon2">Item Barcode</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
-                                placeholder="Item Barcode"
+                                name="itemBarcode"
+placeholder="Item Barcode"
                                 aria-label="Item Barcode"
                                 aria-describedby="basic-addon2"
-                                defaultValue={obj.itemBarcode}
+                                defaultValue={this.state.item.itemBarcode}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -72,10 +83,11 @@ class Item extends Component {
                                 <InputGroup.Text id="basic-addon1">Item Desc.</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
-                                placeholder="Item Desc."
+                                name="itemDesc"
+placeholder="Item Desc."
                                 aria-label="Item Desc."
                                 aria-describedby="basic-addon1"
-                                defaultValue={obj.itemDesc}
+                                defaultValue={this.state.item.itemDesc}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -85,10 +97,11 @@ class Item extends Component {
                                 <InputGroup.Text id="basic-addon1">Item Category</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
-                                placeholder="Item Category"
+                                name="itemCategory"
+placeholder="Item Category"
                                 aria-label="Item Category"
                                 aria-describedby="basic-addon1"
-                                defaultValue={obj.itemCategory}
+                                defaultValue={this.state.item.itemCategory}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -98,10 +111,11 @@ class Item extends Component {
                                 <InputGroup.Text id="basic-addon1">Item U.O.M</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
-                                placeholder="Item U.O.M"
+                                name="itemUom"
+placeholder="Item U.O.M"
                                 aria-label="Item U.O.M"
                                 aria-describedby="basic-addon1"
-                                defaultValue={obj.itemUom}
+                                defaultValue={this.state.item.itemUom}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -111,10 +125,12 @@ class Item extends Component {
                                 <InputGroup.Text id="basic-addon1">Purchase Price</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
-                                placeholder="Purchase Price"
+                                type="number"
+                                name="purchasePrice"
+placeholder="Purchase Price"
                                 aria-label="Purchase Price"
                                 aria-describedby="basic-addon1"
-                                defaultValue={obj.purchasePrice}
+                                defaultValue={this.state.item.purchasePrice}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -124,10 +140,12 @@ class Item extends Component {
                                 <InputGroup.Text id="basic-addon1">Sale Price</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
-                                placeholder="Sale Price"
+                                type="number"
+                                name="salePrice"
+placeholder="Sale Price"
                                 aria-label="Sale Price"
                                 aria-describedby="basic-addon1"
-                                defaultValue={obj.salePrice}
+                                defaultValue={this.state.item.salePrice}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -137,10 +155,12 @@ class Item extends Component {
                                 <InputGroup.Text id="basic-addon1">Max. Stock</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
-                                placeholder="Max. Stock"
+                                type="number"
+                                name="maxStock"
+placeholder="Max. Stock"
                                 aria-label="Max. Stock"
                                 aria-describedby="basic-addon1"
-                                defaultValue={obj.maxStock}
+                                defaultValue={this.state.item.maxStock}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -150,10 +170,12 @@ class Item extends Component {
                                 <InputGroup.Text id="basic-addon1">Min. Stock</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
-                                placeholder="Min. Stock"
+                                type="number"
+                                name="minStock"
+placeholder="Min. Stock"
                                 aria-label="Min. Stock"
                                 aria-describedby="basic-addon1"
-                                defaultValue={obj.minStock}
+                                defaultValue={this.state.item.minStock}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -163,10 +185,12 @@ class Item extends Component {
                                 <InputGroup.Text id="basic-addon1">Effective Start Date</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
-                                placeholder="Effective Start Date"
+                                type="date"
+                                name="effectiveStartDate"
+placeholder="Effective Start Date"
                                 aria-label="Effective Start Date"
                                 aria-describedby="basic-addon1"
-                                defaultValue={obj.effectiveStartDate}
+                                defaultValue={this.state.item.effectiveStartDate}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -176,10 +200,12 @@ class Item extends Component {
                                 <InputGroup.Text id="basic-addon1">Effective End Date</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
-                                placeholder="Effective End Date"
+                                type="date"
+                                name="effectiveEndDate"
+placeholder="Effective End Date"
                                 aria-label="Effective End Date"
                                 aria-describedby="basic-addon1"
-                                defaultValue={obj.effectiveEndDate}
+                                defaultValue={this.state.item.effectiveEndDate}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -238,98 +264,108 @@ class Item extends Component {
                             <FormControl
                                 readOnly
                                 plaintext
-                                defaultValue={obj.itemCode}
+                                defaultValue={this.state.item.itemCode}
                             />
                         </Form.Group>
 
                         <Form.Group ><Form.Label>Item Barcode</Form.Label>
                             <FormControl
-                                placeholder="Item Barcode"
+                                name=""
+placeholder="Item Barcode"
                                 aria-label="Item Barcode"
                                 aria-describedby="basic-addon2"
-                                defaultValue={obj.itemBarcode}
+                                defaultValue={this.state.item.itemBarcode}
                                 onChange={this.handleItemChange}
                             />
                         </Form.Group>
 
                         <Form.Group ><Form.Label>Item Desc.</Form.Label>
                             <FormControl
-                                placeholder="Item Desc."
+                                name=""
+placeholder="Item Desc."
                                 aria-label="Item Desc."
-                                defaultValue={obj.itemDesc}
+                                defaultValue={this.state.item.itemDesc}
                                 onChange={this.handleItemChange}
                             />
                         </Form.Group>
                         </Form.Row>
                         <Form.Group ><Form.Label>Item Category</Form.Label>
                             <FormControl
-                                placeholder="Item Category"
+                                name=""
+placeholder="Item Category"
                                 aria-label="Item Category"
 
-                                defaultValue={obj.itemCategory}
+                                defaultValue={this.state.item.itemCategory}
                                 onChange={this.handleItemChange}
                             />
                         </Form.Group>
 
                         <Form.Group ><Form.Label>Item U.O.M</Form.Label>
                             <FormControl
-                                placeholder="Item U.O.M"
+                                name=""
+placeholder="Item U.O.M"
                                 aria-label="Item U.O.M"
-                                defaultValue={obj.itemUom}
+                                defaultValue={this.state.item.itemUom}
                                 onChange={this.handleItemChange}
                             />
                         </Form.Group>
 
                         <Form.Group ><Form.Label>Purchase Price</Form.Label>
                             <FormControl
-                                placeholder="Purchase Price"
+                                name=""
+placeholder="Purchase Price"
                                 aria-label="Purchase Price"
-                                defaultValue={obj.purchasePrice}
+                                defaultValue={this.state.item.purchasePrice}
                                 onChange={this.handleItemChange}
                             />
                         </Form.Group>
 
                         <Form.Group ><Form.Label>Sale Price</Form.Label>
                             <FormControl
-                                placeholder="Sale Price"
+                                name=""
+placeholder="Sale Price"
                                 aria-label="Sale Price"
-                                defaultValue={obj.salePrice}
+                                defaultValue={this.state.item.salePrice}
                                 onChange={this.handleItemChange}
                             />
                         </Form.Group>
 
                         <Form.Group ><Form.Label>Min. Stock</Form.Label>
                             <FormControl
-                                placeholder="Min. Stock"
+                                name=""
+placeholder="Min. Stock"
                                 aria-label="Min. Stock"
-                                defaultValue={obj.minStock}
+                                defaultValue={this.state.item.minStock}
                                 onChange={this.handleItemChange}
                             />
                         </Form.Group>
 
                         <Form.Group ><Form.Label>Max. Stock</Form.Label>
                             <FormControl
-                                placeholder="Max. Stock"
+                                name=""
+placeholder="Max. Stock"
                                 aria-label="Max. Stock"
-                                defaultValue={obj.maxStock}
+                                defaultValue={this.state.item.maxStock}
                                 onChange={this.handleItemChange}
                             />
                         </Form.Group>
 
                         <Form.Group ><Form.Label>Effective Start Date</Form.Label>
                             <FormControl
-                                placeholder="Effective Start Date"
+                                name=""
+placeholder="Effective Start Date"
                                 aria-label="Effective Start Date"
-                                defaultValue={obj.effectiveStartDate}
+                                defaultValue={this.state.item.effectiveStartDate}
                                 onChange={this.handleItemChange}
                             />
                         </Form.Group>
 
                         <Form.Group ><Form.Label>Effective End Date</Form.Label>
                             <FormControl
-                                placeholder="Effective End Date"
+                                name=""
+placeholder="Effective End Date"
                                 aria-label="Effective End Date"
-                                defaultValue={obj.effectiveEndDate}
+                                defaultValue={this.state.item.effectiveEndDate}
                                 onChange={this.handleItemChange}
                             />
                         </Form.Group>
