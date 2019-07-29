@@ -132,6 +132,7 @@ class Item extends Component {
 
 
     render() {
+        const {item, navigationDtl} = this.state;
         return (
             <>
                 <center><h1>Item Registrtion Form</h1></center>
@@ -147,7 +148,7 @@ class Item extends Component {
                                 aria-label="Item Code"
                                 aria-describedby="basic-addon1"
                                 readOnly
-                                value={this.state.item.itemCode || ''}
+                                value={item.itemCode || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -161,7 +162,7 @@ class Item extends Component {
                                 placeholder="Item Barcode"
                                 aria-label="Item Barcode"
                                 aria-describedby="basic-addon2"
-                                value={this.state.item.itemBarcode || ''}
+                                value={item.itemBarcode || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -175,7 +176,7 @@ class Item extends Component {
                                 placeholder="Item Desc."
                                 aria-label="Item Desc."
                                 aria-describedby="basic-addon1"
-                                value={this.state.item.itemDesc || ''}
+                                value={item.itemDesc || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -189,7 +190,7 @@ class Item extends Component {
                                 placeholder="Item Category"
                                 aria-label="Item Category"
                                 aria-describedby="basic-addon1"
-                                value={this.state.item.itemCategory || ''}
+                                value={item.itemCategory || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -203,7 +204,7 @@ class Item extends Component {
                                 placeholder="Item U.O.M"
                                 aria-label="Item U.O.M"
                                 aria-describedby="basic-addon1"
-                                value={this.state.item.itemUom || ''}
+                                value={item.itemUom || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -218,7 +219,7 @@ class Item extends Component {
                                 placeholder="Purchase Price"
                                 aria-label="Purchase Price"
                                 aria-describedby="basic-addon1"
-                                value={this.state.item.purchasePrice || ''}
+                                value={item.purchasePrice || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -233,7 +234,7 @@ class Item extends Component {
                                 placeholder="Sale Price"
                                 aria-label="Sale Price"
                                 aria-describedby="basic-addon1"
-                                value={this.state.item.salePrice || ''}
+                                value={item.salePrice || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -248,7 +249,7 @@ class Item extends Component {
                                 placeholder="Max. Stock"
                                 aria-label="Max. Stock"
                                 aria-describedby="basic-addon1"
-                                value={this.state.item.maxStock || ''}
+                                value={item.maxStock || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -263,7 +264,7 @@ class Item extends Component {
                                 placeholder="Min. Stock"
                                 aria-label="Min. Stock"
                                 aria-describedby="basic-addon1"
-                                value={this.state.item.minStock || ''}
+                                value={item.minStock || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -279,7 +280,7 @@ class Item extends Component {
                                 aria-label="Effective Start Date"
                                 aria-describedby="basic-addon1"
                                 onSelect={this.handleItemChange}
-                                value={this.state.item.effectiveStartDate || ''}
+                                value={item.effectiveStartDate || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -294,32 +295,32 @@ class Item extends Component {
                                 placeholder="Effective End Date"
                                 aria-label="Effective End Date"
                                 aria-describedby="basic-addon1"
-                                value={this.state.item.effectiveEndDate || ''}
+                                value={item.effectiveEndDate || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
                         <ButtonToolbar>
                             <Button
                                 variant="primary" size="lg"
-                                disabled={this.state.navigationDtl.first}
+                                disabled={navigationDtl.first}
                                 onClick={this.firstItem}
                                 active>First
                             </Button>
                             <Button
                                 variant="primary" size="lg"
-                                disabled={this.state.navigationDtl.first}
+                                disabled={navigationDtl.first}
                                 onClick={this.previousItem}
                                 active>Previous
                             </Button>
                             <Button
                                 variant="primary" size="lg"
-                                disabled={this.state.navigationDtl.last}
+                                disabled={navigationDtl.last}
                                 onClick={this.nextItem}
                                 active>Next
                             </Button>
                             <Button
                                 variant="primary" size="lg"
-                                disabled={this.state.navigationDtl.last}
+                                disabled={navigationDtl.last}
                                 onClick={this.lastItem}
                                 active>Last
                             </Button>
@@ -327,13 +328,13 @@ class Item extends Component {
                         <ButtonToolbar>
                             <Button
                                 variant="primary" size="lg"
-                                // disabled={this.state.navigationDtl.first}
+                                // disabled={navigationDtl.first}
                                 onClick={this.newItem}
                                 active>add
                             </Button>
                             <Button
                                 variant="primary" size="lg"
-                                // disabled={this.state.navigationDtl.first}
+                                // disabled={navigationDtl.first}
                                 onClick={this.deleteItem}
                                 active>Delete
                             </Button>
@@ -344,7 +345,7 @@ class Item extends Component {
                             </Button>
                             <Button
                                 variant="primary" size="lg"
-                                /* disabled={this.state.navigationDtl.last}
+                                /* disabled={navigationDtl.last}
                                 onClick={this.nextItem} */
                                 active>Undo
                             </Button>
@@ -360,7 +361,7 @@ class Item extends Component {
                         </thead>
                         <tbody>
                             {
-                                this.state.item.itemStocks && this.state.item.itemStocks.map((stock) => (
+                                item.itemStocks && item.itemStocks.map((stock) => (
                                     // <li key={stock.itemStockId}>
                                         <tr>
                                             <td>{stock.itemStockDate}</td>
