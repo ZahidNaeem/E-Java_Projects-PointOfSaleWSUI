@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import InputGroup from 'react-bootstrap/InputGroup'
 import FormControl from 'react-bootstrap/FormControl'
 import Button from 'react-bootstrap/Button'
+import ButtonToolbar from 'react-bootstrap/ButtonToolbar'
 import Form from 'react-bootstrap/Form'
+import Table from 'react-bootstrap/Table'
 import axios from 'axios'
 class Item extends Component {
 
@@ -30,16 +32,102 @@ class Item extends Component {
         this.setState({ item });
     }
 
-    handleSubmit = (event) => {
-        console.log("Object sent: ",this.state.item);
-        axios.put('http://localhost:8089/item', this.state.item)
-        .then(res => {
-            console.log("Object received: ", res)
-        })
-        .catch(err => {
-            console.log(err);
-        });
-        event.preventDefault();
+    /* handleSubmit = (event) => {
+        let itemCode = this.state.item.itemCode;
+        if (itemCode == null) {
+            this.saveItem();
+        } else {
+            this.updateItem();
+        }
+    } */
+
+    newItem = () => {
+        this.setState({ item: {}, navigationDtl: { first: true, last: true } });
+    }
+
+    saveItem = () => {
+        console.log("Post: Object sent: ", this.state.item);
+        axios.post('http://localhost:8089/item', this.state.item)
+            .then(res => {
+                console.log("Post: Object received: ", res.data);
+                const { item, navigationDtl } = res.data;
+                this.setState({ item, navigationDtl });
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
+    /*   updateItem = () => {
+          console.log("Put: Object sent: ", this.state.item);
+          axios.put('http://localhost:8089/item', this.state.item)
+              .then(res => {
+                  console.log("Put: Object received: ", res)
+              })
+              .catch(err => {
+                  console.log(err);
+              });
+      } */
+
+    deleteItem = () => {
+        console.log("Delete: Item Code sent: ", this.state.item.itemCode);
+        axios.delete('http://localhost:8089/item/' + this.state.item.itemCode)
+            .then(res => {
+                console.log("Delete: Response: ", res);
+                const { item, navigationDtl } = res.data;
+                this.setState({ item, navigationDtl });
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
+    firstItem = () => {
+        axios.get('http://localhost:8089/item/first')
+            .then(res => {
+                const { item, navigationDtl } = res.data;
+                this.setState({ item, navigationDtl });
+                console.log(this.state.item);
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
+    previousItem = () => {
+        axios.get('http://localhost:8089/item/previous')
+            .then(res => {
+                const { item, navigationDtl } = res.data;
+                this.setState({ item, navigationDtl });
+                console.log(this.state.item);
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
+    nextItem = () => {
+        axios.get('http://localhost:8089/item/next')
+            .then(res => {
+                const { item, navigationDtl } = res.data;
+                this.setState({ item, navigationDtl });
+                console.log(this.state.item);
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
+    lastItem = () => {
+        axios.get('http://localhost:8089/item/last')
+            .then(res => {
+                const { item, navigationDtl } = res.data;
+                this.setState({ item, navigationDtl });
+                console.log(this.state.item);
+            })
+            .catch(err => {
+                console.log(err);
+            });
     }
 
 
@@ -48,18 +136,18 @@ class Item extends Component {
             <>
                 <center><h1>Item Registrtion Form</h1></center>
                 <div>
-                    <Form onSubmit={this.handleSubmit}>
+                    <Form>
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
                                 <InputGroup.Text id="basic-addon1">Item Code</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 name="itemCode"
-placeholder="Item Code"
+                                placeholder="Item Code"
                                 aria-label="Item Code"
                                 aria-describedby="basic-addon1"
                                 readOnly
-                                defaultValue={this.state.item.itemCode}
+                                value={this.state.item.itemCode || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -70,10 +158,10 @@ placeholder="Item Code"
                             </InputGroup.Prepend>
                             <FormControl
                                 name="itemBarcode"
-placeholder="Item Barcode"
+                                placeholder="Item Barcode"
                                 aria-label="Item Barcode"
                                 aria-describedby="basic-addon2"
-                                defaultValue={this.state.item.itemBarcode}
+                                value={this.state.item.itemBarcode || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -84,10 +172,10 @@ placeholder="Item Barcode"
                             </InputGroup.Prepend>
                             <FormControl
                                 name="itemDesc"
-placeholder="Item Desc."
+                                placeholder="Item Desc."
                                 aria-label="Item Desc."
                                 aria-describedby="basic-addon1"
-                                defaultValue={this.state.item.itemDesc}
+                                value={this.state.item.itemDesc || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -98,10 +186,10 @@ placeholder="Item Desc."
                             </InputGroup.Prepend>
                             <FormControl
                                 name="itemCategory"
-placeholder="Item Category"
+                                placeholder="Item Category"
                                 aria-label="Item Category"
                                 aria-describedby="basic-addon1"
-                                defaultValue={this.state.item.itemCategory}
+                                value={this.state.item.itemCategory || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -112,10 +200,10 @@ placeholder="Item Category"
                             </InputGroup.Prepend>
                             <FormControl
                                 name="itemUom"
-placeholder="Item U.O.M"
+                                placeholder="Item U.O.M"
                                 aria-label="Item U.O.M"
                                 aria-describedby="basic-addon1"
-                                defaultValue={this.state.item.itemUom}
+                                value={this.state.item.itemUom || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -127,10 +215,10 @@ placeholder="Item U.O.M"
                             <FormControl
                                 type="number"
                                 name="purchasePrice"
-placeholder="Purchase Price"
+                                placeholder="Purchase Price"
                                 aria-label="Purchase Price"
                                 aria-describedby="basic-addon1"
-                                defaultValue={this.state.item.purchasePrice}
+                                value={this.state.item.purchasePrice || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -142,10 +230,10 @@ placeholder="Purchase Price"
                             <FormControl
                                 type="number"
                                 name="salePrice"
-placeholder="Sale Price"
+                                placeholder="Sale Price"
                                 aria-label="Sale Price"
                                 aria-describedby="basic-addon1"
-                                defaultValue={this.state.item.salePrice}
+                                value={this.state.item.salePrice || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -157,10 +245,10 @@ placeholder="Sale Price"
                             <FormControl
                                 type="number"
                                 name="maxStock"
-placeholder="Max. Stock"
+                                placeholder="Max. Stock"
                                 aria-label="Max. Stock"
                                 aria-describedby="basic-addon1"
-                                defaultValue={this.state.item.maxStock}
+                                value={this.state.item.maxStock || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -172,10 +260,10 @@ placeholder="Max. Stock"
                             <FormControl
                                 type="number"
                                 name="minStock"
-placeholder="Min. Stock"
+                                placeholder="Min. Stock"
                                 aria-label="Min. Stock"
                                 aria-describedby="basic-addon1"
-                                defaultValue={this.state.item.minStock}
+                                value={this.state.item.minStock || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -187,10 +275,11 @@ placeholder="Min. Stock"
                             <FormControl
                                 type="date"
                                 name="effectiveStartDate"
-placeholder="Effective Start Date"
+                                placeholder="Effective Start Date"
                                 aria-label="Effective Start Date"
                                 aria-describedby="basic-addon1"
-                                defaultValue={this.state.item.effectiveStartDate}
+                                onSelect={this.handleItemChange}
+                                value={this.state.item.effectiveStartDate || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -202,184 +291,91 @@ placeholder="Effective Start Date"
                             <FormControl
                                 type="date"
                                 name="effectiveEndDate"
-placeholder="Effective End Date"
+                                placeholder="Effective End Date"
                                 aria-label="Effective End Date"
                                 aria-describedby="basic-addon1"
-                                defaultValue={this.state.item.effectiveEndDate}
+                                value={this.state.item.effectiveEndDate || ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
-                        <Button type="submit" variant="primary" size="lg" block active>Submit</Button>
+                        <ButtonToolbar>
+                            <Button
+                                variant="primary" size="lg"
+                                disabled={this.state.navigationDtl.first}
+                                onClick={this.firstItem}
+                                active>First
+                            </Button>
+                            <Button
+                                variant="primary" size="lg"
+                                disabled={this.state.navigationDtl.first}
+                                onClick={this.previousItem}
+                                active>Previous
+                            </Button>
+                            <Button
+                                variant="primary" size="lg"
+                                disabled={this.state.navigationDtl.last}
+                                onClick={this.nextItem}
+                                active>Next
+                            </Button>
+                            <Button
+                                variant="primary" size="lg"
+                                disabled={this.state.navigationDtl.last}
+                                onClick={this.lastItem}
+                                active>Last
+                            </Button>
+                        </ButtonToolbar>
+                        <ButtonToolbar>
+                            <Button
+                                variant="primary" size="lg"
+                                // disabled={this.state.navigationDtl.first}
+                                onClick={this.newItem}
+                                active>add
+                            </Button>
+                            <Button
+                                variant="primary" size="lg"
+                                // disabled={this.state.navigationDtl.first}
+                                onClick={this.deleteItem}
+                                active>Delete
+                            </Button>
+                            <Button
+                                variant="primary" size="lg"
+                                onClick={this.saveItem}
+                                active>Save
+                            </Button>
+                            <Button
+                                variant="primary" size="lg"
+                                /* disabled={this.state.navigationDtl.last}
+                                onClick={this.nextItem} */
+                                active>Undo
+                            </Button>
+                        </ButtonToolbar>
                     </Form>
+                    <Table responsive>
+                        <thead>
+                            <tr>
+                                <th>Stock Date</th>
+                                <th>Quantity</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {
+                                this.state.item.itemStocks && this.state.item.itemStocks.map((stock) => (
+                                    // <li key={stock.itemStockId}>
+                                        <tr>
+                                            <td>{stock.itemStockDate}</td>
+                                            <td>{stock.qnty}</td>
+                                            <td>{stock.remarks}</td>
+                                        </tr>
+                                    // </li>
+                                ))
+                            }
+                        </tbody>
+                    </Table>
                 </div>
             </>
         );
     }
-    /*
-import React, { Component } from 'react';
-import InputGroup from 'react-bootstrap/InputGroup'
-import FormControl from 'react-bootstrap/FormControl'
-import Button from 'react-bootstrap/Button'
-import Form from 'react-bootstrap/Form'
-
-class Item extends Component {
-
-    state = {
-        item: {},
-        navigationDtl: {}
-    }
-
-    componentDidMount() {
-        const axios = require('axios');
-        axios.get('http://localhost:8089/item/first')
-            .then(res => {
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl })
-            })
-            .catch(console.log)
-    }
-
-    handleItemChange = (event) => {
-        console.log(event.target.value);
-        let item = this.state.item;
-        item[event.target.name] = event.target.value;
-        this.setState({ item });
-    }
-
-    handleSubmit = (event) => {
-        event.preventDefault();
-
-    }
-
-
-    render() {
-        let obj = this.state.item;
-        return (
-            <>
-                <center><h1>Item Registrtion Form</h1></center>
-                <div>
-                    <Form onSubmit={this.handleSubmit}>
-                        <Form.Row>
-                        <Form.Group ><Form.Label>Item Code</Form.Label>
-                            <FormControl
-                                readOnly
-                                plaintext
-                                defaultValue={this.state.item.itemCode}
-                            />
-                        </Form.Group>
-
-                        <Form.Group ><Form.Label>Item Barcode</Form.Label>
-                            <FormControl
-                                name=""
-placeholder="Item Barcode"
-                                aria-label="Item Barcode"
-                                aria-describedby="basic-addon2"
-                                defaultValue={this.state.item.itemBarcode}
-                                onChange={this.handleItemChange}
-                            />
-                        </Form.Group>
-
-                        <Form.Group ><Form.Label>Item Desc.</Form.Label>
-                            <FormControl
-                                name=""
-placeholder="Item Desc."
-                                aria-label="Item Desc."
-                                defaultValue={this.state.item.itemDesc}
-                                onChange={this.handleItemChange}
-                            />
-                        </Form.Group>
-                        </Form.Row>
-                        <Form.Group ><Form.Label>Item Category</Form.Label>
-                            <FormControl
-                                name=""
-placeholder="Item Category"
-                                aria-label="Item Category"
-
-                                defaultValue={this.state.item.itemCategory}
-                                onChange={this.handleItemChange}
-                            />
-                        </Form.Group>
-
-                        <Form.Group ><Form.Label>Item U.O.M</Form.Label>
-                            <FormControl
-                                name=""
-placeholder="Item U.O.M"
-                                aria-label="Item U.O.M"
-                                defaultValue={this.state.item.itemUom}
-                                onChange={this.handleItemChange}
-                            />
-                        </Form.Group>
-
-                        <Form.Group ><Form.Label>Purchase Price</Form.Label>
-                            <FormControl
-                                name=""
-placeholder="Purchase Price"
-                                aria-label="Purchase Price"
-                                defaultValue={this.state.item.purchasePrice}
-                                onChange={this.handleItemChange}
-                            />
-                        </Form.Group>
-
-                        <Form.Group ><Form.Label>Sale Price</Form.Label>
-                            <FormControl
-                                name=""
-placeholder="Sale Price"
-                                aria-label="Sale Price"
-                                defaultValue={this.state.item.salePrice}
-                                onChange={this.handleItemChange}
-                            />
-                        </Form.Group>
-
-                        <Form.Group ><Form.Label>Min. Stock</Form.Label>
-                            <FormControl
-                                name=""
-placeholder="Min. Stock"
-                                aria-label="Min. Stock"
-                                defaultValue={this.state.item.minStock}
-                                onChange={this.handleItemChange}
-                            />
-                        </Form.Group>
-
-                        <Form.Group ><Form.Label>Max. Stock</Form.Label>
-                            <FormControl
-                                name=""
-placeholder="Max. Stock"
-                                aria-label="Max. Stock"
-                                defaultValue={this.state.item.maxStock}
-                                onChange={this.handleItemChange}
-                            />
-                        </Form.Group>
-
-                        <Form.Group ><Form.Label>Effective Start Date</Form.Label>
-                            <FormControl
-                                name=""
-placeholder="Effective Start Date"
-                                aria-label="Effective Start Date"
-                                defaultValue={this.state.item.effectiveStartDate}
-                                onChange={this.handleItemChange}
-                            />
-                        </Form.Group>
-
-                        <Form.Group ><Form.Label>Effective End Date</Form.Label>
-                            <FormControl
-                                name=""
-placeholder="Effective End Date"
-                                aria-label="Effective End Date"
-                                defaultValue={this.state.item.effectiveEndDate}
-                                onChange={this.handleItemChange}
-                            />
-                        </Form.Group>
-
-                        <Button type="submit" variant="primary" size="lg" block active>Submit</Button>
-                    </Form>
-                </div>
-            </>
-        );
-    }
-}
-
-export default Item;
-    */
 }
 
 export default Item;
