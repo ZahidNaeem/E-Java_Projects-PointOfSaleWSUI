@@ -132,7 +132,21 @@ class Item extends Component {
 
 
     render() {
-        const {item, navigationDtl} = this.state;
+        const { item, navigationDtl } = this.state;
+
+        const { itemStocks: stocks } = item;
+        const columns = [{
+            dataField: 'itemStockDate',
+            text: 'Stock Date'
+        },
+        {
+            dataField: 'qnty',
+            text: 'Stock Quantity'
+        },
+        {
+            dataField: 'remarks',
+            text: 'Remarks'
+        }];
         return (
             <>
                 <center><h1>Item Registrtion Form</h1></center>
@@ -299,59 +313,68 @@ class Item extends Component {
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
-                        <ButtonToolbar>
+                        <ButtonToolbar className="m-2">
                             <Button
-                                variant="primary" size="lg"
+                                variant="primary"
                                 disabled={navigationDtl.first}
                                 onClick={this.firstItem}
+                                className="mr-1"
                                 active>First
                             </Button>
                             <Button
-                                variant="primary" size="lg"
+                                variant="primary"
                                 disabled={navigationDtl.first}
                                 onClick={this.previousItem}
+                                className="mr-1"
                                 active>Previous
                             </Button>
                             <Button
-                                variant="primary" size="lg"
+                                variant="primary"
                                 disabled={navigationDtl.last}
                                 onClick={this.nextItem}
+                                className="mr-1"
                                 active>Next
                             </Button>
                             <Button
-                                variant="primary" size="lg"
+                                variant="primary"
                                 disabled={navigationDtl.last}
                                 onClick={this.lastItem}
+                                className="ymr-1"
                                 active>Last
                             </Button>
                         </ButtonToolbar>
-                        <ButtonToolbar>
+                        <ButtonToolbar className="m-2">
                             <Button
-                                variant="primary" size="lg"
+                                variant="primary"
                                 // disabled={navigationDtl.first}
                                 onClick={this.newItem}
-                                active>add
+                                className="mr-1"
+                                active>Add
                             </Button>
                             <Button
-                                variant="primary" size="lg"
+                                variant="primary"
                                 // disabled={navigationDtl.first}
                                 onClick={this.deleteItem}
+                                className="mr-1"
                                 active>Delete
                             </Button>
                             <Button
-                                variant="primary" size="lg"
+                                variant="primary"
                                 onClick={this.saveItem}
+                                className="mr-1"
                                 active>Save
                             </Button>
                             <Button
-                                variant="primary" size="lg"
+                                variant="primary"
                                 /* disabled={navigationDtl.last}
                                 onClick={this.nextItem} */
+                                className="mr-1"
                                 active>Undo
                             </Button>
                         </ButtonToolbar>
                     </Form>
-                    <Table responsive>
+                    <Table
+                        responsive>
                         <thead>
                             <tr>
                                 <th>Stock Date</th>
@@ -363,10 +386,44 @@ class Item extends Component {
                             {
                                 item.itemStocks && item.itemStocks.map((stock) => (
                                     // <li key={stock.itemStockId}>
-                                        <tr>
-                                            <td>{stock.itemStockDate}</td>
-                                            <td>{stock.qnty}</td>
-                                            <td>{stock.remarks}</td>
+                                        <tr key={stock.itemStockId}>
+                                            {/* <td key={stock.itemStockId}/> */}
+                                            {/* <td>{stock.itemStockDate}</td> */}
+                                            <td>
+                                                <FormControl
+                                                    type="date"
+                                                    name="itemStockDate"
+                                                    placeholder="Stock Date"
+                                                    aria-label="Stock Date"
+                                                    aria-describedby="basic-addon1"
+                                                    value={stock.itemStockDate || ''}
+                                                // onChange={this.handleItemChange}
+                                                />
+                                            </td>
+                                            <td>
+                                                <FormControl
+                                                    type="number"
+                                                    name="qnty"
+                                                    placeholder="Stock Quantity"
+                                                    aria-label="Stock Quantity"
+                                                    aria-describedby="basic-addon1"
+                                                    value={stock.qnty || ''}
+                                                // onChange={this.handleItemChange}
+                                                />
+                                            </td>
+                                            <td>
+                                                <FormControl
+                                                    type="text"
+                                                    name="remarks"
+                                                    placeholder="Remarks"
+                                                    aria-label="Remarks"
+                                                    aria-describedby="basic-addon1"
+                                                    value={stock.remarks || ''}
+                                                // onChange={this.handleItemChange}
+                                                />
+                                            </td>
+                                            {/* <td>{stock.qnty}</td>
+                                        <td>{stock.remarks}</td> */}
                                         </tr>
                                     // </li>
                                 ))
