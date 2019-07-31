@@ -10,14 +10,15 @@ class Item extends Component {
 
     state = {
         item: {},
-        navigationDtl: {}
+        navigationDtl: {},
+        stocks: []
     }
 
     componentDidMount() {
         axios.get('http://localhost:8089/item/first')
             .then(res => {
                 const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl })
+                this.setState({ item, navigationDtl, stocks: item.itemStocks })
             })
             .catch(err => {
                 console.log(err);
@@ -32,14 +33,14 @@ class Item extends Component {
         this.setState({ item });
     }
 
-    /* handleSubmit = (event) => {
-        let itemCode = this.state.item.itemCode;
-        if (itemCode == null) {
-            this.saveItem();
-        } else {
-            this.updateItem();
-        }
-    } */
+    handleStockChange = (event, index) => {
+        console.log("Target name", event.target.name);
+        console.log("Index: ", index);
+        let stocks = [...this.state.stocks];
+        console.log("Cell: ", stocks[index][event.target.name]);
+        stocks[index][event.target.name] = event.target.value;
+        this.setState({ stocks });
+    }
 
     newItem = () => {
         this.setState({ item: {}, navigationDtl: { first: true, last: true } });
@@ -47,7 +48,7 @@ class Item extends Component {
 
     saveItem = () => {
         console.log("Post: Object sent: ", this.state.item);
-        axios.post('http://localhost:8089/item', this.state.item)
+        axios.post('http://localhost:8089/item/save', this.state.item)
             .then(res => {
                 console.log("Post: Object received: ", res.data);
                 const { item, navigationDtl } = res.data;
@@ -58,20 +59,9 @@ class Item extends Component {
             });
     }
 
-    /*   updateItem = () => {
-          console.log("Put: Object sent: ", this.state.item);
-          axios.put('http://localhost:8089/item', this.state.item)
-              .then(res => {
-                  console.log("Put: Object received: ", res)
-              })
-              .catch(err => {
-                  console.log(err);
-              });
-      } */
-
     deleteItem = () => {
         console.log("Delete: Item Code sent: ", this.state.item.itemCode);
-        axios.delete('http://localhost:8089/item/' + this.state.item.itemCode)
+        axios.delete('http://localhost:8089/item/delete/' + this.state.item.itemCode)
             .then(res => {
                 console.log("Delete: Response: ", res);
                 const { item, navigationDtl } = res.data;
@@ -130,23 +120,31 @@ class Item extends Component {
             });
     }
 
+    saveStock = () => {
+        console.log("Post: Object sent: ", JSON.stringify(this.state.stocks));
+        axios.post('http://localhost:8089/stock/saveAll', this.state.stocks)
+            .then(res => {
+                console.log("Post: Object received: ", res.data);
+                this.setState({ stock: res.data });
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
+    addStock = () => {
+        let newStock = { item: this.state.item.itemCode };
+        this.setState(
+            {
+                stocks: [...this.state.stocks, newStock]
+            }
+        );
+    }
+
 
     render() {
-        const { item, navigationDtl } = this.state;
+        const { item, navigationDtl, stocks } = this.state;
 
-        const { itemStocks: stocks } = item;
-        const columns = [{
-            dataField: 'itemStockDate',
-            text: 'Stock Date'
-        },
-        {
-            dataField: 'qnty',
-            text: 'Stock Quantity'
-        },
-        {
-            dataField: 'remarks',
-            text: 'Remarks'
-        }];
         return (
             <>
                 <center><h1>Item Registrtion Form</h1></center>
@@ -384,48 +382,60 @@ class Item extends Component {
                         </thead>
                         <tbody>
                             {
-                                item.itemStocks && item.itemStocks.map((stock) => (
-                                    // <li key={stock.itemStockId}>
-                                        <tr key={stock.itemStockId}>
-                                            {/* <td key={stock.itemStockId}/> */}
-                                            {/* <td>{stock.itemStockDate}</td> */}
-                                            <td>
-                                                <FormControl
-                                                    type="date"
-                                                    name="itemStockDate"
-                                                    placeholder="Stock Date"
-                                                    aria-label="Stock Date"
-                                                    aria-describedby="basic-addon1"
-                                                    value={stock.itemStockDate || ''}
-                                                // onChange={this.handleItemChange}
-                                                />
-                                            </td>
-                                            <td>
-                                                <FormControl
-                                                    type="number"
-                                                    name="qnty"
-                                                    placeholder="Stock Quantity"
-                                                    aria-label="Stock Quantity"
-                                                    aria-describedby="basic-addon1"
-                                                    value={stock.qnty || ''}
-                                                // onChange={this.handleItemChange}
-                                                />
-                                            </td>
-                                            <td>
-                                                <FormControl
-                                                    type="text"
-                                                    name="remarks"
-                                                    placeholder="Remarks"
-                                                    aria-label="Remarks"
-                                                    aria-describedby="basic-addon1"
-                                                    value={stock.remarks || ''}
-                                                // onChange={this.handleItemChange}
-                                                />
-                                            </td>
-                                            {/* <td>{stock.qnty}</td>
-                                        <td>{stock.remarks}</td> */}
-                                        </tr>
-                                    // </li>
+                                stocks && stocks.map((stock, index) => (
+                                    <tr key={stock.itemStockId}>
+                                        <td>
+                                            <FormControl
+                                                type="date"
+                                                name="itemStockDate"
+                                                placeholder="Stock Date"
+                                                aria-label="Stock Date"
+                                                aria-describedby="basic-addon1"
+                                                value={stock.itemStockDate || ''}
+                                                onChange={e => this.handleStockChange(e, index)}
+                                            />
+                                        </td>
+                                        <td>
+                                            <FormControl
+                                                type="number"
+                                                name="qnty"
+                                                placeholder="Stock Quantity"
+                                                aria-label="Stock Quantity"
+                                                aria-describedby="basic-addon1"
+                                                value={stock.qnty || ''}
+                                                onChange={e => this.handleStockChange(e, index)}
+                                            />
+                                        </td>
+                                        <td>
+                                            <FormControl
+                                                type="text"
+                                                name="remarks"
+                                                placeholder="Remarks"
+                                                aria-label="Remarks"
+                                                aria-describedby="basic-addon1"
+                                                value={stock.remarks || ''}
+                                                onChange={e => this.handleStockChange(e, index)}
+                                            />
+                                        </td>
+                                        <td>
+                                            <Button
+                                                variant="primary"
+                                                // disabled={navigationDtl.first}
+                                                onClick={this.addStock}
+                                                className="mr-1"
+                                                active>Add Stock
+                                            </Button>
+                                        </td>
+                                        <td>
+                                            <Button
+                                                variant="primary"
+                                                // disabled={navigationDtl.first}
+                                                onClick={this.saveStock}
+                                                className="mr-1"
+                                                active>Save Stock
+                                            </Button>
+                                        </td>
+                                    </tr>
                                 ))
                             }
                         </tbody>
