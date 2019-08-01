@@ -6,6 +6,7 @@ import ButtonToolbar from 'react-bootstrap/ButtonToolbar'
 import Form from 'react-bootstrap/Form'
 import Table from 'react-bootstrap/Table'
 import axios from 'axios'
+import moment from 'moment'
 class Item extends Component {
 
     state = {
@@ -26,19 +27,25 @@ class Item extends Component {
     }
 
     handleItemChange = (event) => {
-        console.log("Target name", event.target.name);
-        console.log(event.target.value);
+        const { name, value } = event.target;
+        console.log("Target name", name);
+        console.log(value);
         let item = this.state.item;
-        item[event.target.name] = event.target.value;
+        item[name] = value;
         this.setState({ item });
     }
 
     handleStockChange = (event, index) => {
-        console.log("Target name", event.target.name);
+        const { name, value } = event.target;
+        console.log("Target name", name);
         console.log("Index: ", index);
+        if (name === "itemStockDate") {
+            console.log("Actual Date: ", value);
+            console.log("moment Date: ", moment(value).format('DD/MM/YYYY'));
+        }
         let stocks = [...this.state.stocks];
-        console.log("Cell: ", stocks[index][event.target.name]);
-        stocks[index][event.target.name] = event.target.value;
+        console.log("Cell old value: ", stocks[index][name]);
+        stocks[index][name] = value;
         this.setState({ stocks });
     }
 
@@ -418,22 +425,22 @@ class Item extends Component {
                                             />
                                         </td>
                                         <td>
-                                            <Button
-                                                variant="primary"
-                                                // disabled={navigationDtl.first}
-                                                onClick={this.addStock}
-                                                className="mr-1"
-                                                active>Add Stock
+                                            <ButtonToolbar>
+                                                <Button
+                                                    variant="primary"
+                                                    // disabled={navigationDtl.first}
+                                                    onClick={this.addStock}
+                                                    className="mr-1"
+                                                    active>Add Stock
                                             </Button>
-                                        </td>
-                                        <td>
-                                            <Button
-                                                variant="primary"
-                                                // disabled={navigationDtl.first}
-                                                onClick={this.saveStock}
-                                                className="mr-1"
-                                                active>Save Stock
+                                                <Button
+                                                    variant="primary"
+                                                    // disabled={navigationDtl.first}
+                                                    onClick={this.saveStock}
+                                                    className="mr-1"
+                                                    active>Save Stock
                                             </Button>
+                                            </ButtonToolbar>
                                         </td>
                                     </tr>
                                 ))
