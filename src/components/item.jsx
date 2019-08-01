@@ -6,7 +6,6 @@ import ButtonToolbar from 'react-bootstrap/ButtonToolbar'
 import Form from 'react-bootstrap/Form'
 import Table from 'react-bootstrap/Table'
 import axios from 'axios'
-import moment from 'moment'
 class Item extends Component {
 
     state = {
@@ -35,20 +34,6 @@ class Item extends Component {
         this.setState({ item });
     }
 
-    handleStockChange = (event, index) => {
-        const { name, value } = event.target;
-        console.log("Target name", name);
-        console.log("Index: ", index);
-        if (name === "itemStockDate") {
-            console.log("Actual Date: ", value);
-            console.log("moment Date: ", moment(value).format('DD/MM/YYYY'));
-        }
-        let stocks = [...this.state.stocks];
-        console.log("Cell old value: ", stocks[index][name]);
-        stocks[index][name] = value;
-        this.setState({ stocks });
-    }
-
     newItem = () => {
         this.setState({ item: {}, navigationDtl: { first: true, last: true }, stocks: [] });
     }
@@ -59,7 +44,7 @@ class Item extends Component {
             .then(res => {
                 console.log("Post: Object received: ", res.data);
                 const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl });
+                this.setState({ item, navigationDtl, stocks: item.itemStocks });
             })
             .catch(err => {
                 console.log(err);
@@ -108,7 +93,8 @@ class Item extends Component {
             .then(res => {
                 const { item, navigationDtl } = res.data;
                 this.setState({ item, navigationDtl, stocks: item.itemStocks })
-                console.log(this.state.item);
+                console.log("Item: ", item);
+                console.log("Stock: ", item.itemStocks);
             })
             .catch(err => {
                 console.log(err);
@@ -127,9 +113,23 @@ class Item extends Component {
             });
     }
 
-    saveStock = () => {
-        console.log("Post: Object sent: ", JSON.stringify(this.state.stocks));
-        axios.post('http://localhost:8089/stock/saveAll', this.state.stocks)
+    handleStockChange = (event, index) => {
+        const { name, value } = event.target;
+        let item = this.state.item;
+        let stocks = this.state.stocks;
+        console.log("Target name", name);
+        console.log("Index: ", index);
+        console.log("Value: ", value);
+        console.log("Cell old value: ", stocks[index][name]);
+        stocks[index][name] = value;
+        item.stocks = stocks;
+        this.setState({ item, stocks });
+    }
+
+    /* saveStock = () => {
+        let stocks = this.state.stocks;
+        console.log("Post: Object sent: ", stocks);
+        axios.post('http://localhost:8089/stock/saveAll', stocks)
             .then(res => {
                 console.log("Post: Object received: ", res.data);
                 this.setState({ stock: res.data });
@@ -137,15 +137,16 @@ class Item extends Component {
             .catch(err => {
                 console.log(err);
             });
-    }
+    } */
 
     addStock = () => {
-        let newStock = { item: this.state.item.itemCode };
-        this.setState(
-            {
-                stocks: [...this.state.stocks, newStock]
-            }
-        );
+        let item = this.state.item;
+        let itemCode = item.itemCode;
+        let newStock = { item: itemCode };
+        let stocks = this.state.stocks;
+        stocks.push(newStock);
+        item.stocks = stocks;
+        this.setState({ item, stocks });
     }
 
 
@@ -196,6 +197,7 @@ class Item extends Component {
                                 aria-label="Item Desc."
                                 aria-describedby="basic-addon1"
                                 value={item.itemDesc || ''}
+                                required
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -224,6 +226,7 @@ class Item extends Component {
                                 aria-label="Item U.O.M"
                                 aria-describedby="basic-addon1"
                                 value={item.itemUom || ''}
+                                required
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -300,6 +303,7 @@ class Item extends Component {
                                 aria-describedby="basic-addon1"
                                 onSelect={this.handleItemChange}
                                 value={item.effectiveStartDate || ''}
+                                required
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -388,7 +392,7 @@ class Item extends Component {
                             <Button
                                 variant="primary"
                                 // disabled={navigationDtl.first}
-                                onClick={this.saveStock}
+                                onClick={this.saveItem}
                                 className="mr-1"
                                 active>Save Stock
                                             </Button>
@@ -415,6 +419,7 @@ class Item extends Component {
                                                 aria-label="Stock Date"
                                                 aria-describedby="basic-addon1"
                                                 value={stock.itemStockDate || ''}
+                                                required
                                                 onChange={e => this.handleStockChange(e, index)}
                                             />
                                         </td>
@@ -426,6 +431,7 @@ class Item extends Component {
                                                 aria-label="Stock Quantity"
                                                 aria-describedby="basic-addon1"
                                                 value={stock.qnty || ''}
+                                                required
                                                 onChange={e => this.handleStockChange(e, index)}
                                             />
                                         </td>
@@ -452,7 +458,7 @@ class Item extends Component {
                                                 <Button
                                                     variant="primary"
                                                     // disabled={navigationDtl.first}
-                                                    onClick={this.saveStock}
+                                                    onClick={this.saveItem}
                                                     className="mr-1"
                                                     active>Save Stock
                                             </Button>
