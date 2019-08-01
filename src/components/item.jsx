@@ -50,7 +50,7 @@ class Item extends Component {
     }
 
     newItem = () => {
-        this.setState({ item: {}, navigationDtl: { first: true, last: true } });
+        this.setState({ item: {}, navigationDtl: { first: true, last: true }, stocks: [] });
     }
 
     saveItem = () => {
@@ -72,7 +72,7 @@ class Item extends Component {
             .then(res => {
                 console.log("Delete: Response: ", res);
                 const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl });
+                this.setState({ item, navigationDtl, stocks: item.itemStocks })
             })
             .catch(err => {
                 console.log(err);
@@ -83,7 +83,7 @@ class Item extends Component {
         axios.get('http://localhost:8089/item/first')
             .then(res => {
                 const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl });
+                this.setState({ item, navigationDtl, stocks: item.itemStocks })
                 console.log(this.state.item);
             })
             .catch(err => {
@@ -95,7 +95,7 @@ class Item extends Component {
         axios.get('http://localhost:8089/item/previous')
             .then(res => {
                 const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl });
+                this.setState({ item, navigationDtl, stocks: item.itemStocks })
                 console.log(this.state.item);
             })
             .catch(err => {
@@ -107,7 +107,7 @@ class Item extends Component {
         axios.get('http://localhost:8089/item/next')
             .then(res => {
                 const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl });
+                this.setState({ item, navigationDtl, stocks: item.itemStocks })
                 console.log(this.state.item);
             })
             .catch(err => {
@@ -119,7 +119,7 @@ class Item extends Component {
         axios.get('http://localhost:8089/item/last')
             .then(res => {
                 const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl });
+                this.setState({ item, navigationDtl, stocks: item.itemStocks })
                 console.log(this.state.item);
             })
             .catch(err => {
@@ -376,6 +376,22 @@ class Item extends Component {
                                 className="mr-1"
                                 active>Undo
                             </Button>
+                        </ButtonToolbar>
+                        <ButtonToolbar>
+                            <Button
+                                variant="primary"
+                                // disabled={navigationDtl.first}
+                                onClick={this.addStock}
+                                className="mr-1"
+                                active>Add Stock
+                                            </Button>
+                            <Button
+                                variant="primary"
+                                // disabled={navigationDtl.first}
+                                onClick={this.saveStock}
+                                className="mr-1"
+                                active>Save Stock
+                                            </Button>
                         </ButtonToolbar>
                     </Form>
                     <Table
