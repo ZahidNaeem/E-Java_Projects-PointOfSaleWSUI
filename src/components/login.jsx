@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
-import  '../assets/css/sb-admin-2.css';
+import '../assets/css/sb-admin-2.css';
+import { Link } from 'react-router-dom';
 
 class Login extends Component {
     state = {}
     render() {
         const windowsHeight = {
-           height: window.innerHeight + "px"
+            height: window.innerHeight + "px"
         }
         return (<>
             <div className="bg-gradient-primary" style={windowsHeight}>
@@ -34,7 +35,7 @@ class Login extends Component {
                                                             <label className="custom-control-label" htmlFor="customCheck">Remember Me</label>
                                                         </div>
                                                     </div>
-                                                    <button className="btn btn-primary btn-user btn-block">Login</button>
+                                                    <Link className="btn btn-primary btn-user btn-block" to="/item/first">Login</Link>
                                                 </form>
                                                 <hr />
                                                 <div className="text-center">
