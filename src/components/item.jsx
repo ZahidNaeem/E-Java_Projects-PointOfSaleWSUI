@@ -6,12 +6,14 @@ import ButtonToolbar from 'react-bootstrap/ButtonToolbar'
 import Form from 'react-bootstrap/Form'
 import Table from 'react-bootstrap/Table'
 import axios from 'axios'
+import SweetAlert from 'react-bootstrap-sweetalert'
 class Item extends Component {
 
     state = {
         item: {},
         navigationDtl: {},
-        stocks: []
+        stocks: [],
+        alert: null
     }
 
     componentDidMount() {
@@ -51,7 +53,29 @@ class Item extends Component {
             });
     }
 
+    showItemDeletePopup = () => {
+        const getAlert = () => (
+            <SweetAlert
+                warning
+                showCancel
+                confirmBtnText="Delete"
+                confirmBtnBsStyle="danger"
+                cancelBtnBsStyle="default"
+                title="Delete Confirmation"
+                Text="Are you sure you want to delete this item? It will also delete all stocks related to it."
+                onConfirm={() => this.deleteItem()}
+                onCancel={() => this.hideStockDeletePopup()}
+            >
+                Delete Item
+            </SweetAlert>
+        );
+        this.setState({
+            alert: getAlert()
+        });
+    }
+
     deleteItem = () => {
+        if(this.state.item.itemCode != null){
         console.log("Delete: Item Code sent: ", this.state.item.itemCode);
         axios.delete('http://localhost:8089/item/delete/' + this.state.item.itemCode)
             .then(res => {
@@ -61,6 +85,10 @@ class Item extends Component {
             })
             .catch(err => {
                 console.log(err);
+            });
+        }
+            this.setState({
+                alert: null
             });
     }
 
@@ -140,13 +168,59 @@ class Item extends Component {
     } */
 
     addStock = () => {
-        let item = this.state.item;
+        let item = { ...this.state.item };
         let itemCode = item.itemCode;
         let newStock = { item: itemCode };
-        let stocks = this.state.stocks;
+        let stocks = [...this.state.stocks];
         stocks.push(newStock);
-        item.stocks = stocks;
+        item.itemStocks = stocks;
         this.setState({ item, stocks });
+    }
+
+    showStockDeletePopup = (index) => {
+        const getAlert = () => (
+            <SweetAlert
+                warning
+                showCancel
+                confirmBtnText="Delete"
+                confirmBtnBsStyle="danger"
+                cancelBtnBsStyle="default"
+                title="Delete Confirmation"
+                Text="Are you sure you want to delete this stock?"
+                onConfirm={(i) => this.deleteStock(index)}
+                onCancel={() => this.hideStockDeletePopup()}
+            >
+                Delete Stock
+            </SweetAlert>
+        );
+        this.setState({
+            alert: getAlert()
+        });
+    }
+
+    hideStockDeletePopup = () => {
+        console.log('Hiding alert...');
+        this.setState({
+            alert: null
+        });
+    }
+
+    deleteStock = (index) => {
+        let item = { ...this.state.item };
+        let stocks = [...this.state.stocks];
+        let id = stocks[index]["itemStockId"];
+        if (id != null) {
+            axios.delete('http://localhost:8089/stock/delete/' + id)
+                .then(res => {
+                    console.log("Delete: Response: ", res);
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+        }
+        stocks.splice(index, 1);
+        item.itemStocks = stocks;
+        this.setState({ item, stocks, alert: null });
     }
 
 
@@ -160,13 +234,12 @@ class Item extends Component {
                     <Form>
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text id="basic-addon1">Item Code</InputGroup.Text>
+                                <InputGroup.Text style={{ width: "180px" }}>Item Code</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 name="itemCode"
                                 placeholder="Item Code"
                                 aria-label="Item Code"
-                                aria-describedby="basic-addon1"
                                 readOnly
                                 value={item.itemCode || ''}
                                 onChange={this.handleItemChange}
@@ -175,13 +248,12 @@ class Item extends Component {
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text id="basic-addon2">Item Barcode</InputGroup.Text>
+                                <InputGroup.Text style={{ width: "180px" }}>Item Barcode</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 name="itemBarcode"
                                 placeholder="Item Barcode"
                                 aria-label="Item Barcode"
-                                aria-describedby="basic-addon2"
                                 value={item.itemBarcode || ''}
                                 onChange={this.handleItemChange}
                             />
@@ -189,13 +261,12 @@ class Item extends Component {
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text id="basic-addon1">Item Desc.</InputGroup.Text>
+                                <InputGroup.Text style={{ width: "180px" }}>Item Desc.</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 name="itemDesc"
                                 placeholder="Item Desc."
                                 aria-label="Item Desc."
-                                aria-describedby="basic-addon1"
                                 value={item.itemDesc || ''}
                                 required
                                 onChange={this.handleItemChange}
@@ -204,13 +275,12 @@ class Item extends Component {
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text id="basic-addon1">Item Category</InputGroup.Text>
+                                <InputGroup.Text style={{ width: "180px" }}>Item Category</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 name="itemCategory"
                                 placeholder="Item Category"
                                 aria-label="Item Category"
-                                aria-describedby="basic-addon1"
                                 value={item.itemCategory || ''}
                                 onChange={this.handleItemChange}
                             />
@@ -218,13 +288,12 @@ class Item extends Component {
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text id="basic-addon1">Item U.O.M</InputGroup.Text>
+                                <InputGroup.Text style={{ width: "180px" }}>Item U.O.M</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 name="itemUom"
                                 placeholder="Item U.O.M"
                                 aria-label="Item U.O.M"
-                                aria-describedby="basic-addon1"
                                 value={item.itemUom || ''}
                                 required
                                 onChange={this.handleItemChange}
@@ -233,14 +302,13 @@ class Item extends Component {
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text id="basic-addon1">Purchase Price</InputGroup.Text>
+                                <InputGroup.Text style={{ width: "180px" }}>Purchase Price</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 type="number"
                                 name="purchasePrice"
                                 placeholder="Purchase Price"
                                 aria-label="Purchase Price"
-                                aria-describedby="basic-addon1"
                                 value={item.purchasePrice || ''}
                                 onChange={this.handleItemChange}
                             />
@@ -248,14 +316,13 @@ class Item extends Component {
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text id="basic-addon1">Sale Price</InputGroup.Text>
+                                <InputGroup.Text style={{ width: "180px" }}>Sale Price</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 type="number"
                                 name="salePrice"
                                 placeholder="Sale Price"
                                 aria-label="Sale Price"
-                                aria-describedby="basic-addon1"
                                 value={item.salePrice || ''}
                                 onChange={this.handleItemChange}
                             />
@@ -263,14 +330,13 @@ class Item extends Component {
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text id="basic-addon1">Max. Stock</InputGroup.Text>
+                                <InputGroup.Text style={{ width: "180px" }}>Max. Stock</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 type="number"
                                 name="maxStock"
                                 placeholder="Max. Stock"
                                 aria-label="Max. Stock"
-                                aria-describedby="basic-addon1"
                                 value={item.maxStock || ''}
                                 onChange={this.handleItemChange}
                             />
@@ -278,14 +344,13 @@ class Item extends Component {
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text id="basic-addon1">Min. Stock</InputGroup.Text>
+                                <InputGroup.Text style={{ width: "180px" }}>Min. Stock</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 type="number"
                                 name="minStock"
                                 placeholder="Min. Stock"
                                 aria-label="Min. Stock"
-                                aria-describedby="basic-addon1"
                                 value={item.minStock || ''}
                                 onChange={this.handleItemChange}
                             />
@@ -293,16 +358,15 @@ class Item extends Component {
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text id="basic-addon1">Effective Start Date</InputGroup.Text>
+                                <InputGroup.Text style={{ width: "180px" }}>Effective Start Date</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 type="date"
                                 name="effectiveStartDate"
                                 placeholder="Effective Start Date"
                                 aria-label="Effective Start Date"
-                                aria-describedby="basic-addon1"
                                 onSelect={this.handleItemChange}
-                                value={item.effectiveStartDate || ''}
+                                value={item.effectiveStartDate != null ? item.effectiveStartDate.split("T")[0] : ''}
                                 required
                                 onChange={this.handleItemChange}
                             />
@@ -310,15 +374,14 @@ class Item extends Component {
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text id="basic-addon1">Effective End Date</InputGroup.Text>
+                                <InputGroup.Text style={{ width: "180px" }}>Effective End Date</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 type="date"
                                 name="effectiveEndDate"
                                 placeholder="Effective End Date"
                                 aria-label="Effective End Date"
-                                aria-describedby="basic-addon1"
-                                value={item.effectiveEndDate || ''}
+                                value={item.effectiveEndDate != null ? item.effectiveEndDate.split("T")[0] : ''}
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
@@ -360,13 +423,16 @@ class Item extends Component {
                                 className="mr-1"
                                 active>Add
                             </Button>
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={this.deleteItem}
-                                className="mr-1"
-                                active>Delete
+                            <div>
+                                <Button
+                                    variant="primary"
+                                    // disabled={navigationDtl.first}
+                                    onClick={this.showItemDeletePopup}
+                                    className="mr-1"
+                                    active>Delete
                             </Button>
+                                {this.state.alert}
+                            </div>
                             <Button
                                 variant="primary"
                                 onClick={this.saveItem}
@@ -417,8 +483,7 @@ class Item extends Component {
                                                 name="itemStockDate"
                                                 placeholder="Stock Date"
                                                 aria-label="Stock Date"
-                                                aria-describedby="basic-addon1"
-                                                value={stock.itemStockDate || ''}
+                                                value={stock.itemStockDate != null ? stock.itemStockDate.split("T")[0] : ''}
                                                 required
                                                 onChange={e => this.handleStockChange(e, index)}
                                             />
@@ -429,7 +494,6 @@ class Item extends Component {
                                                 name="qnty"
                                                 placeholder="Stock Quantity"
                                                 aria-label="Stock Quantity"
-                                                aria-describedby="basic-addon1"
                                                 value={stock.qnty || ''}
                                                 required
                                                 onChange={e => this.handleStockChange(e, index)}
@@ -441,7 +505,6 @@ class Item extends Component {
                                                 name="remarks"
                                                 placeholder="Remarks"
                                                 aria-label="Remarks"
-                                                aria-describedby="basic-addon1"
                                                 value={stock.remarks || ''}
                                                 onChange={e => this.handleStockChange(e, index)}
                                             />
@@ -462,6 +525,17 @@ class Item extends Component {
                                                     className="mr-1"
                                                     active>Save Stock
                                             </Button>
+
+                                                <div>
+                                                    <Button
+                                                        variant="primary"
+                                                        // disabled={navigationDtl.first}
+                                                        onClick={(i) => this.showStockDeletePopup(index)}
+                                                        className="mr-1"
+                                                        active>Delete Stock
+                                            </Button>
+                                                    {this.state.alert}
+                                                </div>
                                             </ButtonToolbar>
                                         </td>
                                     </tr>
