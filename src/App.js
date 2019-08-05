@@ -1,10 +1,15 @@
 import React, { Component } from 'react';
-import Item from './components/item'
+import { Route, Switch, Redirect } from "react-router-dom";
+import Main from './components/main';
+import Login from './components/login';
 class App extends Component {
 
     render() {
         return (
-            <Item />
+            <Switch>
+                <Route path="/index" component={Main} />
+                <Route path="/" component={Login} />
+            </Switch>
         )
     }
 }
