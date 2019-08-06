@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
-import { InputGroup, FormControl, Button, ButtonToolbar, ButtonGroup, Form, Table, Toast } from 'react-bootstrap'
+import { InputGroup, FormControl, Button, ButtonToolbar, ButtonGroup, Form, Table } from 'react-bootstrap'
 import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 class Item extends Component {
 
     state = {
@@ -10,8 +12,7 @@ class Item extends Component {
         stocks: [],
         itemAlert: false,
         stockAlert: false,
-        itemToast: false,
-        stockToast: false
+        stockIndex: null
     }
 
     componentDidMount() {
@@ -38,16 +39,18 @@ class Item extends Component {
         this.setState({ item: {}, navigationDtl: { first: true, last: true }, stocks: [] });
     }
 
-    saveItem = () => {
+    saveItem = (message) => {
         console.log("Post: Object sent: ", this.state.item);
         axios.post('http://localhost:8089/item/save', this.state.item)
             .then(res => {
                 console.log("Post: Object received: ", res.data);
                 const { item, navigationDtl } = res.data;
                 this.setState({ item, navigationDtl, stocks: item.itemStocks });
+                toast.success(message);
             })
             .catch(err => {
                 console.log(err);
+                toast.error("There is an error:\n" + err);
             });
     }
 
@@ -141,10 +144,10 @@ class Item extends Component {
         this.setState({ item, stocks });
     }
 
-    deleteStock = (index) => {
+    deleteStock = () => {
         let item = { ...this.state.item };
         let stocks = [...this.state.stocks];
-        let id = stocks[index]["itemStockId"];
+        let id = stocks[this.state.stockIndex]["itemStockId"];
         if (id != null) {
             axios.delete('http://localhost:8089/stock/delete/' + id)
                 .then(res => {
@@ -154,7 +157,7 @@ class Item extends Component {
                     console.log(err);
                 });
         }
-        stocks.splice(index, 1);
+        stocks.splice(this.state.stockIndex, 1);
         item.itemStocks = stocks;
         this.setState({ item, stocks, stockAlert: false });
     }
@@ -351,86 +354,92 @@ class Item extends Component {
                                 active>Last
                             </Button>
                         </ButtonToolbar>
-                        <ButtonToolbar>
-                            <div>
-                                <Button
-                                    variant="primary"
-                                    // disabled={navigationDtl.first}
-                                    onClick={this.newItem}
-                                    className="mr-1"
-                                    active>Add
+                        <ButtonToolbar className="ml-2">
+                            <Button
+                                variant="primary"
+                                // disabled={navigationDtl.first}
+                                onClick={this.newItem}
+                                className="mr-1"
+                                active>Add
                             </Button>
-                                <Button
-                                    variant="primary"
-                                    // disabled={navigationDtl.first}
-                                    onClick={() => this.setState({ itemAlert: true })}
-                                    className="mr-1"
-                                    active>Delete
+                            <Button
+                                variant="primary"
+                                // disabled={navigationDtl.first}
+                                onClick={() => this.setState({ itemAlert: true })}
+                                className="mr-1"
+                                active>Delete
                             </Button>
-                                <Button
-                                    variant="primary"
-                                    onClick={() => { this.saveItem(); this.setState({ itemToast: true }) }}
-                                    className="mr-1"
-                                    active>Save
+                            <Button
+                                variant="primary"
+                                onClick={() => this.saveItem("Item saved successfully.")}
+                                className="mr-1"
+                                active>Save
                             </Button>
-                                <Button
-                                    variant="primary"
-                                    /* disabled={navigationDtl.last}
-                                    onClick={this.nextItem} */
-                                    className="mr-1"
-                                    active>Undo
+                            <Button
+                                variant="primary"
+                                /* disabled={navigationDtl.last}
+                                onClick={this.nextItem} */
+                                className="mr-1"
+                                active>Undo
                             </Button>
-                                <SweetAlert
-                                    show={this.state.itemAlert}
-                                    warning
-                                    showCancel
-                                    confirmBtnText="Delete"
-                                    confirmBtnBsStyle="danger"
-                                    cancelBtnBsStyle="default"
-                                    title="Delete Confirmation"
-                                    Text="Are you sure you want to delete this item? It will also delete all stocks related to it."
-                                    onConfirm={() => this.deleteItem()}
-                                    onCancel={() => this.setState({ itemAlert: false })}
-                                >
-                                    Delete Item
+                            <SweetAlert
+                                show={this.state.itemAlert}
+                                warning
+                                showCancel
+                                confirmBtnText="Delete"
+                                confirmBtnBsStyle="danger"
+                                cancelBtnBsStyle="default"
+                                title="Delete Confirmation"
+                                Text="Are you sure you want to delete this item? It will also delete all stocks related to it."
+                                onConfirm={() => this.deleteItem()}
+                                onCancel={() => this.setState({ itemAlert: false })}
+                            >
+                                Delete Item
                                 </SweetAlert>
-                                <Toast
-                                    onCancel={() => this.setState({ itemToast: false })}
-                                    onClose={() => this.setState({ itemToast: false })}
-                                    show={this.state.itemToast}
-                                    delay={2000}
-                                    autohide>
-                                    <Toast.Header>
-                                        <strong className="mr-auto">Save Item</strong>
-                                        {/* <small>11 mins ago</small> */}
-                                    </Toast.Header>
-                                    <Toast.Body>Item saved successfully</Toast.Body>
-                                </Toast>
-                            </div>
                         </ButtonToolbar>
-                        {/* <ButtonGroup className="m-2"> */}
-                        <ButtonGroup>
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={this.addStock}
-                                className="mr-1"
-                                active>Add Stock
+                        <ButtonGroup className="m-2">
+                                                <Button
+                                                    variant="primary"
+                                                    // disabled={navigationDtl.first}
+                                                     onClick={this.addStock}
+                                                    className="mr-1"
+                                                    active>Add Stock
                                             </Button>
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={this.saveItem}
-                                className="mr-1"
-                                active>Save Stock
+                                                <Button
+                                                    variant="primary"
+                                                    // disabled={navigationDtl.first}
+                                                    onClick={() => {this.saveItem("Stock saved successfully.")}}
+                                                    className="mr-1"
+                                                    active>Save Stock
                                             </Button>
-                        </ButtonGroup>
+                                                <Button
+                                                    variant="primary"
+                                                    // disabled={navigationDtl.first}
+                                                    onClick={() => this.setState({ stockAlert: true })}
+                                                    className="mr-1"
+                                                    active>Delete Stock
+                                                    </Button>
+                                                <SweetAlert
+                                                    show={this.state.stockAlert}
+                                                    warning
+                                                    showCancel
+                                                    confirmBtnText="Delete"
+                                                    confirmBtnBsStyle="danger"
+                                                    cancelBtnBsStyle="default"
+                                                    title="Delete Confirmation"
+                                                    Text="Are you sure you want to delete this stock?"
+                                                    onConfirm={() => this.deleteStock()}
+                                                    onCancel={() => this.setState({ stockAlert: false })}
+                                                >
+                                                    Delete Stock
+                                                    </SweetAlert>
+                                            </ButtonGroup>
                     </Form>
                     <Table
                         striped
                         bordered
                         hover
-                        responsive>
+                        responsive> 
                         <thead>
                             <tr>
                                 <th>Stock Date</th>
@@ -441,7 +450,8 @@ class Item extends Component {
                         <tbody>
                             {
                                 stocks && stocks.map((stock, index) => (
-                                    <tr key={stock.itemStockId}>
+                                    <tr key={stock.itemStockId}
+                                    onFocus={() => {this.setState({stockIndex: index})}}>
                                         <td>
                                             <FormControl
                                                 type="date"
@@ -473,59 +483,6 @@ class Item extends Component {
                                                 value={stock.remarks || ''}
                                                 onChange={e => this.handleStockChange(e, index)}
                                             />
-                                        </td>
-                                        <td>
-                                            <ButtonGroup>
-                                                <div>
-                                                    <Button
-                                                        variant="primary"
-                                                        // disabled={navigationDtl.first}
-                                                        onClick={this.addStock}
-                                                        className="mr-1"
-                                                        active>Add Stock
-                                            </Button>
-                                                    <Button
-                                                        variant="primary"
-                                                        // disabled={navigationDtl.first}
-                                                        onClick={() => { this.saveItem(); this.setState({ stockToast: true }) }}
-                                                        className="mr-1"
-                                                        active>Save Stock
-                                            </Button>
-                                                    <Button
-                                                        variant="primary"
-                                                        // disabled={navigationDtl.first}
-                                                        onClick={() => this.setState({ stockAlert: true })}
-                                                        className="mr-1"
-                                                        active>Delete Stock
-                                                    </Button>
-                                                    <SweetAlert
-                                                        show={this.state.stockAlert}
-                                                        warning
-                                                        showCancel
-                                                        confirmBtnText="Delete"
-                                                        confirmBtnBsStyle="danger"
-                                                        cancelBtnBsStyle="default"
-                                                        title="Delete Confirmation"
-                                                        Text="Are you sure you want to delete this stock?"
-                                                        onConfirm={() => this.deleteStock(index)}
-                                                        onCancel={() => this.setState({ stockAlert: false })}
-                                                    >
-                                                        Delete Stock
-                                                    </SweetAlert>
-                                                    <Toast
-                                                        onCancel={() => this.setState({ stockToast: false })}
-                                                        onClose={() => this.setState({ stockToast: false })}
-                                                        show={this.state.stockToast}
-                                                        delay={2000}
-                                                        autohide>
-                                                        <Toast.Header>
-                                                            <strong className="mr-auto">Save Stock</strong>
-                                                            {/* <small>11 mins ago</small> */}
-                                                        </Toast.Header>
-                                                        <Toast.Body>Stock saved successfully</Toast.Body>
-                                                    </Toast>
-                                                </div>
-                                            </ButtonGroup>
                                         </td>
                                     </tr>
                                 ))
