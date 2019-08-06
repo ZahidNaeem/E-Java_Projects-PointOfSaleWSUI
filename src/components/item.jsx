@@ -1,10 +1,5 @@
 import React, { Component } from 'react';
-import InputGroup from 'react-bootstrap/InputGroup'
-import FormControl from 'react-bootstrap/FormControl'
-import Button from 'react-bootstrap/Button'
-import ButtonToolbar from 'react-bootstrap/ButtonToolbar'
-import Form from 'react-bootstrap/Form'
-import Table from 'react-bootstrap/Table'
+import { InputGroup, FormControl, Button, ButtonToolbar, ButtonGroup, Form, Table } from 'react-bootstrap'
 import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 class Item extends Component {
@@ -13,7 +8,7 @@ class Item extends Component {
         item: {},
         navigationDtl: {},
         stocks: [],
-        alert: null
+        showAlert: false
     }
 
     componentDidMount() {
@@ -53,43 +48,22 @@ class Item extends Component {
             });
     }
 
-    showItemDeletePopup = () => {
-        const getAlert = () => (
-            <SweetAlert
-                warning
-                showCancel
-                confirmBtnText="Delete"
-                confirmBtnBsStyle="danger"
-                cancelBtnBsStyle="default"
-                title="Delete Confirmation"
-                Text="Are you sure you want to delete this item? It will also delete all stocks related to it."
-                onConfirm={() => this.deleteItem()}
-                onCancel={() => this.hideStockDeletePopup()}
-            >
-                Delete Item
-            </SweetAlert>
-        );
-        this.setState({
-            alert: getAlert()
-        });
-    }
-
     deleteItem = () => {
-        if(this.state.item.itemCode != null){
-        console.log("Delete: Item Code sent: ", this.state.item.itemCode);
-        axios.delete('http://localhost:8089/item/delete/' + this.state.item.itemCode)
-            .then(res => {
-                console.log("Delete: Response: ", res);
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, stocks: item.itemStocks })
-            })
-            .catch(err => {
-                console.log(err);
-            });
+        if (this.state.item.itemCode != null) {
+            console.log("Delete: Item Code sent: ", this.state.item.itemCode);
+            axios.delete('http://localhost:8089/item/delete/' + this.state.item.itemCode)
+                .then(res => {
+                    console.log("Delete: Response: ", res);
+                    const { item, navigationDtl } = res.data;
+                    this.setState({ item, navigationDtl, stocks: item.itemStocks })
+                })
+                .catch(err => {
+                    console.log(err);
+                });
         }
-            this.setState({
-                alert: null
-            });
+        this.setState({
+            alert: false
+        });
     }
 
     firstItem = () => {
@@ -154,19 +128,6 @@ class Item extends Component {
         this.setState({ item, stocks });
     }
 
-    /* saveStock = () => {
-        let stocks = this.state.stocks;
-        console.log("Post: Object sent: ", stocks);
-        axios.post('http://localhost:8089/stock/saveAll', stocks)
-            .then(res => {
-                console.log("Post: Object received: ", res.data);
-                this.setState({ stock: res.data });
-            })
-            .catch(err => {
-                console.log(err);
-            });
-    } */
-
     addStock = () => {
         let item = { ...this.state.item };
         let itemCode = item.itemCode;
@@ -177,31 +138,10 @@ class Item extends Component {
         this.setState({ item, stocks });
     }
 
-    showStockDeletePopup = (index) => {
-        const getAlert = () => (
-            <SweetAlert
-                warning
-                showCancel
-                confirmBtnText="Delete"
-                confirmBtnBsStyle="danger"
-                cancelBtnBsStyle="default"
-                title="Delete Confirmation"
-                Text="Are you sure you want to delete this stock?"
-                onConfirm={(i) => this.deleteStock(index)}
-                onCancel={() => this.hideStockDeletePopup()}
-            >
-                Delete Stock
-            </SweetAlert>
-        );
-        this.setState({
-            alert: getAlert()
-        });
-    }
-
-    hideStockDeletePopup = () => {
+    hideDeleteAlert = () => {
         console.log('Hiding alert...');
         this.setState({
-            alert: null
+            showAlert: false
         });
     }
 
@@ -220,7 +160,7 @@ class Item extends Component {
         }
         stocks.splice(index, 1);
         item.itemStocks = stocks;
-        this.setState({ item, stocks, alert: null });
+        this.setState({ item, stocks, showAlert: false });
     }
 
 
@@ -427,11 +367,24 @@ class Item extends Component {
                                 <Button
                                     variant="primary"
                                     // disabled={navigationDtl.first}
-                                    onClick={this.showItemDeletePopup}
+                                    onClick={() => this.setState({ showAlert: true })}
                                     className="mr-1"
                                     active>Delete
                             </Button>
-                                {this.state.alert}
+                                <SweetAlert
+                                    show={this.state.showAlert}
+                                    warning
+                                    showCancel
+                                    confirmBtnText="Delete"
+                                    confirmBtnBsStyle="danger"
+                                    cancelBtnBsStyle="default"
+                                    title="Delete Confirmation"
+                                    Text="Are you sure you want to delete this item? It will also delete all stocks related to it."
+                                    onConfirm={() => this.deleteItem()}
+                                    onCancel={() => this.hideDeleteAlert()}
+                                >
+                                    Delete Item
+                                </SweetAlert>
                             </div>
                             <Button
                                 variant="primary"
@@ -447,7 +400,7 @@ class Item extends Component {
                                 active>Undo
                             </Button>
                         </ButtonToolbar>
-                        <ButtonToolbar>
+                        <ButtonGroup className="m-2">
                             <Button
                                 variant="primary"
                                 // disabled={navigationDtl.first}
@@ -462,9 +415,12 @@ class Item extends Component {
                                 className="mr-1"
                                 active>Save Stock
                                             </Button>
-                        </ButtonToolbar>
+                        </ButtonGroup>
                     </Form>
                     <Table
+                        striped
+                        bordered
+                        hover
                         responsive>
                         <thead>
                             <tr>
@@ -510,7 +466,7 @@ class Item extends Component {
                                             />
                                         </td>
                                         <td>
-                                            <ButtonToolbar>
+                                            <ButtonGroup>
                                                 <Button
                                                     variant="primary"
                                                     // disabled={navigationDtl.first}
@@ -530,13 +486,26 @@ class Item extends Component {
                                                     <Button
                                                         variant="primary"
                                                         // disabled={navigationDtl.first}
-                                                        onClick={(i) => this.showStockDeletePopup(index)}
+                                                        onClick={() => this.setState({ showAlert: true })}
                                                         className="mr-1"
                                                         active>Delete Stock
-                                            </Button>
-                                                    {this.state.alert}
+                                                    </Button>
+                                                    <SweetAlert
+                                                        show={this.state.showAlert}
+                                                        warning
+                                                        showCancel
+                                                        confirmBtnText="Delete"
+                                                        confirmBtnBsStyle="danger"
+                                                        cancelBtnBsStyle="default"
+                                                        title="Delete Confirmation"
+                                                        Text="Are you sure you want to delete this stock?"
+                                                        onConfirm={() => this.deleteStock(index)}
+                                                        onCancel={() => this.hideDeleteAlert()}
+                                                    >
+                                                        Delete Stock
+                                                    </SweetAlert>
                                                 </div>
-                                            </ButtonToolbar>
+                                            </ButtonGroup>
                                         </td>
                                     </tr>
                                 ))

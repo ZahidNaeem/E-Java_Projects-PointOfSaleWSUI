@@ -35,7 +35,7 @@ class Login extends Component {
                                                             <label className="custom-control-label" htmlFor="customCheck">Remember Me</label>
                                                         </div>
                                                     </div>
-                                                    <Link className="btn btn-primary btn-user btn-block" to="/item/first">Login</Link>
+                                                    <Link className="btn btn-primary btn-user btn-block" to="/item">Login</Link>
                                                 </form>
                                                 <hr />
                                                 <div className="text-center">
