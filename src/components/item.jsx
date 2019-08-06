@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { InputGroup, FormControl, Button, ButtonToolbar, ButtonGroup, Form, Table } from 'react-bootstrap'
+import { InputGroup, FormControl, Button, ButtonToolbar, ButtonGroup, Form, Table, Toast } from 'react-bootstrap'
 import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 class Item extends Component {
@@ -8,7 +8,10 @@ class Item extends Component {
         item: {},
         navigationDtl: {},
         stocks: [],
-        showAlert: false
+        itemAlert: false,
+        stockAlert: false,
+        itemToast: false,
+        stockToast: false
     }
 
     componentDidMount() {
@@ -62,7 +65,7 @@ class Item extends Component {
                 });
         }
         this.setState({
-            alert: false
+            itemAlert: false
         });
     }
 
@@ -138,13 +141,6 @@ class Item extends Component {
         this.setState({ item, stocks });
     }
 
-    hideDeleteAlert = () => {
-        console.log('Hiding alert...');
-        this.setState({
-            showAlert: false
-        });
-    }
-
     deleteStock = (index) => {
         let item = { ...this.state.item };
         let stocks = [...this.state.stocks];
@@ -160,7 +156,7 @@ class Item extends Component {
         }
         stocks.splice(index, 1);
         item.itemStocks = stocks;
-        this.setState({ item, stocks, showAlert: false });
+        this.setState({ item, stocks, stockAlert: false });
     }
 
 
@@ -355,24 +351,37 @@ class Item extends Component {
                                 active>Last
                             </Button>
                         </ButtonToolbar>
-                        <ButtonToolbar className="m-2">
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={this.newItem}
-                                className="mr-1"
-                                active>Add
-                            </Button>
+                        <ButtonToolbar>
                             <div>
                                 <Button
                                     variant="primary"
                                     // disabled={navigationDtl.first}
-                                    onClick={() => this.setState({ showAlert: true })}
+                                    onClick={this.newItem}
+                                    className="mr-1"
+                                    active>Add
+                            </Button>
+                                <Button
+                                    variant="primary"
+                                    // disabled={navigationDtl.first}
+                                    onClick={() => this.setState({ itemAlert: true })}
                                     className="mr-1"
                                     active>Delete
                             </Button>
+                                <Button
+                                    variant="primary"
+                                    onClick={() => { this.saveItem(); this.setState({ itemToast: true }) }}
+                                    className="mr-1"
+                                    active>Save
+                            </Button>
+                                <Button
+                                    variant="primary"
+                                    /* disabled={navigationDtl.last}
+                                    onClick={this.nextItem} */
+                                    className="mr-1"
+                                    active>Undo
+                            </Button>
                                 <SweetAlert
-                                    show={this.state.showAlert}
+                                    show={this.state.itemAlert}
                                     warning
                                     showCancel
                                     confirmBtnText="Delete"
@@ -381,26 +390,26 @@ class Item extends Component {
                                     title="Delete Confirmation"
                                     Text="Are you sure you want to delete this item? It will also delete all stocks related to it."
                                     onConfirm={() => this.deleteItem()}
-                                    onCancel={() => this.hideDeleteAlert()}
+                                    onCancel={() => this.setState({ itemAlert: false })}
                                 >
                                     Delete Item
                                 </SweetAlert>
+                                <Toast
+                                    onCancel={() => this.setState({ itemToast: false })}
+                                    onClose={() => this.setState({ itemToast: false })}
+                                    show={this.state.itemToast}
+                                    delay={2000}
+                                    autohide>
+                                    <Toast.Header>
+                                        <strong className="mr-auto">Save Item</strong>
+                                        {/* <small>11 mins ago</small> */}
+                                    </Toast.Header>
+                                    <Toast.Body>Item saved successfully</Toast.Body>
+                                </Toast>
                             </div>
-                            <Button
-                                variant="primary"
-                                onClick={this.saveItem}
-                                className="mr-1"
-                                active>Save
-                            </Button>
-                            <Button
-                                variant="primary"
-                                /* disabled={navigationDtl.last}
-                                onClick={this.nextItem} */
-                                className="mr-1"
-                                active>Undo
-                            </Button>
                         </ButtonToolbar>
-                        <ButtonGroup className="m-2">
+                        {/* <ButtonGroup className="m-2"> */}
+                        <ButtonGroup>
                             <Button
                                 variant="primary"
                                 // disabled={navigationDtl.first}
@@ -467,31 +476,30 @@ class Item extends Component {
                                         </td>
                                         <td>
                                             <ButtonGroup>
-                                                <Button
-                                                    variant="primary"
-                                                    // disabled={navigationDtl.first}
-                                                    onClick={this.addStock}
-                                                    className="mr-1"
-                                                    active>Add Stock
-                                            </Button>
-                                                <Button
-                                                    variant="primary"
-                                                    // disabled={navigationDtl.first}
-                                                    onClick={this.saveItem}
-                                                    className="mr-1"
-                                                    active>Save Stock
-                                            </Button>
-
                                                 <div>
                                                     <Button
                                                         variant="primary"
                                                         // disabled={navigationDtl.first}
-                                                        onClick={() => this.setState({ showAlert: true })}
+                                                        onClick={this.addStock}
+                                                        className="mr-1"
+                                                        active>Add Stock
+                                            </Button>
+                                                    <Button
+                                                        variant="primary"
+                                                        // disabled={navigationDtl.first}
+                                                        onClick={() => { this.saveItem(); this.setState({ stockToast: true }) }}
+                                                        className="mr-1"
+                                                        active>Save Stock
+                                            </Button>
+                                                    <Button
+                                                        variant="primary"
+                                                        // disabled={navigationDtl.first}
+                                                        onClick={() => this.setState({ stockAlert: true })}
                                                         className="mr-1"
                                                         active>Delete Stock
                                                     </Button>
                                                     <SweetAlert
-                                                        show={this.state.showAlert}
+                                                        show={this.state.stockAlert}
                                                         warning
                                                         showCancel
                                                         confirmBtnText="Delete"
@@ -500,10 +508,22 @@ class Item extends Component {
                                                         title="Delete Confirmation"
                                                         Text="Are you sure you want to delete this stock?"
                                                         onConfirm={() => this.deleteStock(index)}
-                                                        onCancel={() => this.hideDeleteAlert()}
+                                                        onCancel={() => this.setState({ stockAlert: false })}
                                                     >
                                                         Delete Stock
                                                     </SweetAlert>
+                                                    <Toast
+                                                        onCancel={() => this.setState({ stockToast: false })}
+                                                        onClose={() => this.setState({ stockToast: false })}
+                                                        show={this.state.stockToast}
+                                                        delay={2000}
+                                                        autohide>
+                                                        <Toast.Header>
+                                                            <strong className="mr-auto">Save Stock</strong>
+                                                            {/* <small>11 mins ago</small> */}
+                                                        </Toast.Header>
+                                                        <Toast.Body>Stock saved successfully</Toast.Body>
+                                                    </Toast>
                                                 </div>
                                             </ButtonGroup>
                                         </td>
