@@ -5,6 +5,7 @@ import Main from './components/main';
 import Login from './components/login';
 import Item from './components/item';
 import { toast } from 'react-toastify';
+import Party from './components/party';
 class App extends Component {
 
     render() {
@@ -20,6 +21,7 @@ class App extends Component {
             <Switch>
                 <Route path="/index" component={Main} />
                 <Route path="/item" component={Item} />
+                <Route path="/party" component={Party} />
                 <Route path="/" component={Login} />
             </Switch>
         )
