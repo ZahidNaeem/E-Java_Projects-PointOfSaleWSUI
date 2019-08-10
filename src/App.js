@@ -4,13 +4,24 @@ import { Route, Switch } from "react-router-dom";
 import Main from './components/main';
 import Login from './components/login';
 import Item from './components/item';
+import { toast } from 'react-toastify';
+import Party from './components/party';
 class App extends Component {
 
     render() {
+        toast.configure({
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true
+            });
         return (
             <Switch>
                 <Route path="/index" component={Main} />
-                <Route path="/item/first" component={Item} />
+                <Route path="/item" component={Item} />
+                <Route path="/party" component={Party} />
                 <Route path="/" component={Login} />
             </Switch>
         )

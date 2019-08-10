@@ -5,54 +5,54 @@ import SweetAlert from 'react-bootstrap-sweetalert'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Select from 'react-select'
-class Item extends Component {
+class Party extends Component {
 
     state = {
-        item: {},
+        party: {},
         navigationDtl: {},
-        stocks: [],
-        itemAlert: false,
-        stockAlert: false,
-        stockIndex: null
+        balances: [],
+        partyAlert: false,
+        balanceAlert: false,
+        balanceIndex: null
     }
 
     componentDidMount() {
-        axios.get('http://localhost:8089/item/first')
+        axios.get('http://localhost:8089/party/first')
             .then(res => {
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, stocks: item.itemStocks })
+                const { party, navigationDtl } = res.data;
+                this.setState({ party, navigationDtl, balances: party.partyBalances })
             })
             .catch(err => {
                 console.log(err);
             });
     }
 
-    handleItemChange = (event) => {
+    handlePartyChange = (event) => {
         const { name, value } = event.target;
         console.log("Target name", name);
         console.log(value);
-        let item = { ...this.state.item };
-        item[name] = value;
-        this.setState({ item });
+        let party = { ...this.state.party };
+        party[name] = value;
+        this.setState({ party });
     }
 
     handleSelectChange = (name, value) => {
-        let item = { ...this.state.item };
-        item[value.name] = name.value;
-        this.setState({ item });
+        let party = { ...this.state.party };
+        party[value.name] = name.value;
+        this.setState({ party });
     }
 
-    newItem = () => {
-        this.setState({ item: {}, navigationDtl: { first: true, last: true }, stocks: [] });
+    newParty = () => {
+        this.setState({ party: {}, navigationDtl: { first: true, last: true }, balances: [] });
     }
 
-    saveItem = (message) => {
-        console.log("Post: Object sent: ", this.state.item);
-        axios.post('http://localhost:8089/item/save', this.state.item)
+    saveParty = (message) => {
+        console.log("Post: Object sent: ", this.state.party);
+        axios.post('http://localhost:8089/party/save', this.state.party)
             .then(res => {
                 console.log("Post: Object received: ", res.data);
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, stocks: item.itemStocks });
+                const { party, navigationDtl } = res.data;
+                this.setState({ party, navigationDtl, balances: party.partyBalances });
                 toast.success(message);
             })
             .catch(err => {
@@ -61,134 +61,102 @@ class Item extends Component {
             });
     }
 
-    deleteItem = () => {
-        if (this.state.item.itemCode != null) {
-            console.log("Delete: Item Code sent: ", this.state.item.itemCode);
-            axios.delete('http://localhost:8089/item/delete/' + this.state.item.itemCode)
+    deleteParty = () => {
+        if (this.state.party.partyCode != null) {
+            console.log("Delete: Party Code sent: ", this.state.party.partyCode);
+            axios.delete('http://localhost:8089/party/delete/' + this.state.party.partyCode)
                 .then(res => {
                     console.log("Delete: Response: ", res);
-                    const { item, navigationDtl } = res.data;
-                    this.setState({ item, navigationDtl, stocks: item.itemStocks })
+                    const { party, navigationDtl } = res.data;
+                    this.setState({ party, navigationDtl, balances: party.partyBalances })
                 })
                 .catch(err => {
                     console.log(err);
                 });
         }
         this.setState({
-            itemAlert: false
+            partyAlert: false
         });
     }
 
-    firstItem = () => {
-        axios.get('http://localhost:8089/item/first')
+    firstParty = () => {
+        axios.get('http://localhost:8089/party/first')
             .then(res => {
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, stocks: item.itemStocks })
-                console.log(this.state.item);
+                const { party, navigationDtl } = res.data;
+                this.setState({ party, navigationDtl, balances: party.partyBalances })
+                console.log(this.state.party);
             })
             .catch(err => {
                 console.log(err);
             });
     }
 
-    previousItem = () => {
-        axios.get('http://localhost:8089/item/previous')
+    previousParty = () => {
+        axios.get('http://localhost:8089/party/previous')
             .then(res => {
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, stocks: item.itemStocks })
-                console.log(this.state.item);
+                const { party, navigationDtl } = res.data;
+                this.setState({ party, navigationDtl, balances: party.partyBalances })
+                console.log(this.state.party);
             })
             .catch(err => {
                 console.log(err);
             });
     }
 
-    nextItem = () => {
-        axios.get('http://localhost:8089/item/next')
+    nextParty = () => {
+        axios.get('http://localhost:8089/party/next')
             .then(res => {
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, stocks: item.itemStocks })
-                console.log("Item: ", item);
-                console.log("Stock: ", item.itemStocks);
+                const { party, navigationDtl } = res.data;
+                this.setState({ party, navigationDtl, balances: party.partyBalances })
+                console.log("Party: ", party);
+                console.log("Balance: ", party.partyBalances);
             })
             .catch(err => {
                 console.log(err);
             });
     }
 
-    lastItem = () => {
-        axios.get('http://localhost:8089/item/last')
+    lastParty = () => {
+        axios.get('http://localhost:8089/party/last')
             .then(res => {
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, stocks: item.itemStocks })
-                console.log(this.state.item);
+                const { party, navigationDtl } = res.data;
+                this.setState({ party, navigationDtl, balances: party.partyBalances })
+                console.log(this.state.party);
             })
             .catch(err => {
                 console.log(err);
             });
     }
 
-    itemCategories() {
-        let data = [];
-        axios.get('http://localhost:8089/item/cats')
-            .then(res => {
-                console.log(res.data);
-                res.data.forEach(element => {
-                    data.push({ value: element, label: element });
-                });
-            })
-            .catch(err => {
-                console.log(err);
-            });
-
-        return data;
-    }
-
-    itemUOMs = () => {
-        let data = [];
-        axios.get('http://localhost:8089/item/uoms')
-            .then(res => {
-                console.log(res.data);
-                res.data.forEach(element => {
-                    data.push({ value: element, label: element });
-                });
-            })
-            .catch(err => {
-                console.log(err);
-            });
-
-        return data;
-    }
-
-    handleStockChange = (event, index) => {
+    handleBalanceChange = (event, index) => {
         const { name, value } = event.target;
-        let item = this.state.item;
-        let stocks = this.state.stocks;
+        let party = this.state.party;
+        let balances = this.state.balances;
         console.log("Target name", name);
         console.log("Index: ", index);
         console.log("Value: ", value);
-        console.log("Cell old value: ", stocks[index][name]);
-        stocks[index][name] = value;
-        item.stocks = stocks;
-        this.setState({ item, stocks });
+        console.log("Cell old value: ", balances[index][name]);
+        balances[index][name] = value;
+        party.balances = balances;
+        this.setState({ party, balances });
     }
 
-    addStock = () => {
-        let item = { ...this.state.item };
-        let itemCode = item.itemCode;
-        let newStock = { item: itemCode };
-        let stocks = [...this.state.stocks];
-        stocks.push(newStock);
-        item.itemStocks = stocks;
-        this.setState({ item, stocks });
+    addBalance = () => {
+        let party = { ...this.state.party };
+        let partyCode = party.partyCode;
+        let newBalance = { party: partyCode };
+        let balances = [...this.state.balances];
+        balances.push(newBalance);
+        party.partyBalances = balances;
+        this.setState({ party, balances });
     }
 
-    deleteStock = () => {
-        let item = { ...this.state.item };
-        let stocks = [...this.state.stocks];
-        let id = stocks[this.state.stockIndex]["itemStockId"];
+    deleteBalance = () => {
+        let party = { ...this.state.party };
+        let balances = [...this.state.balances];
+        let id = balances[this.state.balanceIndex]["partyBalanceId"];
         if (id != null) {
-            axios.delete('http://localhost:8089/stock/delete/' + id)
+            axios.delete('http://localhost:8089/balance/delete/' + id)
                 .then(res => {
                     console.log("Delete: Response: ", res);
                 })
@@ -196,104 +164,99 @@ class Item extends Component {
                     console.log(err);
                 });
         }
-        stocks.splice(this.state.stockIndex, 1);
-        item.itemStocks = stocks;
-        this.setState({ item, stocks, stockAlert: false });
+        balances.splice(this.state.balanceIndex, 1);
+        party.partyBalances = balances;
+        this.setState({ party, balances, balanceAlert: false });
     }
 
 
     render() {
-        const { item, navigationDtl, stocks } = this.state;
-
-        const cats = this.itemCategories();
-        const uoms = this.itemUOMs();
-
+        const { party, navigationDtl, balances } = this.state;
+        const options = [
+            { value: 'Supplier', label: 'Supplier' },
+            { value: 'Buyer', label: 'Buyer' }
+        ]
         return (
             <>
-                <center><h1>Item Registrtion Form</h1></center>
+                <center><h1>Party Registrtion Form</h1></center>
                 <div>
                     <Form>
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Item Code</InputGroup.Text>
+                                <InputGroup.Text style={{ width: "180px" }}>Party Code</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
-                                name="itemCode"
-                                placeholder="Item Code"
-                                aria-label="Item Code"
+                                name="partyCode"
+                                placeholder="Party Code"
+                                aria-label="Party Code"
                                 readOnly
-                                value={item.itemCode || ''}
-                                onChange={this.handleItemChange}
+                                value={party.partyCode || ''}
+                                onChange={this.handlePartyChange}
                             />
                         </InputGroup>
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Item Barcode</InputGroup.Text>
+                                <InputGroup.Text style={{ width: "180px" }}>Party Name</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
-                                name="itemBarcode"
-                                placeholder="Item Barcode"
-                                aria-label="Item Barcode"
-                                value={item.itemBarcode || ''}
-                                onChange={this.handleItemChange}
+                                name="partyName"
+                                placeholder="Party Name"
+                                aria-label="Party Name"
+                                value={party.partyName || ''}
+                                onChange={this.handlePartyChange}
                             />
                         </InputGroup>
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Item Desc.</InputGroup.Text>
+                                <InputGroup.Text style={{ width: "180px" }}>Party Owner</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
-                                name="itemDesc"
-                                placeholder="Item Desc."
-                                aria-label="Item Desc."
-                                value={item.itemDesc || ''}
+                                name="partyOwner"
+                                placeholder="Party Owner"
+                                aria-label="Party Owner"
+                                value={party.partyOwner || ''}
                                 required
-                                onChange={this.handleItemChange}
+                                onChange={this.handlePartyChange}
                             />
                         </InputGroup>
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Item Category</InputGroup.Text>
+                                <InputGroup.Text style={{ width: "180px" }}>Party Type</InputGroup.Text>
                             </InputGroup.Prepend>
-                            <div style={{ width: "300px" }}>
+                            <div style={{ width: '200px' }}>
                                 <Select
-                                    name="itemCategory"
-                                    placeholder="Select Item Category"
-                                    aria-label="Item Category"
-                                    value={{ value: item.itemCategory || '', label: item.itemCategory || '' }}
+                                    name="partyType"
+                                    value={{ value: party.partyType || '', label: party.partyType || '' }}
+                                    placeholder='Select Party Type'
                                     onChange={(name, value) => this.handleSelectChange(name, value)}
                                     clearable={true}
-                                    options={cats}
-                                />
-                            </div>
-                        </InputGroup>
-
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Item U.O.M</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <div style={{ width: "300px" }}>
-                                <Select
-                                    name="itemUom"
-                                    placeholder="Select Item U.O.M"
-                                    aria-label="Item U.O.M"
-                                    value={{ value: item.itemUom || '', label: item.itemUom || '' }}
-                                    onChange={(name, value) => this.handleSelectChange(name, value)}
-                                    clearable={true}
-                                    options={uoms}
+                                    options={options}
                                 />
                             </div>
                             {/* <FormControl
-                                name="itemUom"
-                                placeholder="Item U.O.M"
-                                aria-label="Item U.O.M"
-                                value={item.itemUom || ''}
-                                required
-                                onChange={this.handleItemChange}
+                                name="partyType"
+                                placeholder="Party Type"
+                                aria-label="Party Type"
+                                value={party.partyType || ''}
+                                onChange={this.handlePartyChange}
                             /> */}
+                        </InputGroup>
+
+                        <InputGroup className="mb-3">
+                            <InputGroup.Prepend>
+                                <InputGroup.Text style={{ width: "180px" }}>Party U.O.M</InputGroup.Text>
+                            </InputGroup.Prepend>
+                            <FormControl
+                                name="partyUom"
+                                placeholder="Party U.O.M"
+                                aria-label="Party U.O.M"
+                                value={party.partyUom || ''}
+                                required
+                                onChange={this.handlePartyChange}
+                            />
                         </InputGroup>
 
                         <InputGroup className="mb-3">
@@ -305,8 +268,8 @@ class Item extends Component {
                                 name="purchasePrice"
                                 placeholder="Purchase Price"
                                 aria-label="Purchase Price"
-                                value={item.purchasePrice || ''}
-                                onChange={this.handleItemChange}
+                                value={party.purchasePrice || ''}
+                                onChange={this.handlePartyChange}
                             />
                         </InputGroup>
 
@@ -319,36 +282,36 @@ class Item extends Component {
                                 name="salePrice"
                                 placeholder="Sale Price"
                                 aria-label="Sale Price"
-                                value={item.salePrice || ''}
-                                onChange={this.handleItemChange}
+                                value={party.salePrice || ''}
+                                onChange={this.handlePartyChange}
                             />
                         </InputGroup>
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Max. Stock</InputGroup.Text>
+                                <InputGroup.Text style={{ width: "180px" }}>Max. Balance</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 type="number"
-                                name="maxStock"
-                                placeholder="Max. Stock"
-                                aria-label="Max. Stock"
-                                value={item.maxStock || ''}
-                                onChange={this.handleItemChange}
+                                name="maxBalance"
+                                placeholder="Max. Balance"
+                                aria-label="Max. Balance"
+                                value={party.maxBalance || ''}
+                                onChange={this.handlePartyChange}
                             />
                         </InputGroup>
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Min. Stock</InputGroup.Text>
+                                <InputGroup.Text style={{ width: "180px" }}>Min. Balance</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 type="number"
-                                name="minStock"
-                                placeholder="Min. Stock"
-                                aria-label="Min. Stock"
-                                value={item.minStock || ''}
-                                onChange={this.handleItemChange}
+                                name="minBalance"
+                                placeholder="Min. Balance"
+                                aria-label="Min. Balance"
+                                value={party.minBalance || ''}
+                                onChange={this.handlePartyChange}
                             />
                         </InputGroup>
 
@@ -361,10 +324,10 @@ class Item extends Component {
                                 name="effectiveStartDate"
                                 placeholder="Effective Start Date"
                                 aria-label="Effective Start Date"
-                                onSelect={this.handleItemChange}
-                                value={item.effectiveStartDate != null ? item.effectiveStartDate.split("T")[0] : ''}
+                                onSelect={this.handlePartyChange}
+                                value={party.effectiveStartDate != null ? party.effectiveStartDate.split("T")[0] : ''}
                                 required
-                                onChange={this.handleItemChange}
+                                onChange={this.handlePartyChange}
                             />
                         </InputGroup>
 
@@ -377,36 +340,36 @@ class Item extends Component {
                                 name="effectiveEndDate"
                                 placeholder="Effective End Date"
                                 aria-label="Effective End Date"
-                                value={item.effectiveEndDate != null ? item.effectiveEndDate.split("T")[0] : ''}
-                                onChange={this.handleItemChange}
+                                value={party.effectiveEndDate != null ? party.effectiveEndDate.split("T")[0] : ''}
+                                onChange={this.handlePartyChange}
                             />
                         </InputGroup>
                         <ButtonToolbar className="m-2">
                             <Button
                                 variant="primary"
                                 disabled={navigationDtl.first}
-                                onClick={this.firstItem}
+                                onClick={this.firstParty}
                                 className="mr-1"
                                 active>First
                             </Button>
                             <Button
                                 variant="primary"
                                 disabled={navigationDtl.first}
-                                onClick={this.previousItem}
+                                onClick={this.previousParty}
                                 className="mr-1"
                                 active>Previous
                             </Button>
                             <Button
                                 variant="primary"
                                 disabled={navigationDtl.last}
-                                onClick={this.nextItem}
+                                onClick={this.nextParty}
                                 className="mr-1"
                                 active>Next
                             </Button>
                             <Button
                                 variant="primary"
                                 disabled={navigationDtl.last}
-                                onClick={this.lastItem}
+                                onClick={this.lastParty}
                                 className="ymr-1"
                                 active>Last
                             </Button>
@@ -415,80 +378,80 @@ class Item extends Component {
                             <Button
                                 variant="primary"
                                 // disabled={navigationDtl.first}
-                                onClick={this.newItem}
+                                onClick={this.newParty}
                                 className="mr-1"
                                 active>Add
                             </Button>
                             <Button
                                 variant="primary"
                                 // disabled={navigationDtl.first}
-                                onClick={() => this.setState({ itemAlert: true })}
+                                onClick={() => this.setState({ partyAlert: true })}
                                 className="mr-1"
                                 active>Delete
                             </Button>
                             <Button
                                 variant="primary"
-                                onClick={() => this.saveItem("Item saved successfully.")}
+                                onClick={() => this.saveParty("Party saved successfully.")}
                                 className="mr-1"
                                 active>Save
                             </Button>
                             <Button
                                 variant="primary"
                                 /* disabled={navigationDtl.last}
-                                onClick={this.nextItem} */
+                                onClick={this.nextParty} */
                                 className="mr-1"
                                 active>Undo
                             </Button>
                             <SweetAlert
-                                show={this.state.itemAlert}
+                                show={this.state.partyAlert}
                                 warning
                                 showCancel
                                 confirmBtnText="Delete"
                                 confirmBtnBsStyle="danger"
                                 cancelBtnBsStyle="default"
                                 title="Delete Confirmation"
-                                Text="Are you sure you want to delete this item? It will also delete all stocks related to it."
-                                onConfirm={() => this.deleteItem()}
-                                onCancel={() => this.setState({ itemAlert: false })}
+                                Text="Are you sure you want to delete this party? It will also delete all balances related to it."
+                                onConfirm={() => this.deleteParty()}
+                                onCancel={() => this.setState({ partyAlert: false })}
                             >
-                                Delete Item
+                                Delete Party
                                 </SweetAlert>
                         </ButtonToolbar>
                         <ButtonGroup className="m-2">
                             <Button
                                 variant="primary"
                                 // disabled={navigationDtl.first}
-                                onClick={this.addStock}
+                                onClick={this.addBalance}
                                 className="mr-1"
-                                active>Add Stock
+                                active>Add Balance
                                             </Button>
                             <Button
                                 variant="primary"
                                 // disabled={navigationDtl.first}
-                                onClick={() => { this.saveItem("Stock saved successfully.") }}
+                                onClick={() => { this.saveParty("Balance saved successfully.") }}
                                 className="mr-1"
-                                active>Save Stock
+                                active>Save Balance
                                             </Button>
                             <Button
                                 variant="primary"
                                 // disabled={navigationDtl.first}
-                                onClick={() => this.setState({ stockAlert: true })}
+                                onClick={() => this.setState({ balanceAlert: true })}
                                 className="mr-1"
-                                active>Delete Stock
+                                active>Delete Balance
                                                     </Button>
                             <SweetAlert
-                                show={this.state.stockAlert}
+                                show={this.state.balanceAlert}
                                 warning
                                 showCancel
                                 confirmBtnText="Delete"
                                 confirmBtnBsStyle="danger"
                                 cancelBtnBsStyle="default"
                                 title="Delete Confirmation"
-                                Text="Are you sure you want to delete this stock?"
-                                onConfirm={() => this.deleteStock()}
-                                onCancel={() => this.setState({ stockAlert: false })}
+                                Text="Are you sure you want to delete this balance?"
+                                onConfirm={() => this.deleteBalance()}
+                                onCancel={() => this.setState({ balanceAlert: false })}
                             >
-                                Delete Stock
+                                Delete Balance
                                                     </SweetAlert>
                         </ButtonGroup>
                     </Form>
@@ -499,36 +462,36 @@ class Item extends Component {
                         responsive>
                         <thead>
                             <tr>
-                                <th>Stock Date</th>
+                                <th>Balance Date</th>
                                 <th>Quantity</th>
                                 <th>Remarks</th>
                             </tr>
                         </thead>
                         <tbody>
                             {
-                                stocks && stocks.map((stock, index) => (
-                                    <tr key={stock.itemStockId}
-                                        onFocus={() => { this.setState({ stockIndex: index }) }}>
+                                balances && balances.map((balance, index) => (
+                                    <tr key={balance.partyBalanceId}
+                                        onFocus={() => { this.setState({ balanceIndex: index }) }}>
                                         <td>
                                             <FormControl
                                                 type="date"
-                                                name="itemStockDate"
-                                                placeholder="Stock Date"
-                                                aria-label="Stock Date"
-                                                value={stock.itemStockDate != null ? stock.itemStockDate.split("T")[0] : ''}
+                                                name="partyBalanceDate"
+                                                placeholder="Balance Date"
+                                                aria-label="Balance Date"
+                                                value={balance.partyBalanceDate != null ? balance.partyBalanceDate.split("T")[0] : ''}
                                                 required
-                                                onChange={e => this.handleStockChange(e, index)}
+                                                onChange={e => this.handleBalanceChange(e, index)}
                                             />
                                         </td>
                                         <td>
                                             <FormControl
                                                 type="number"
                                                 name="qnty"
-                                                placeholder="Stock Quantity"
-                                                aria-label="Stock Quantity"
-                                                value={stock.qnty || ''}
+                                                placeholder="Balance Quantity"
+                                                aria-label="Balance Quantity"
+                                                value={balance.qnty || ''}
                                                 required
-                                                onChange={e => this.handleStockChange(e, index)}
+                                                onChange={e => this.handleBalanceChange(e, index)}
                                             />
                                         </td>
                                         <td>
@@ -537,8 +500,8 @@ class Item extends Component {
                                                 name="remarks"
                                                 placeholder="Remarks"
                                                 aria-label="Remarks"
-                                                value={stock.remarks || ''}
-                                                onChange={e => this.handleStockChange(e, index)}
+                                                value={balance.remarks || ''}
+                                                onChange={e => this.handleBalanceChange(e, index)}
                                             />
                                         </td>
                                     </tr>
@@ -552,4 +515,4 @@ class Item extends Component {
     }
 }
 
-export default Item;
+export default Party;
