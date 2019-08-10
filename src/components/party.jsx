@@ -4,6 +4,7 @@ import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import Select from 'react-select'
 class Party extends Component {
 
     state = {
@@ -30,8 +31,14 @@ class Party extends Component {
         const { name, value } = event.target;
         console.log("Target name", name);
         console.log(value);
-        let party = this.state.party;
+        let party = { ...this.state.party };
         party[name] = value;
+        this.setState({ party });
+    }
+
+    handleSelectChange = (name, value) => {
+        let party = { ...this.state.party };
+        party[value.name] = name.value;
         this.setState({ party });
     }
 
@@ -165,7 +172,10 @@ class Party extends Component {
 
     render() {
         const { party, navigationDtl, balances } = this.state;
-
+        const options = [
+            { value: 'Supplier', label: 'Supplier' },
+            { value: 'Buyer', label: 'Buyer' }
+        ]
         return (
             <>
                 <center><h1>Party Registrtion Form</h1></center>
@@ -216,13 +226,23 @@ class Party extends Component {
                             <InputGroup.Prepend>
                                 <InputGroup.Text style={{ width: "180px" }}>Party Type</InputGroup.Text>
                             </InputGroup.Prepend>
-                            <FormControl
-                                name="partpartyType"
+                            <div style={{ width: '200px' }}>
+                                <Select
+                                    name="partyType"
+                                    value={{ value: party.partyType || '', label: party.partyType || '' }}
+                                    placeholder='Select Party Type'
+                                    onChange={(name, value) => this.handleSelectChange(name, value)}
+                                    clearable={true}
+                                    options={options}
+                                />
+                            </div>
+                            {/* <FormControl
+                                name="partyType"
                                 placeholder="Party Type"
                                 aria-label="Party Type"
                                 value={party.partyType || ''}
                                 onChange={this.handlePartyChange}
-                            />
+                            /> */}
                         </InputGroup>
 
                         <InputGroup className="mb-3">

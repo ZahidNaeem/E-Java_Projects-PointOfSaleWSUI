@@ -4,6 +4,7 @@ import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import Select from 'react-select'
 class Item extends Component {
 
     state = {
@@ -30,8 +31,14 @@ class Item extends Component {
         const { name, value } = event.target;
         console.log("Target name", name);
         console.log(value);
-        let item = this.state.item;
+        let item = { ...this.state.item };
         item[name] = value;
+        this.setState({ item });
+    }
+
+    handleSelectChange = (name, value) => {
+        let item = { ...this.state.item };
+        item[value.name] = name.value;
         this.setState({ item });
     }
 
@@ -121,6 +128,38 @@ class Item extends Component {
             });
     }
 
+    itemCategories() {
+        let data = [];
+        axios.get('http://localhost:8089/item/cats')
+            .then(res => {
+                console.log(res.data);
+                res.data.forEach(element => {
+                    data.push({ value: element, label: element });
+                });
+            })
+            .catch(err => {
+                console.log(err);
+            });
+
+        return data;
+    }
+
+    itemUOMs = () => {
+        let data = [];
+        axios.get('http://localhost:8089/item/uoms')
+            .then(res => {
+                console.log(res.data);
+                res.data.forEach(element => {
+                    data.push({ value: element, label: element });
+                });
+            })
+            .catch(err => {
+                console.log(err);
+            });
+
+        return data;
+    }
+
     handleStockChange = (event, index) => {
         const { name, value } = event.target;
         let item = this.state.item;
@@ -165,6 +204,9 @@ class Item extends Component {
 
     render() {
         const { item, navigationDtl, stocks } = this.state;
+
+        const cats = this.itemCategories();
+        const uoms = this.itemUOMs();
 
         return (
             <>
@@ -216,27 +258,42 @@ class Item extends Component {
                             <InputGroup.Prepend>
                                 <InputGroup.Text style={{ width: "180px" }}>Item Category</InputGroup.Text>
                             </InputGroup.Prepend>
-                            <FormControl
-                                name="itemCategory"
-                                placeholder="Item Category"
-                                aria-label="Item Category"
-                                value={item.itemCategory || ''}
-                                onChange={this.handleItemChange}
-                            />
+                            <div style={{ width: "300px" }}>
+                                <Select
+                                    name="itemCategory"
+                                    placeholder="Select Item Category"
+                                    aria-label="Item Category"
+                                    value={{ value: item.itemCategory || '', label: item.itemCategory || '' }}
+                                    onChange={(name, value) => this.handleSelectChange(name, value)}
+                                    clearable={true}
+                                    options={cats}
+                                />
+                            </div>
                         </InputGroup>
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
                                 <InputGroup.Text style={{ width: "180px" }}>Item U.O.M</InputGroup.Text>
                             </InputGroup.Prepend>
-                            <FormControl
+                            <div style={{ width: "300px" }}>
+                                <Select
+                                    name="itemUom"
+                                    placeholder="Select Item U.O.M"
+                                    aria-label="Item U.O.M"
+                                    value={{ value: item.itemUom || '', label: item.itemUom || '' }}
+                                    onChange={(name, value) => this.handleSelectChange(name, value)}
+                                    clearable={true}
+                                    options={uoms}
+                                />
+                            </div>
+                            {/* <FormControl
                                 name="itemUom"
                                 placeholder="Item U.O.M"
                                 aria-label="Item U.O.M"
                                 value={item.itemUom || ''}
                                 required
                                 onChange={this.handleItemChange}
-                            />
+                            /> */}
                         </InputGroup>
 
                         <InputGroup className="mb-3">
@@ -398,48 +455,48 @@ class Item extends Component {
                                 </SweetAlert>
                         </ButtonToolbar>
                         <ButtonGroup className="m-2">
-                                                <Button
-                                                    variant="primary"
-                                                    // disabled={navigationDtl.first}
-                                                     onClick={this.addStock}
-                                                    className="mr-1"
-                                                    active>Add Stock
+                            <Button
+                                variant="primary"
+                                // disabled={navigationDtl.first}
+                                onClick={this.addStock}
+                                className="mr-1"
+                                active>Add Stock
                                             </Button>
-                                                <Button
-                                                    variant="primary"
-                                                    // disabled={navigationDtl.first}
-                                                    onClick={() => {this.saveItem("Stock saved successfully.")}}
-                                                    className="mr-1"
-                                                    active>Save Stock
+                            <Button
+                                variant="primary"
+                                // disabled={navigationDtl.first}
+                                onClick={() => { this.saveItem("Stock saved successfully.") }}
+                                className="mr-1"
+                                active>Save Stock
                                             </Button>
-                                                <Button
-                                                    variant="primary"
-                                                    // disabled={navigationDtl.first}
-                                                    onClick={() => this.setState({ stockAlert: true })}
-                                                    className="mr-1"
-                                                    active>Delete Stock
+                            <Button
+                                variant="primary"
+                                // disabled={navigationDtl.first}
+                                onClick={() => this.setState({ stockAlert: true })}
+                                className="mr-1"
+                                active>Delete Stock
                                                     </Button>
-                                                <SweetAlert
-                                                    show={this.state.stockAlert}
-                                                    warning
-                                                    showCancel
-                                                    confirmBtnText="Delete"
-                                                    confirmBtnBsStyle="danger"
-                                                    cancelBtnBsStyle="default"
-                                                    title="Delete Confirmation"
-                                                    Text="Are you sure you want to delete this stock?"
-                                                    onConfirm={() => this.deleteStock()}
-                                                    onCancel={() => this.setState({ stockAlert: false })}
-                                                >
-                                                    Delete Stock
+                            <SweetAlert
+                                show={this.state.stockAlert}
+                                warning
+                                showCancel
+                                confirmBtnText="Delete"
+                                confirmBtnBsStyle="danger"
+                                cancelBtnBsStyle="default"
+                                title="Delete Confirmation"
+                                Text="Are you sure you want to delete this stock?"
+                                onConfirm={() => this.deleteStock()}
+                                onCancel={() => this.setState({ stockAlert: false })}
+                            >
+                                Delete Stock
                                                     </SweetAlert>
-                                            </ButtonGroup>
+                        </ButtonGroup>
                     </Form>
                     <Table
                         striped
                         bordered
                         hover
-                        responsive> 
+                        responsive>
                         <thead>
                             <tr>
                                 <th>Stock Date</th>
@@ -451,7 +508,7 @@ class Item extends Component {
                             {
                                 stocks && stocks.map((stock, index) => (
                                     <tr key={stock.itemStockId}
-                                    onFocus={() => {this.setState({stockIndex: index})}}>
+                                        onFocus={() => { this.setState({ stockIndex: index }) }}>
                                         <td>
                                             <FormControl
                                                 type="date"
