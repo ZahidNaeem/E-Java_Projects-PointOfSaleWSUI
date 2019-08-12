@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { InputGroup, FormControl, Button, ButtonToolbar, ButtonGroup, Form, Table } from 'react-bootstrap'
+import { InputGroup, FormControl, Button, ButtonToolbar, Form, Table } from 'react-bootstrap'
 import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 import { toast } from 'react-toastify'
@@ -41,18 +41,26 @@ class Item extends Component {
     }
 
     saveItem = (message) => {
-        console.log("Post: Object sent: ", this.state.item);
-        axios.post('http://localhost:8089/item/save', this.state.item)
-            .then(res => {
-                console.log("Post: Object received: ", res.data);
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, stocks: item.itemStocks });
-                toast.success(message);
-            })
-            .catch(err => {
-                console.log(err);
-                toast.error("There is an error:\n" + err);
-            });
+        if (this.state.item.itemDesc === undefined || this.state.item.itemDesc === null || this.state.item.itemDesc === '') {
+            toast.error("Item Desc. is required field");
+        } else if (this.state.item.itemUom === undefined || this.state.item.itemUom === null || this.state.item.itemUom === '') {
+            toast.error("Item U.O.M is required field");
+        } else if (this.state.item.effectiveStartDate === undefined || this.state.item.effectiveStartDate === null || this.state.item.effectiveStartDate === '') {
+            toast.error("Eff. start date is required field");
+        } else {
+            console.log("Post: Object sent: ", this.state.item);
+            axios.post('http://localhost:8089/item/save', this.state.item)
+                .then(res => {
+                    console.log("Post: Object received: ", res.data);
+                    const { item, navigationDtl } = res.data;
+                    this.setState({ item, navigationDtl, stocks: item.itemStocks });
+                    toast.success(message);
+                })
+                .catch(err => {
+                    console.log(err);
+                    toast.error("There is an error:\n" + err);
+                });
+        }
     }
 
     deleteItem = () => {
@@ -212,287 +220,286 @@ class Item extends Component {
         return (
             <>
                 <center><h1>Item Registrtion Form</h1></center>
-                <div>
-                    <Form>
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={inputGroupTextStyle}>Item Code</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                name="itemCode"
-                                placeholder="Item Code"
-                                aria-label="Item Code"
-                                readOnly
-                                value={item.itemCode || ''}
-                                onChange={this.handleItemChange}
-                            />
+                <Form>
+                    <InputGroup className="mb-3">
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Item Code</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            name="itemCode"
+                            placeholder="Item Code"
+                            aria-label="Item Code"
+                            readOnly
+                            value={item.itemCode || ''}
+                            onChange={this.handleItemChange}
+                        />
 
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={inputGroupTextStyle}>Item Barcode</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                name="itemBarcode"
-                                placeholder="Item Barcode"
-                                aria-label="Item Barcode"
-                                value={item.itemBarcode || ''}
-                                onChange={this.handleItemChange}
-                            />
-                        </InputGroup>
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Item Barcode</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            name="itemBarcode"
+                            placeholder="Item Barcode"
+                            aria-label="Item Barcode"
+                            value={item.itemBarcode || ''}
+                            onChange={this.handleItemChange}
+                        />
+                    </InputGroup>
 
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={inputGroupTextStyle}>Item Desc.</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                name="itemDesc"
-                                placeholder="Item Desc."
-                                aria-label="Item Desc."
-                                value={item.itemDesc || ''}
-                                required
-                                onChange={this.handleItemChange}
-                            />
-                        </InputGroup>
+                    <InputGroup className="mb-3">
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Item Desc.</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            name="itemDesc"
+                            placeholder="Item Desc."
+                            aria-label="Item Desc."
+                            value={item.itemDesc || ''}
+                            required
+                            onChange={this.handleItemChange}
+                        />
+                    </InputGroup>
 
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={inputGroupTextStyle}>Item Category</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <Combobox
-                                style={stretchStyle}
-                                name="itemCategory"
-                                placeholder="Select Item Category"
-                                aria-label="Item Category"
-                                data={cats}
-                                value={item.itemCategory || ''}
-                                onChange={(name) => this.handleComboboxChange(name, "itemCategory")}
-                            />
+                    <InputGroup className="mb-3">
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Item Category</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <Combobox
+                            style={stretchStyle}
+                            name="itemCategory"
+                            placeholder="Select Item Category"
+                            aria-label="Item Category"
+                            data={cats}
+                            value={item.itemCategory || ''}
+                            onChange={(name) => this.handleComboboxChange(name, "itemCategory")}
+                        />
 
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={inputGroupTextStyle}>Item U.O.M</InputGroup.Text>
-                            </InputGroup.Prepend>
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Item U.O.M</InputGroup.Text>
+                        </InputGroup.Prepend>
 
-                            <Combobox
-                                style={stretchStyle}
-                                name="itemUom"
-                                placeholder="Select Item U.O.M"
-                                aria-label="Item U.O.M"
-                                data={uoms}
-                                value={item.itemUom || ''}
-                                onChange={(name) => this.handleComboboxChange(name, "itemUom")}
-                            />
-                        </InputGroup>
+                        <Combobox
+                            style={stretchStyle}
+                            name="itemUom"
+                            placeholder="Select Item U.O.M"
+                            aria-label="Item U.O.M"
+                            data={uoms}
+                            value={item.itemUom || ''}
+                            onChange={(name) => this.handleComboboxChange(name, "itemUom")}
+                        />
+                    </InputGroup>
 
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={inputGroupTextStyle}>Purchase Price</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                type="number"
-                                name="purchasePrice"
-                                placeholder="Purchase Price"
-                                aria-label="Purchase Price"
-                                value={item.purchasePrice || ''}
-                                onChange={this.handleItemChange}
-                            />
+                    <InputGroup className="mb-3">
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Purchase Price</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            type="number"
+                            name="purchasePrice"
+                            placeholder="Purchase Price"
+                            aria-label="Purchase Price"
+                            value={item.purchasePrice || ''}
+                            onChange={this.handleItemChange}
+                        />
 
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={inputGroupTextStyle}>Sale Price</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                type="number"
-                                name="salePrice"
-                                placeholder="Sale Price"
-                                aria-label="Sale Price"
-                                value={item.salePrice || ''}
-                                onChange={this.handleItemChange}
-                            />
-                        </InputGroup>
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Sale Price</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            type="number"
+                            name="salePrice"
+                            placeholder="Sale Price"
+                            aria-label="Sale Price"
+                            value={item.salePrice || ''}
+                            onChange={this.handleItemChange}
+                        />
+                    </InputGroup>
 
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={inputGroupTextStyle}>Min. Stock</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                type="number"
-                                name="minStock"
-                                placeholder="Min. Stock"
-                                aria-label="Min. Stock"
-                                value={item.minStock || ''}
-                                onChange={this.handleItemChange}
-                            />
+                    <InputGroup className="mb-3">
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Min. Stock</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            type="number"
+                            name="minStock"
+                            placeholder="Min. Stock"
+                            aria-label="Min. Stock"
+                            value={item.minStock || ''}
+                            onChange={this.handleItemChange}
+                        />
 
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={inputGroupTextStyle}>Max. Stock</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                type="number"
-                                name="maxStock"
-                                placeholder="Max. Stock"
-                                aria-label="Max. Stock"
-                                value={item.maxStock || ''}
-                                onChange={this.handleItemChange}
-                            />
-                        </InputGroup>
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Max. Stock</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            type="number"
+                            name="maxStock"
+                            placeholder="Max. Stock"
+                            aria-label="Max. Stock"
+                            value={item.maxStock || ''}
+                            onChange={this.handleItemChange}
+                        />
+                    </InputGroup>
 
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={inputGroupTextStyle}>Effective Start Date</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                type="date"
-                                name="effectiveStartDate"
-                                placeholder="Effective Start Date"
-                                aria-label="Effective Start Date"
-                                onSelect={this.handleItemChange}
-                                value={item.effectiveStartDate != null ? item.effectiveStartDate.split("T")[0] : ''}
-                                required
-                                onChange={this.handleItemChange}
-                            />
+                    <InputGroup className="mb-3">
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Effective Start Date</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            type="date"
+                            name="effectiveStartDate"
+                            placeholder="Effective Start Date"
+                            aria-label="Effective Start Date"
+                            onSelect={this.handleItemChange}
+                            value={item.effectiveStartDate != null ? item.effectiveStartDate.split("T")[0] : ''}
+                            required
+                            onChange={this.handleItemChange}
+                        />
 
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={inputGroupTextStyle}>Effective End Date</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                type="date"
-                                name="effectiveEndDate"
-                                placeholder="Effective End Date"
-                                aria-label="Effective End Date"
-                                value={item.effectiveEndDate != null ? item.effectiveEndDate.split("T")[0] : ''}
-                                onChange={this.handleItemChange}
-                            />
-                        </InputGroup>
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Effective End Date</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            type="date"
+                            name="effectiveEndDate"
+                            placeholder="Effective End Date"
+                            aria-label="Effective End Date"
+                            value={item.effectiveEndDate != null ? item.effectiveEndDate.split("T")[0] : ''}
+                            onChange={this.handleItemChange}
+                        />
+                    </InputGroup>
 
-                        <ButtonToolbar className="m-2">
-                            <Button
-                                variant="primary"
-                                disabled={navigationDtl.first}
-                                onClick={this.firstItem}
-                                className="mr-1" style={smallButtonStyle}
-                                active>First
+                    <ButtonToolbar className="m-2">
+                        <Button
+                            variant="primary"
+                            disabled={navigationDtl.first}
+                            onClick={this.firstItem}
+                            className="mr-1" style={smallButtonStyle}
+                            active>First
                             </Button>
 
-                            <Button
-                                variant="primary"
-                                disabled={navigationDtl.first}
-                                onClick={this.previousItem}
-                                className="mr-1" style={smallButtonStyle}
-                                active>Previous
+                        <Button
+                            variant="primary"
+                            disabled={navigationDtl.first}
+                            onClick={this.previousItem}
+                            className="mr-1" style={smallButtonStyle}
+                            active>Previous
                             </Button>
 
-                            <Button
-                                variant="primary"
-                                disabled={navigationDtl.last}
-                                onClick={this.nextItem}
-                                className="mr-1" style={smallButtonStyle}
-                                active>Next
+                        <Button
+                            variant="primary"
+                            disabled={navigationDtl.last}
+                            onClick={this.nextItem}
+                            className="mr-1" style={smallButtonStyle}
+                            active>Next
                             </Button>
 
-                            <Button
-                                variant="primary"
-                                disabled={navigationDtl.last}
-                                onClick={this.lastItem}
-                                className="mr-1" style={smallButtonStyle}
-                                active>Last
+                        <Button
+                            variant="primary"
+                            disabled={navigationDtl.last}
+                            onClick={this.lastItem}
+                            className="mr-1" style={smallButtonStyle}
+                            active>Last
                             </Button>
 
-                        </ButtonToolbar>
+                    </ButtonToolbar>
 
-                        <ButtonToolbar className="ml-2">
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={this.newItem}
-                                className="mr-1" style={smallButtonStyle}
-                                active>Add
+                    <ButtonToolbar className="ml-2">
+                        <Button
+                            variant="primary"
+                            // disabled={navigationDtl.first}
+                            onClick={this.newItem}
+                            className="mr-1" style={smallButtonStyle}
+                            active>Add
                             </Button>
 
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={() => this.setState({ itemAlert: true })}
-                                className="mr-1" style={smallButtonStyle}
-                                active>Delete
+                        <Button
+                            variant="primary"
+                            // disabled={navigationDtl.first}
+                            onClick={() => this.setState({ itemAlert: true })}
+                            className="mr-1" style={smallButtonStyle}
+                            active>Delete
                             </Button>
 
-                            <Button
-                                variant="primary"
-                                onClick={() => this.saveItem("Item saved successfully.")}
-                                className="mr-1" style={smallButtonStyle}
-                                active>Save
+                        <Button
+                            variant="primary"
+                            onClick={() => this.saveItem("Item saved successfully.")}
+                            className="mr-1" style={smallButtonStyle}
+                            active>Save
                             </Button>
 
-                            <Button
-                                variant="primary"
-                                /* disabled={navigationDtl.last} */
-                                onClick={this.undoChanges}
-                                className="mr-1" style={smallButtonStyle}
-                                active>Undo
+                        <Button
+                            variant="primary"
+                            /* disabled={navigationDtl.last} */
+                            onClick={this.undoChanges}
+                            className="mr-1" style={smallButtonStyle}
+                            active>Undo
                             </Button>
 
-                            <SweetAlert
-                                show={this.state.itemAlert}
-                                warning
-                                showCancel
-                                confirmBtnText="Delete"
-                                confirmBtnBsStyle="danger"
-                                cancelBtnBsStyle="default"
-                                title="Delete Confirmation"
-                                Text="Are you sure you want to delete this item? It will also delete all stocks related to it."
-                                onConfirm={() => this.deleteItem()}
-                                onCancel={() => this.setState({ itemAlert: false })}
-                            >
-                                Delete Item
+                        <SweetAlert
+                            show={this.state.itemAlert}
+                            warning
+                            showCancel
+                            confirmBtnText="Delete"
+                            confirmBtnBsStyle="danger"
+                            cancelBtnBsStyle="default"
+                            title="Delete Confirmation"
+                            Text="Are you sure you want to delete this item? It will also delete all stocks related to it."
+                            onConfirm={() => this.deleteItem()}
+                            onCancel={() => this.setState({ itemAlert: false })}
+                        >
+                            Delete Item
                                 </SweetAlert>
-                        </ButtonToolbar>
-                    
+                    </ButtonToolbar>
+
                     <br />
                     <center><h2>Item Stocks</h2></center>
+                    <ButtonToolbar className="m-2">
+                        <Button
+                            variant="primary"
+                            // disabled={navigationDtl.first}
+                            onClick={this.addStock}
+                            className="mr-1" style={largeButtonStyle}
+                            active>Add Stock
+                                            </Button>
+
+                        <Button
+                            variant="primary"
+                            // disabled={navigationDtl.first}
+                            onClick={() => { this.saveItem("Stock saved successfully.") }}
+                            className="mr-1" style={largeButtonStyle}
+                            active>Save Stock
+                                            </Button>
+
+                        <Button
+                            variant="primary"
+                            // disabled={navigationDtl.first}
+                            onClick={() => this.setState({ stockAlert: true })}
+                            className="mr-1" style={largeButtonStyle}
+                            active>Delete Stock
+                                                    </Button>
+
+                        <SweetAlert
+                            show={this.state.stockAlert}
+                            warning
+                            showCancel
+                            confirmBtnText="Delete"
+                            confirmBtnBsStyle="danger"
+                            cancelBtnBsStyle="default"
+                            title="Delete Confirmation"
+                            Text="Are you sure you want to delete this stock?"
+                            onConfirm={() => this.deleteStock()}
+                            onCancel={() => this.setState({ stockAlert: false })}
+                        >
+                            Delete Stock
+                                                    </SweetAlert>
+                    </ButtonToolbar>
                     <Table
                         striped
                         bordered
                         hover
                         responsive>
                         <thead>
-                            <ButtonGroup className="m-2">
-                                <Button
-                                    variant="primary"
-                                    // disabled={navigationDtl.first}
-                                    onClick={this.addStock}
-                                    className="mr-1" style={largeButtonStyle}
-                                    active>Add Stock
-                                            </Button>
-
-                                <Button
-                                    variant="primary"
-                                    // disabled={navigationDtl.first}
-                                    onClick={() => { this.saveItem("Stock saved successfully.") }}
-                                    className="mr-1" style={largeButtonStyle}
-                                    active>Save Stock
-                                            </Button>
-
-                                <Button
-                                    variant="primary"
-                                    // disabled={navigationDtl.first}
-                                    onClick={() => this.setState({ stockAlert: true })}
-                                    className="mr-1" style={largeButtonStyle}
-                                    active>Delete Stock
-                                                    </Button>
-
-                                <SweetAlert
-                                    show={this.state.stockAlert}
-                                    warning
-                                    showCancel
-                                    confirmBtnText="Delete"
-                                    confirmBtnBsStyle="danger"
-                                    cancelBtnBsStyle="default"
-                                    title="Delete Confirmation"
-                                    Text="Are you sure you want to delete this stock?"
-                                    onConfirm={() => this.deleteStock()}
-                                    onCancel={() => this.setState({ stockAlert: false })}
-                                >
-                                    Delete Stock
-                                                    </SweetAlert>
-                            </ButtonGroup>
 
                             <tr>
                                 <th style={inputDateStyle}>Stock Date</th>
@@ -542,8 +549,7 @@ class Item extends Component {
                             }
                         </tbody>
                     </Table>
-                    </Form>
-                </div>
+                </Form>
             </>
         );
     }

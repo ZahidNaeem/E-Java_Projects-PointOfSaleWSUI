@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { InputGroup, FormControl, Button, ButtonToolbar, ButtonGroup, Form, Table } from 'react-bootstrap'
+import { InputGroup, FormControl, Button, ButtonToolbar, Form, Table } from 'react-bootstrap'
 import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 import { toast } from 'react-toastify'
@@ -100,6 +100,16 @@ class Party extends Component {
 
     lastParty = () => {
         this.navigateParty('http://localhost:8089/party/last');
+    }
+
+    undoChanges = () => {
+        if (this.state.party.partyCode != null) {
+            console.log("Party Code: ", this.state.party.partyCode);
+            let url = 'http://localhost:8089/party/' + this.state.party.partyCode;
+            this.navigateParty(url);
+        } else {
+            this.lastParty();
+        }
     }
 
     handleBalanceChange = (event, index) => {
@@ -416,8 +426,8 @@ class Party extends Component {
                             </Button>
                             <Button
                                 variant="primary"
-                                /* disabled={navigationDtl.last}
-                                onClick={this.nextParty} */
+                                /* disabled={navigationDtl.last} */
+                                onClick={this.undoChanges}
                                 className="mr-1" style={smallButtonStyle}
                                 active>Undo
                             </Button>
@@ -437,99 +447,99 @@ class Party extends Component {
                                 </SweetAlert>
                         </ButtonToolbar>
 
-                    <br />
-                    <center><h2>Party Balances</h2></center>
-                    <Table
-                        striped
-                        bordered
-                        hover
-                        responsive>
-                        <thead>
-                            <ButtonGroup className="m-2">
-                                <Button
-                                    variant="primary"
-                                    // disabled={navigationDtl.first}
-                                    onClick={this.addBalance}
-                                    className="mr-1" style={largeButtonStyle}
-                                    active>Add Balance
+                        <br />
+                        <center><h2>Party Balances</h2></center>
+                        <ButtonToolbar className="m-2">
+                            <Button
+                                variant="primary"
+                                // disabled={navigationDtl.first}
+                                onClick={this.addBalance}
+                                className="mr-1" style={largeButtonStyle}
+                                active>Add Balance
                                             </Button>
-                                <Button
-                                    variant="primary"
-                                    // disabled={navigationDtl.first}
-                                    onClick={() => { this.saveParty("Balance saved successfully.") }}
-                                    className="mr-1" style={largeButtonStyle}
-                                    active>Save Balance
+                            <Button
+                                variant="primary"
+                                // disabled={navigationDtl.first}
+                                onClick={() => { this.saveParty("Balance saved successfully.") }}
+                                className="mr-1" style={largeButtonStyle}
+                                active>Save Balance
                                             </Button>
-                                <Button
-                                    variant="primary"
-                                    // disabled={navigationDtl.first}
-                                    onClick={() => this.setState({ balanceAlert: true })}
-                                    className="mr-1" style={largeButtonStyle}
-                                    active>Delete Balance
+                            <Button
+                                variant="primary"
+                                // disabled={navigationDtl.first}
+                                onClick={() => this.setState({ balanceAlert: true })}
+                                className="mr-1" style={largeButtonStyle}
+                                active>Delete Balance
                                                     </Button>
-                                <SweetAlert
-                                    show={this.state.balanceAlert}
-                                    warning
-                                    showCancel
-                                    confirmBtnText="Delete"
-                                    confirmBtnBsStyle="danger"
-                                    cancelBtnBsStyle="default"
-                                    title="Delete Confirmation"
-                                    Text="Are you sure you want to delete this balance?"
-                                    onConfirm={() => this.deleteBalance()}
-                                    onCancel={() => this.setState({ balanceAlert: false })}
-                                >
-                                    Delete Balance
+                            <SweetAlert
+                                show={this.state.balanceAlert}
+                                warning
+                                showCancel
+                                confirmBtnText="Delete"
+                                confirmBtnBsStyle="danger"
+                                cancelBtnBsStyle="default"
+                                title="Delete Confirmation"
+                                Text="Are you sure you want to delete this balance?"
+                                onConfirm={() => this.deleteBalance()}
+                                onCancel={() => this.setState({ balanceAlert: false })}
+                            >
+                                Delete Balance
                                                     </SweetAlert>
-                            </ButtonGroup>
-                            <tr>
-                                <th style={inputDateStyle}>Balance Date</th>
-                                <th style={inputDateStyle}>Quantity</th>
-                                <th style={stretchStyle}>Remarks</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {
-                                balances && balances.map((balance, index) => (
-                                    <tr key={balance.partyBalanceId}
-                                        onFocus={() => { this.setState({ balanceIndex: index }) }}>
-                                        <td>
-                                            <FormControl
-                                                type="date"
-                                                name="partyBalanceDate"
-                                                placeholder="Balance Date"
-                                                aria-label="Balance Date"
-                                                value={balance.partyBalanceDate != null ? balance.partyBalanceDate.split("T")[0] : ''}
-                                                required
-                                                onChange={e => this.handleBalanceChange(e, index)}
-                                            />
-                                        </td>
-                                        <td>
-                                            <FormControl
-                                                type="number"
-                                                name="amount"
-                                                placeholder="Amount"
-                                                aria-label="Amount"
-                                                value={balance.amount || ''}
-                                                required
-                                                onChange={e => this.handleBalanceChange(e, index)}
-                                            />
-                                        </td>
-                                        <td>
-                                            <FormControl
-                                                type="text"
-                                                name="remarks"
-                                                placeholder="Remarks"
-                                                aria-label="Remarks"
-                                                value={balance.remarks || ''}
-                                                onChange={e => this.handleBalanceChange(e, index)}
-                                            />
-                                        </td>
-                                    </tr>
-                                ))
-                            }
-                        </tbody>
-                    </Table>
+                        </ButtonToolbar>
+                        <Table
+                            striped
+                            bordered
+                            hover
+                            responsive>
+                            <thead>
+                                <tr>
+                                    <th style={inputDateStyle}>Balance Date</th>
+                                    <th style={inputDateStyle}>Quantity</th>
+                                    <th style={stretchStyle}>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    balances && balances.map((balance, index) => (
+                                        <tr key={balance.partyBalanceId}
+                                            onFocus={() => { this.setState({ balanceIndex: index }) }}>
+                                            <td>
+                                                <FormControl
+                                                    type="date"
+                                                    name="partyBalanceDate"
+                                                    placeholder="Balance Date"
+                                                    aria-label="Balance Date"
+                                                    value={balance.partyBalanceDate != null ? balance.partyBalanceDate.split("T")[0] : ''}
+                                                    required
+                                                    onChange={e => this.handleBalanceChange(e, index)}
+                                                />
+                                            </td>
+                                            <td>
+                                                <FormControl
+                                                    type="number"
+                                                    name="amount"
+                                                    placeholder="Amount"
+                                                    aria-label="Amount"
+                                                    value={balance.amount || ''}
+                                                    required
+                                                    onChange={e => this.handleBalanceChange(e, index)}
+                                                />
+                                            </td>
+                                            <td>
+                                                <FormControl
+                                                    type="text"
+                                                    name="remarks"
+                                                    placeholder="Remarks"
+                                                    aria-label="Remarks"
+                                                    value={balance.remarks || ''}
+                                                    onChange={e => this.handleBalanceChange(e, index)}
+                                                />
+                                            </td>
+                                        </tr>
+                                    ))
+                                }
+                            </tbody>
+                        </Table>
                     </Form>
                 </div>
             </>
