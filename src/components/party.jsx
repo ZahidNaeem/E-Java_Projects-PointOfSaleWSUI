@@ -17,14 +17,7 @@ class Party extends Component {
     }
 
     componentDidMount() {
-        axios.get('http://localhost:8089/party/first')
-            .then(res => {
-                const { party, navigationDtl } = res.data;
-                this.setState({ party, navigationDtl, balances: party.partyBalances })
-            })
-            .catch(err => {
-                console.log(err);
-            });
+        this.firstParty();
     }
 
     handlePartyChange = (event) => {
@@ -79,8 +72,8 @@ class Party extends Component {
         });
     }
 
-    firstParty = () => {
-        axios.get('http://localhost:8089/party/first')
+    navigateParty (url) {
+        axios.get(url)
             .then(res => {
                 const { party, navigationDtl } = res.data;
                 this.setState({ party, navigationDtl, balances: party.partyBalances })
@@ -89,43 +82,22 @@ class Party extends Component {
             .catch(err => {
                 console.log(err);
             });
+    }
+
+    firstParty = () => {
+        this.navigateParty('http://localhost:8089/party/first');
     }
 
     previousParty = () => {
-        axios.get('http://localhost:8089/party/previous')
-            .then(res => {
-                const { party, navigationDtl } = res.data;
-                this.setState({ party, navigationDtl, balances: party.partyBalances })
-                console.log(this.state.party);
-            })
-            .catch(err => {
-                console.log(err);
-            });
+        this.navigateParty('http://localhost:8089/party/previous');
     }
 
     nextParty = () => {
-        axios.get('http://localhost:8089/party/next')
-            .then(res => {
-                const { party, navigationDtl } = res.data;
-                this.setState({ party, navigationDtl, balances: party.partyBalances })
-                console.log("Party: ", party);
-                console.log("Balance: ", party.partyBalances);
-            })
-            .catch(err => {
-                console.log(err);
-            });
+        this.navigateParty('http://localhost:8089/party/next');
     }
 
     lastParty = () => {
-        axios.get('http://localhost:8089/party/last')
-            .then(res => {
-                const { party, navigationDtl } = res.data;
-                this.setState({ party, navigationDtl, balances: party.partyBalances })
-                console.log(this.state.party);
-            })
-            .catch(err => {
-                console.log(err);
-            });
+        this.navigateParty('http://localhost:8089/party/last');
     }
 
     handleBalanceChange = (event, index) => {
@@ -172,10 +144,32 @@ class Party extends Component {
 
     render() {
         const { party, navigationDtl, balances } = this.state;
+
         const options = [
             { value: 'Supplier', label: 'Supplier' },
             { value: 'Buyer', label: 'Buyer' }
         ]
+
+        const inputGroupTextStyle = {
+            width: "180px"
+        }
+
+        const stretchStyle = {
+            flex: "1"
+        }
+
+        const smallButtonStyle = {
+            width: "80px"
+        }
+
+        const largeButtonStyle = {
+            width: "130px"
+        }
+
+        const inputDateStyle = {
+            width: "200px"
+        }
+
         return (
             <>
                 <center><h1>Party Registrtion Form</h1></center>
@@ -183,7 +177,7 @@ class Party extends Component {
                     <Form>
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Party Code</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>Party Code</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 name="partyCode"
@@ -194,130 +188,159 @@ class Party extends Component {
                                 onChange={this.handlePartyChange}
                             />
                         </InputGroup>
-
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Party Name</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>Party Name</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 name="partyName"
                                 placeholder="Party Name"
                                 aria-label="Party Name"
                                 value={party.partyName || ''}
+                                required
                                 onChange={this.handlePartyChange}
                             />
-                        </InputGroup>
 
-                        <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Party Owner</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>Party Owner</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 name="partyOwner"
                                 placeholder="Party Owner"
                                 aria-label="Party Owner"
                                 value={party.partyOwner || ''}
-                                required
                                 onChange={this.handlePartyChange}
                             />
                         </InputGroup>
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Party Type</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>Contact Person</InputGroup.Text>
                             </InputGroup.Prepend>
-                            <div style={{ width: '200px' }}>
+                            <FormControl
+                                name="contactPerson"
+                                placeholder="Contact Person"
+                                aria-label="Contact Person"
+                                value={party.contactPerson || ''}
+                                required
+                                onChange={this.handlePartyChange}
+                            />
+
+                            <InputGroup.Prepend>
+                                <InputGroup.Text style={inputGroupTextStyle}>Party Type</InputGroup.Text>
+                            </InputGroup.Prepend>
+                            <div style={stretchStyle}>
                                 <Select
                                     name="partyType"
                                     value={{ value: party.partyType || '', label: party.partyType || '' }}
+                                    required
                                     placeholder='Select Party Type'
                                     onChange={(name, value) => this.handleSelectChange(name, value)}
                                     clearable={true}
                                     options={options}
                                 />
                             </div>
-                            {/* <FormControl
-                                name="partyType"
-                                placeholder="Party Type"
-                                aria-label="Party Type"
-                                value={party.partyType || ''}
-                                onChange={this.handlePartyChange}
-                            /> */}
                         </InputGroup>
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Party U.O.M</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>Cell #</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
-                                name="partyUom"
-                                placeholder="Party U.O.M"
-                                aria-label="Party U.O.M"
-                                value={party.partyUom || ''}
-                                required
+                                name="cellNo"
+                                placeholder="Cell #"
+                                aria-label="Cell #"
+                                value={party.cellNo || ''}
+                                onChange={this.handlePartyChange}
+                            />
+
+                            <InputGroup.Prepend>
+                                <InputGroup.Text style={inputGroupTextStyle}>Phone</InputGroup.Text>
+                            </InputGroup.Prepend>
+                            <FormControl
+                                name="phone"
+                                placeholder="Phone"
+                                aria-label="Phone"
+                                value={party.phone || ''}
                                 onChange={this.handlePartyChange}
                             />
                         </InputGroup>
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Purchase Price</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>Fax</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
-                                type="number"
-                                name="purchasePrice"
-                                placeholder="Purchase Price"
-                                aria-label="Purchase Price"
-                                value={party.purchasePrice || ''}
+                                name="fax"
+                                placeholder="Fax"
+                                aria-label="Fax"
+                                value={party.fax || ''}
+                                onChange={this.handlePartyChange}
+                            />
+
+                            <InputGroup.Prepend>
+                                <InputGroup.Text style={inputGroupTextStyle}>Address</InputGroup.Text>
+                            </InputGroup.Prepend>
+                            <FormControl
+                                name="address"
+                                placeholder="Address"
+                                aria-label="Address"
+                                value={party.address || ''}
                                 onChange={this.handlePartyChange}
                             />
                         </InputGroup>
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Sale Price</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>E-mail</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
-                                type="number"
-                                name="salePrice"
-                                placeholder="Sale Price"
-                                aria-label="Sale Price"
-                                value={party.salePrice || ''}
+                                name="email"
+                                placeholder="E-mail"
+                                aria-label="E-mail"
+                                value={party.email || ''}
+                                onChange={this.handlePartyChange}
+                            />
+
+                            <InputGroup.Prepend>
+                                <InputGroup.Text style={inputGroupTextStyle}>Web</InputGroup.Text>
+                            </InputGroup.Prepend>
+                            <FormControl
+                                name="web"
+                                placeholder="Web"
+                                aria-label="Web"
+                                value={party.web || ''}
                                 onChange={this.handlePartyChange}
                             />
                         </InputGroup>
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Max. Balance</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>N.T.N</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
-                                type="number"
-                                name="maxBalance"
-                                placeholder="Max. Balance"
-                                aria-label="Max. Balance"
-                                value={party.maxBalance || ''}
+                                name="ntn"
+                                placeholder="N.T.N"
+                                aria-label="N.T.N"
+                                value={party.ntn || ''}
+                                onChange={this.handlePartyChange}
+                            />
+
+                            <InputGroup.Prepend>
+                                <InputGroup.Text style={inputGroupTextStyle}>S.T.R.N</InputGroup.Text>
+                            </InputGroup.Prepend>
+                            <FormControl
+                                name="strn"
+                                placeholder="S.T.R.N"
+                                aria-label="S.T.R.N"
+                                value={party.strn || ''}
                                 onChange={this.handlePartyChange}
                             />
                         </InputGroup>
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Min. Balance</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                type="number"
-                                name="minBalance"
-                                placeholder="Min. Balance"
-                                aria-label="Min. Balance"
-                                value={party.minBalance || ''}
-                                onChange={this.handlePartyChange}
-                            />
-                        </InputGroup>
-
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Effective Start Date</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>Effective Start Date</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 type="date"
@@ -329,11 +352,9 @@ class Party extends Component {
                                 required
                                 onChange={this.handlePartyChange}
                             />
-                        </InputGroup>
 
-                        <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Effective End Date</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>Effective End Date</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 type="date"
@@ -344,33 +365,34 @@ class Party extends Component {
                                 onChange={this.handlePartyChange}
                             />
                         </InputGroup>
+
                         <ButtonToolbar className="m-2">
                             <Button
                                 variant="primary"
                                 disabled={navigationDtl.first}
                                 onClick={this.firstParty}
-                                className="mr-1"
+                                className="mr-1" style={smallButtonStyle}
                                 active>First
                             </Button>
                             <Button
                                 variant="primary"
                                 disabled={navigationDtl.first}
                                 onClick={this.previousParty}
-                                className="mr-1"
+                                className="mr-1" style={smallButtonStyle}
                                 active>Previous
                             </Button>
                             <Button
                                 variant="primary"
                                 disabled={navigationDtl.last}
                                 onClick={this.nextParty}
-                                className="mr-1"
+                                className="mr-1" style={smallButtonStyle}
                                 active>Next
                             </Button>
                             <Button
                                 variant="primary"
                                 disabled={navigationDtl.last}
                                 onClick={this.lastParty}
-                                className="ymr-1"
+                                className="mr-1" style={smallButtonStyle}
                                 active>Last
                             </Button>
                         </ButtonToolbar>
@@ -379,27 +401,27 @@ class Party extends Component {
                                 variant="primary"
                                 // disabled={navigationDtl.first}
                                 onClick={this.newParty}
-                                className="mr-1"
+                                className="mr-1" style={smallButtonStyle}
                                 active>Add
                             </Button>
                             <Button
                                 variant="primary"
                                 // disabled={navigationDtl.first}
                                 onClick={() => this.setState({ partyAlert: true })}
-                                className="mr-1"
+                                className="mr-1" style={smallButtonStyle}
                                 active>Delete
                             </Button>
                             <Button
                                 variant="primary"
                                 onClick={() => this.saveParty("Party saved successfully.")}
-                                className="mr-1"
+                                className="mr-1" style={smallButtonStyle}
                                 active>Save
                             </Button>
                             <Button
                                 variant="primary"
                                 /* disabled={navigationDtl.last}
                                 onClick={this.nextParty} */
-                                className="mr-1"
+                                className="mr-1" style={smallButtonStyle}
                                 active>Undo
                             </Button>
                             <SweetAlert
@@ -417,54 +439,57 @@ class Party extends Component {
                                 Delete Party
                                 </SweetAlert>
                         </ButtonToolbar>
-                        <ButtonGroup className="m-2">
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={this.addBalance}
-                                className="mr-1"
-                                active>Add Balance
-                                            </Button>
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={() => { this.saveParty("Balance saved successfully.") }}
-                                className="mr-1"
-                                active>Save Balance
-                                            </Button>
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={() => this.setState({ balanceAlert: true })}
-                                className="mr-1"
-                                active>Delete Balance
-                                                    </Button>
-                            <SweetAlert
-                                show={this.state.balanceAlert}
-                                warning
-                                showCancel
-                                confirmBtnText="Delete"
-                                confirmBtnBsStyle="danger"
-                                cancelBtnBsStyle="default"
-                                title="Delete Confirmation"
-                                Text="Are you sure you want to delete this balance?"
-                                onConfirm={() => this.deleteBalance()}
-                                onCancel={() => this.setState({ balanceAlert: false })}
-                            >
-                                Delete Balance
-                                                    </SweetAlert>
-                        </ButtonGroup>
                     </Form>
+
+                    <br />
+                    <center><h2>Party Balances</h2></center>
                     <Table
                         striped
                         bordered
                         hover
                         responsive>
                         <thead>
+                            <ButtonGroup className="m-2">
+                                <Button
+                                    variant="primary"
+                                    // disabled={navigationDtl.first}
+                                    onClick={this.addBalance}
+                                    className="mr-1" style={largeButtonStyle}
+                                    active>Add Balance
+                                            </Button>
+                                <Button
+                                    variant="primary"
+                                    // disabled={navigationDtl.first}
+                                    onClick={() => { this.saveParty("Balance saved successfully.") }}
+                                    className="mr-1" style={largeButtonStyle}
+                                    active>Save Balance
+                                            </Button>
+                                <Button
+                                    variant="primary"
+                                    // disabled={navigationDtl.first}
+                                    onClick={() => this.setState({ balanceAlert: true })}
+                                    className="mr-1" style={largeButtonStyle}
+                                    active>Delete Balance
+                                                    </Button>
+                                <SweetAlert
+                                    show={this.state.balanceAlert}
+                                    warning
+                                    showCancel
+                                    confirmBtnText="Delete"
+                                    confirmBtnBsStyle="danger"
+                                    cancelBtnBsStyle="default"
+                                    title="Delete Confirmation"
+                                    Text="Are you sure you want to delete this balance?"
+                                    onConfirm={() => this.deleteBalance()}
+                                    onCancel={() => this.setState({ balanceAlert: false })}
+                                >
+                                    Delete Balance
+                                                    </SweetAlert>
+                            </ButtonGroup>
                             <tr>
-                                <th>Balance Date</th>
-                                <th>Quantity</th>
-                                <th>Remarks</th>
+                                <th style={inputDateStyle}>Balance Date</th>
+                                <th style={inputDateStyle}>Quantity</th>
+                                <th style={stretchStyle}>Remarks</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -486,10 +511,10 @@ class Party extends Component {
                                         <td>
                                             <FormControl
                                                 type="number"
-                                                name="qnty"
-                                                placeholder="Balance Quantity"
-                                                aria-label="Balance Quantity"
-                                                value={balance.qnty || ''}
+                                                name="amount"
+                                                placeholder="Amount"
+                                                aria-label="Amount"
+                                                value={balance.amount || ''}
                                                 required
                                                 onChange={e => this.handleBalanceChange(e, index)}
                                             />

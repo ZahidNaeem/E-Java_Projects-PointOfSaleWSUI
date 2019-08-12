@@ -17,14 +17,7 @@ class Item extends Component {
     }
 
     componentDidMount() {
-        axios.get('http://localhost:8089/item/first')
-            .then(res => {
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, stocks: item.itemStocks })
-            })
-            .catch(err => {
-                console.log(err);
-            });
+        this.firstItem();
     }
 
     handleItemChange = (event) => {
@@ -79,8 +72,8 @@ class Item extends Component {
         });
     }
 
-    firstItem = () => {
-        axios.get('http://localhost:8089/item/first')
+    navigateItem(url) {
+        axios.get(url)
             .then(res => {
                 const { item, navigationDtl } = res.data;
                 this.setState({ item, navigationDtl, stocks: item.itemStocks })
@@ -89,43 +82,32 @@ class Item extends Component {
             .catch(err => {
                 console.log(err);
             });
+    }
+
+    firstItem = () => {
+        this.navigateItem('http://localhost:8089/item/first');
     }
 
     previousItem = () => {
-        axios.get('http://localhost:8089/item/previous')
-            .then(res => {
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, stocks: item.itemStocks })
-                console.log(this.state.item);
-            })
-            .catch(err => {
-                console.log(err);
-            });
+        this.navigateItem('http://localhost:8089/item/previous');
     }
 
     nextItem = () => {
-        axios.get('http://localhost:8089/item/next')
-            .then(res => {
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, stocks: item.itemStocks })
-                console.log("Item: ", item);
-                console.log("Stock: ", item.itemStocks);
-            })
-            .catch(err => {
-                console.log(err);
-            });
+        this.navigateItem('http://localhost:8089/item/next');
     }
 
     lastItem = () => {
-        axios.get('http://localhost:8089/item/last')
-            .then(res => {
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, stocks: item.itemStocks })
-                console.log(this.state.item);
-            })
-            .catch(err => {
-                console.log(err);
-            });
+        this.navigateItem('http://localhost:8089/item/last');
+    }
+
+    undoChanges = () => {
+        if (this.state.item.itemCode != null) {
+            console.log("Item Code: ", this.state.item.itemCode);
+            let url = 'http://localhost:8089/item/' + this.state.item.itemCode;
+            this.navigateItem(url);
+        } else {
+            this.lastItem();
+        }
     }
 
     itemCategories() {
@@ -208,6 +190,26 @@ class Item extends Component {
         const cats = this.itemCategories();
         const uoms = this.itemUOMs();
 
+        const inputGroupTextStyle = {
+            width: "180px"
+        }
+
+        const stretchStyle = {
+            flex: "1"
+        }
+
+        const smallButtonStyle = {
+            width: "7%"
+        }
+
+        const largeButtonStyle = {
+            width: "15%"
+        }
+
+        const inputDateStyle = {
+            width: "15%"
+        }
+
         return (
             <>
                 <center><h1>Item Registrtion Form</h1></center>
@@ -215,7 +217,7 @@ class Item extends Component {
                     <Form>
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Item Code</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>Item Code</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 name="itemCode"
@@ -225,11 +227,9 @@ class Item extends Component {
                                 value={item.itemCode || ''}
                                 onChange={this.handleItemChange}
                             />
-                        </InputGroup>
 
-                        <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Item Barcode</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>Item Barcode</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 name="itemBarcode"
@@ -242,7 +242,7 @@ class Item extends Component {
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Item Desc.</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>Item Desc.</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 name="itemDesc"
@@ -256,9 +256,9 @@ class Item extends Component {
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Item Category</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>Item Category</InputGroup.Text>
                             </InputGroup.Prepend>
-                            <div style={{ width: "300px" }}>
+                            <div style={stretchStyle}>
                                 <Select
                                     name="itemCategory"
                                     placeholder="Select Item Category"
@@ -269,13 +269,11 @@ class Item extends Component {
                                     options={cats}
                                 />
                             </div>
-                        </InputGroup>
 
-                        <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Item U.O.M</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>Item U.O.M</InputGroup.Text>
                             </InputGroup.Prepend>
-                            <div style={{ width: "300px" }}>
+                            <div style={stretchStyle}>
                                 <Select
                                     name="itemUom"
                                     placeholder="Select Item U.O.M"
@@ -286,19 +284,11 @@ class Item extends Component {
                                     options={uoms}
                                 />
                             </div>
-                            {/* <FormControl
-                                name="itemUom"
-                                placeholder="Item U.O.M"
-                                aria-label="Item U.O.M"
-                                value={item.itemUom || ''}
-                                required
-                                onChange={this.handleItemChange}
-                            /> */}
                         </InputGroup>
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Purchase Price</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>Purchase Price</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 type="number"
@@ -308,11 +298,9 @@ class Item extends Component {
                                 value={item.purchasePrice || ''}
                                 onChange={this.handleItemChange}
                             />
-                        </InputGroup>
 
-                        <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Sale Price</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>Sale Price</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 type="number"
@@ -326,7 +314,19 @@ class Item extends Component {
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Max. Stock</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>Min. Stock</InputGroup.Text>
+                            </InputGroup.Prepend>
+                            <FormControl
+                                type="number"
+                                name="minStock"
+                                placeholder="Min. Stock"
+                                aria-label="Min. Stock"
+                                value={item.minStock || ''}
+                                onChange={this.handleItemChange}
+                            />
+
+                            <InputGroup.Prepend>
+                                <InputGroup.Text style={inputGroupTextStyle}>Max. Stock</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 type="number"
@@ -340,21 +340,7 @@ class Item extends Component {
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Min. Stock</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                type="number"
-                                name="minStock"
-                                placeholder="Min. Stock"
-                                aria-label="Min. Stock"
-                                value={item.minStock || ''}
-                                onChange={this.handleItemChange}
-                            />
-                        </InputGroup>
-
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Effective Start Date</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>Effective Start Date</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 type="date"
@@ -366,11 +352,9 @@ class Item extends Component {
                                 required
                                 onChange={this.handleItemChange}
                             />
-                        </InputGroup>
 
-                        <InputGroup className="mb-3">
                             <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Effective End Date</InputGroup.Text>
+                                <InputGroup.Text style={inputGroupTextStyle}>Effective End Date</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
                                 type="date"
@@ -381,64 +365,74 @@ class Item extends Component {
                                 onChange={this.handleItemChange}
                             />
                         </InputGroup>
+
                         <ButtonToolbar className="m-2">
                             <Button
                                 variant="primary"
                                 disabled={navigationDtl.first}
                                 onClick={this.firstItem}
-                                className="mr-1"
+                                className="mr-1" style={smallButtonStyle}
                                 active>First
                             </Button>
+
                             <Button
                                 variant="primary"
                                 disabled={navigationDtl.first}
                                 onClick={this.previousItem}
-                                className="mr-1"
+                                className="mr-1" style={smallButtonStyle}
                                 active>Previous
                             </Button>
+
                             <Button
                                 variant="primary"
                                 disabled={navigationDtl.last}
                                 onClick={this.nextItem}
-                                className="mr-1"
+                                className="mr-1" style={smallButtonStyle}
                                 active>Next
                             </Button>
+
                             <Button
                                 variant="primary"
                                 disabled={navigationDtl.last}
                                 onClick={this.lastItem}
-                                className="ymr-1"
+                                className="mr-1" style={smallButtonStyle}
                                 active>Last
                             </Button>
+
                         </ButtonToolbar>
+
                         <ButtonToolbar className="ml-2">
                             <Button
                                 variant="primary"
                                 // disabled={navigationDtl.first}
                                 onClick={this.newItem}
-                                className="mr-1"
+                                className="mr-1" style={smallButtonStyle}
                                 active>Add
                             </Button>
+
                             <Button
                                 variant="primary"
                                 // disabled={navigationDtl.first}
                                 onClick={() => this.setState({ itemAlert: true })}
-                                className="mr-1"
+                                className="mr-1" style={smallButtonStyle}
                                 active>Delete
                             </Button>
+
                             <Button
                                 variant="primary"
                                 onClick={() => this.saveItem("Item saved successfully.")}
-                                className="mr-1"
+                                className="mr-1" style={smallButtonStyle}
                                 active>Save
                             </Button>
+
                             <Button
                                 variant="primary"
-                                /* disabled={navigationDtl.last}
-                                onClick={this.nextItem} */
-                                className="mr-1"
+                                /* disabled={navigationDtl.last} */
+                                onClick={this.undoChanges}
+                                className="mr-1" style={smallButtonStyle}
                                 active>Undo
                             </Button>
+
                             <SweetAlert
                                 show={this.state.itemAlert}
                                 warning
@@ -454,54 +448,60 @@ class Item extends Component {
                                 Delete Item
                                 </SweetAlert>
                         </ButtonToolbar>
-                        <ButtonGroup className="m-2">
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={this.addStock}
-                                className="mr-1"
-                                active>Add Stock
-                                            </Button>
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={() => { this.saveItem("Stock saved successfully.") }}
-                                className="mr-1"
-                                active>Save Stock
-                                            </Button>
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={() => this.setState({ stockAlert: true })}
-                                className="mr-1"
-                                active>Delete Stock
-                                                    </Button>
-                            <SweetAlert
-                                show={this.state.stockAlert}
-                                warning
-                                showCancel
-                                confirmBtnText="Delete"
-                                confirmBtnBsStyle="danger"
-                                cancelBtnBsStyle="default"
-                                title="Delete Confirmation"
-                                Text="Are you sure you want to delete this stock?"
-                                onConfirm={() => this.deleteStock()}
-                                onCancel={() => this.setState({ stockAlert: false })}
-                            >
-                                Delete Stock
-                                                    </SweetAlert>
-                        </ButtonGroup>
                     </Form>
+                    <br />
+                    <center><h2>Item Stocks</h2></center>
                     <Table
                         striped
                         bordered
                         hover
                         responsive>
                         <thead>
+                            <ButtonGroup className="m-2">
+                                <Button
+                                    variant="primary"
+                                    // disabled={navigationDtl.first}
+                                    onClick={this.addStock}
+                                    className="mr-1" style={largeButtonStyle}
+                                    active>Add Stock
+                                            </Button>
+
+                                <Button
+                                    variant="primary"
+                                    // disabled={navigationDtl.first}
+                                    onClick={() => { this.saveItem("Stock saved successfully.") }}
+                                    className="mr-1" style={largeButtonStyle}
+                                    active>Save Stock
+                                            </Button>
+
+                                <Button
+                                    variant="primary"
+                                    // disabled={navigationDtl.first}
+                                    onClick={() => this.setState({ stockAlert: true })}
+                                    className="mr-1" style={largeButtonStyle}
+                                    active>Delete Stock
+                                                    </Button>
+
+                                <SweetAlert
+                                    show={this.state.stockAlert}
+                                    warning
+                                    showCancel
+                                    confirmBtnText="Delete"
+                                    confirmBtnBsStyle="danger"
+                                    cancelBtnBsStyle="default"
+                                    title="Delete Confirmation"
+                                    Text="Are you sure you want to delete this stock?"
+                                    onConfirm={() => this.deleteStock()}
+                                    onCancel={() => this.setState({ stockAlert: false })}
+                                >
+                                    Delete Stock
+                                                    </SweetAlert>
+                            </ButtonGroup>
+
                             <tr>
-                                <th>Stock Date</th>
-                                <th>Quantity</th>
-                                <th>Remarks</th>
+                                <th style={inputDateStyle}>Stock Date</th>
+                                <th style={inputDateStyle}>Quantity</th>
+                                <th style={stretchStyle}>Remarks</th>
                             </tr>
                         </thead>
                         <tbody>
