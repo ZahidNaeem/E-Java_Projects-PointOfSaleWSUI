@@ -4,7 +4,9 @@ import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import Select from 'react-select'
+import 'react-widgets/dist/css/react-widgets.css'
+import { Combobox } from 'react-widgets'
+
 class Party extends Component {
 
     state = {
@@ -29,9 +31,9 @@ class Party extends Component {
         this.setState({ party });
     }
 
-    handleSelectChange = (name, value) => {
+    handleComboboxChange = (value, name) => {
         let party = { ...this.state.party };
-        party[value.name] = name.value;
+        party[name] = value;
         this.setState({ party });
     }
 
@@ -72,7 +74,7 @@ class Party extends Component {
         });
     }
 
-    navigateParty (url) {
+    navigateParty(url) {
         axios.get(url)
             .then(res => {
                 const { party, navigationDtl } = res.data;
@@ -145,10 +147,7 @@ class Party extends Component {
     render() {
         const { party, navigationDtl, balances } = this.state;
 
-        const options = [
-            { value: 'Supplier', label: 'Supplier' },
-            { value: 'Buyer', label: 'Buyer' }
-        ]
+        const partyTypes = ['Supplier', 'Buyer'];
 
         const inputGroupTextStyle = {
             width: "180px"
@@ -215,6 +214,19 @@ class Party extends Component {
 
                         <InputGroup className="mb-3">
                             <InputGroup.Prepend>
+                                <InputGroup.Text style={inputGroupTextStyle}>Party Type</InputGroup.Text>
+                            </InputGroup.Prepend>
+                            <Combobox
+                                style={stretchStyle}
+                                name="partyType"
+                                placeholder="Select Party Type"
+                                aria-label="Party Type"
+                                data={partyTypes}
+                                value={party.partyType || ''}
+                                onChange={(name) => this.handleComboboxChange(name, "partyType")}
+                            />
+
+                            <InputGroup.Prepend>
                                 <InputGroup.Text style={inputGroupTextStyle}>Contact Person</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl
@@ -225,21 +237,6 @@ class Party extends Component {
                                 required
                                 onChange={this.handlePartyChange}
                             />
-
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={inputGroupTextStyle}>Party Type</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <div style={stretchStyle}>
-                                <Select
-                                    name="partyType"
-                                    value={{ value: party.partyType || '', label: party.partyType || '' }}
-                                    required
-                                    placeholder='Select Party Type'
-                                    onChange={(name, value) => this.handleSelectChange(name, value)}
-                                    clearable={true}
-                                    options={options}
-                                />
-                            </div>
                         </InputGroup>
 
                         <InputGroup className="mb-3">
@@ -439,7 +436,6 @@ class Party extends Component {
                                 Delete Party
                                 </SweetAlert>
                         </ButtonToolbar>
-                    </Form>
 
                     <br />
                     <center><h2>Party Balances</h2></center>
@@ -534,6 +530,7 @@ class Party extends Component {
                             }
                         </tbody>
                     </Table>
+                    </Form>
                 </div>
             </>
         );

@@ -4,7 +4,8 @@ import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import Select from 'react-select'
+import 'react-widgets/dist/css/react-widgets.css'
+import { Combobox } from 'react-widgets'
 class Item extends Component {
 
     state = {
@@ -29,9 +30,9 @@ class Item extends Component {
         this.setState({ item });
     }
 
-    handleSelectChange = (name, value) => {
+    handleComboboxChange = (value, name) => {
         let item = { ...this.state.item };
-        item[value.name] = name.value;
+        item[name] = value;
         this.setState({ item });
     }
 
@@ -114,9 +115,8 @@ class Item extends Component {
         let data = [];
         axios.get('http://localhost:8089/item/cats')
             .then(res => {
-                console.log(res.data);
                 res.data.forEach(element => {
-                    data.push({ value: element, label: element });
+                    data.push(element);
                 });
             })
             .catch(err => {
@@ -130,9 +130,8 @@ class Item extends Component {
         let data = [];
         axios.get('http://localhost:8089/item/uoms')
             .then(res => {
-                console.log(res.data);
                 res.data.forEach(element => {
-                    data.push({ value: element, label: element });
+                    data.push(element);
                 });
             })
             .catch(err => {
@@ -258,32 +257,29 @@ class Item extends Component {
                             <InputGroup.Prepend>
                                 <InputGroup.Text style={inputGroupTextStyle}>Item Category</InputGroup.Text>
                             </InputGroup.Prepend>
-                            <div style={stretchStyle}>
-                                <Select
-                                    name="itemCategory"
-                                    placeholder="Select Item Category"
-                                    aria-label="Item Category"
-                                    value={{ value: item.itemCategory || '', label: item.itemCategory || '' }}
-                                    onChange={(name, value) => this.handleSelectChange(name, value)}
-                                    clearable={true}
-                                    options={cats}
-                                />
-                            </div>
+                            <Combobox
+                                style={stretchStyle}
+                                name="itemCategory"
+                                placeholder="Select Item Category"
+                                aria-label="Item Category"
+                                data={cats}
+                                value={item.itemCategory || ''}
+                                onChange={(name) => this.handleComboboxChange(name, "itemCategory")}
+                            />
 
                             <InputGroup.Prepend>
                                 <InputGroup.Text style={inputGroupTextStyle}>Item U.O.M</InputGroup.Text>
                             </InputGroup.Prepend>
-                            <div style={stretchStyle}>
-                                <Select
-                                    name="itemUom"
-                                    placeholder="Select Item U.O.M"
-                                    aria-label="Item U.O.M"
-                                    value={{ value: item.itemUom || '', label: item.itemUom || '' }}
-                                    onChange={(name, value) => this.handleSelectChange(name, value)}
-                                    clearable={true}
-                                    options={uoms}
-                                />
-                            </div>
+
+                            <Combobox
+                                style={stretchStyle}
+                                name="itemUom"
+                                placeholder="Select Item U.O.M"
+                                aria-label="Item U.O.M"
+                                data={uoms}
+                                value={item.itemUom || ''}
+                                onChange={(name) => this.handleComboboxChange(name, "itemUom")}
+                            />
                         </InputGroup>
 
                         <InputGroup className="mb-3">
@@ -448,7 +444,7 @@ class Item extends Component {
                                 Delete Item
                                 </SweetAlert>
                         </ButtonToolbar>
-                    </Form>
+                    
                     <br />
                     <center><h2>Item Stocks</h2></center>
                     <Table
@@ -546,6 +542,7 @@ class Item extends Component {
                             }
                         </tbody>
                     </Table>
+                    </Form>
                 </div>
             </>
         );
