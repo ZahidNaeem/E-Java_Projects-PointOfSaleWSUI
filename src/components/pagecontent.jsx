@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import Footer from './common/footer';
 import Navbar from './common/navbar';
-import Item from './item/item';
+import Item from './item';
 import Dashboard from './common/dashboard';
-import Party from './party/party';
+import Party from './party';
 
 class PageContent extends Component {
   
