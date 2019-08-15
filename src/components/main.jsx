@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import SideBar from './sidebar';
+import SideBar from './common/sidebar';
 import PageContent from './pagecontent';
 
 class Main extends Component {
@@ -9,7 +9,7 @@ class Main extends Component {
             <div id="page-top">
                 <div id="wrapper">
                     <SideBar />
-                    <PageContent />
+                    <PageContent pathname={this.props.location.pathname}/>
                     <a className="scroll-to-top rounded" href="#page-top">
                         <i className="fas fa-angle-up"></i>
                     </a>
