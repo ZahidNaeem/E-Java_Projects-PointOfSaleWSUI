@@ -181,7 +181,7 @@ class Party extends Component {
 
         return (
             <>
-                <center><h1>Party Registrtion Form</h1></center>
+                {/* <center><h1>Party Registrtion Form</h1></center> */}
                 <div>
                     <Form>
                         <InputGroup className="mb-3">

@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import '../assets/css/sb-admin-2.css';
 import { Link } from 'react-router-dom';
 
 class Login extends Component {
