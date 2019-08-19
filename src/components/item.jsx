@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { InputGroup, FormControl, Button, ButtonToolbar, ButtonGroup, Form, Table } from 'react-bootstrap'
+import { InputGroup, FormControl, Button, ButtonToolbar, Form, Table } from 'react-bootstrap'
 import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import Select from 'react-select'
+import 'react-widgets/dist/css/react-widgets.css'
+import { Combobox } from 'react-widgets'
 class Item extends Component {
 
     state = {
@@ -17,14 +18,7 @@ class Item extends Component {
     }
 
     componentDidMount() {
-        axios.get('http://localhost:8089/item/first')
-            .then(res => {
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, stocks: item.itemStocks })
-            })
-            .catch(err => {
-                console.log(err);
-            });
+        this.firstItem();
     }
 
     handleItemChange = (event) => {
@@ -36,9 +30,9 @@ class Item extends Component {
         this.setState({ item });
     }
 
-    handleSelectChange = (name, value) => {
+    handleComboboxChange = (value, name) => {
         let item = { ...this.state.item };
-        item[value.name] = name.value;
+        item[name] = value;
         this.setState({ item });
     }
 
@@ -47,18 +41,26 @@ class Item extends Component {
     }
 
     saveItem = (message) => {
-        console.log("Post: Object sent: ", this.state.item);
-        axios.post('http://localhost:8089/item/save', this.state.item)
-            .then(res => {
-                console.log("Post: Object received: ", res.data);
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, stocks: item.itemStocks });
-                toast.success(message);
-            })
-            .catch(err => {
-                console.log(err);
-                toast.error("There is an error:\n" + err);
-            });
+        if (this.state.item.itemDesc === undefined || this.state.item.itemDesc === null || this.state.item.itemDesc === '') {
+            toast.error("Item Desc. is required field");
+        } else if (this.state.item.itemUom === undefined || this.state.item.itemUom === null || this.state.item.itemUom === '') {
+            toast.error("Item U.O.M is required field");
+        } else if (this.state.item.effectiveStartDate === undefined || this.state.item.effectiveStartDate === null || this.state.item.effectiveStartDate === '') {
+            toast.error("Eff. start date is required field");
+        } else {
+            console.log("Post: Object sent: ", this.state.item);
+            axios.post('http://localhost:8089/item/save', this.state.item)
+                .then(res => {
+                    console.log("Post: Object received: ", res.data);
+                    const { item, navigationDtl } = res.data;
+                    this.setState({ item, navigationDtl, stocks: item.itemStocks });
+                    toast.success(message);
+                })
+                .catch(err => {
+                    console.log(err);
+                    toast.error("There is an error:\n" + err);
+                });
+        }
     }
 
     deleteItem = () => {
@@ -79,8 +81,8 @@ class Item extends Component {
         });
     }
 
-    firstItem = () => {
-        axios.get('http://localhost:8089/item/first')
+    navigateItem(url) {
+        axios.get(url)
             .then(res => {
                 const { item, navigationDtl } = res.data;
                 this.setState({ item, navigationDtl, stocks: item.itemStocks })
@@ -89,52 +91,40 @@ class Item extends Component {
             .catch(err => {
                 console.log(err);
             });
+    }
+
+    firstItem = () => {
+        this.navigateItem('http://localhost:8089/item/first');
     }
 
     previousItem = () => {
-        axios.get('http://localhost:8089/item/previous')
-            .then(res => {
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, stocks: item.itemStocks })
-                console.log(this.state.item);
-            })
-            .catch(err => {
-                console.log(err);
-            });
+        this.navigateItem('http://localhost:8089/item/previous');
     }
 
     nextItem = () => {
-        axios.get('http://localhost:8089/item/next')
-            .then(res => {
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, stocks: item.itemStocks })
-                console.log("Item: ", item);
-                console.log("Stock: ", item.itemStocks);
-            })
-            .catch(err => {
-                console.log(err);
-            });
+        this.navigateItem('http://localhost:8089/item/next');
     }
 
     lastItem = () => {
-        axios.get('http://localhost:8089/item/last')
-            .then(res => {
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, stocks: item.itemStocks })
-                console.log(this.state.item);
-            })
-            .catch(err => {
-                console.log(err);
-            });
+        this.navigateItem('http://localhost:8089/item/last');
+    }
+
+    undoChanges = () => {
+        if (this.state.item.itemCode != null) {
+            console.log("Item Code: ", this.state.item.itemCode);
+            let url = 'http://localhost:8089/item/' + this.state.item.itemCode;
+            this.navigateItem(url);
+        } else {
+            this.lastItem();
+        }
     }
 
     itemCategories() {
         let data = [];
         axios.get('http://localhost:8089/item/cats')
             .then(res => {
-                console.log(res.data);
                 res.data.forEach(element => {
-                    data.push({ value: element, label: element });
+                    data.push(element);
                 });
             })
             .catch(err => {
@@ -148,9 +138,8 @@ class Item extends Component {
         let data = [];
         axios.get('http://localhost:8089/item/uoms')
             .then(res => {
-                console.log(res.data);
                 res.data.forEach(element => {
-                    data.push({ value: element, label: element });
+                    data.push(element);
                 });
             })
             .catch(err => {
@@ -208,300 +197,314 @@ class Item extends Component {
         const cats = this.itemCategories();
         const uoms = this.itemUOMs();
 
+        const inputGroupTextStyle = {
+            width: "180px"
+        }
+
+        const stretchStyle = {
+            flex: "1"
+        }
+
+        const smallButtonStyle = {
+            width: "7%"
+        }
+
+        const largeButtonStyle = {
+            width: "15%"
+        }
+
+        const inputDateStyle = {
+            width: "15%"
+        }
+
         return (
             <>
-                {/* <center><h1>Item Registrtion Form</h1></center> */}
-                <div>
-                    <Form>
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Item Code</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                name="itemCode"
-                                placeholder="Item Code"
-                                aria-label="Item Code"
-                                readOnly
-                                value={item.itemCode || ''}
-                                onChange={this.handleItemChange}
-                            />
-                        </InputGroup>
+                <center><h1>Item Registrtion Form</h1></center>
+                <Form>
+                    <InputGroup className="mb-3">
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Item Code</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            name="itemCode"
+                            placeholder="Item Code"
+                            aria-label="Item Code"
+                            readOnly
+                            value={item.itemCode || ''}
+                            onChange={this.handleItemChange}
+                        />
 
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Item Barcode</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                name="itemBarcode"
-                                placeholder="Item Barcode"
-                                aria-label="Item Barcode"
-                                value={item.itemBarcode || ''}
-                                onChange={this.handleItemChange}
-                            />
-                        </InputGroup>
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Item Barcode</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            name="itemBarcode"
+                            placeholder="Item Barcode"
+                            aria-label="Item Barcode"
+                            value={item.itemBarcode || ''}
+                            onChange={this.handleItemChange}
+                        />
+                    </InputGroup>
 
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Item Desc.</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                name="itemDesc"
-                                placeholder="Item Desc."
-                                aria-label="Item Desc."
-                                value={item.itemDesc || ''}
-                                required
-                                onChange={this.handleItemChange}
-                            />
-                        </InputGroup>
+                    <InputGroup className="mb-3">
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Item Desc.</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            name="itemDesc"
+                            placeholder="Item Desc."
+                            aria-label="Item Desc."
+                            value={item.itemDesc || ''}
+                            required
+                            onChange={this.handleItemChange}
+                        />
+                    </InputGroup>
 
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Item Category</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <div style={{ width: "300px" }}>
-                                <Select
-                                    name="itemCategory"
-                                    placeholder="Select Item Category"
-                                    aria-label="Item Category"
-                                    value={{ value: item.itemCategory || '', label: item.itemCategory || '' }}
-                                    onChange={(name, value) => this.handleSelectChange(name, value)}
-                                    clearable={true}
-                                    options={cats}
-                                />
-                            </div>
-                        </InputGroup>
+                    <InputGroup className="mb-3">
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Item Category</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <Combobox
+                            style={stretchStyle}
+                            name="itemCategory"
+                            placeholder="Select Item Category"
+                            aria-label="Item Category"
+                            data={cats}
+                            value={item.itemCategory || ''}
+                            onChange={(name) => this.handleComboboxChange(name, "itemCategory")}
+                        />
 
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Item U.O.M</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <div style={{ width: "300px" }}>
-                                <Select
-                                    name="itemUom"
-                                    placeholder="Select Item U.O.M"
-                                    aria-label="Item U.O.M"
-                                    value={{ value: item.itemUom || '', label: item.itemUom || '' }}
-                                    onChange={(name, value) => this.handleSelectChange(name, value)}
-                                    clearable={true}
-                                    options={uoms}
-                                />
-                            </div>
-                            {/* <FormControl
-                                name="itemUom"
-                                placeholder="Item U.O.M"
-                                aria-label="Item U.O.M"
-                                value={item.itemUom || ''}
-                                required
-                                onChange={this.handleItemChange}
-                            /> */}
-                        </InputGroup>
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Item U.O.M</InputGroup.Text>
+                        </InputGroup.Prepend>
 
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Purchase Price</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                type="number"
-                                name="purchasePrice"
-                                placeholder="Purchase Price"
-                                aria-label="Purchase Price"
-                                value={item.purchasePrice || ''}
-                                onChange={this.handleItemChange}
-                            />
-                        </InputGroup>
+                        <Combobox
+                            style={stretchStyle}
+                            name="itemUom"
+                            placeholder="Select Item U.O.M"
+                            aria-label="Item U.O.M"
+                            data={uoms}
+                            value={item.itemUom || ''}
+                            onChange={(name) => this.handleComboboxChange(name, "itemUom")}
+                        />
+                    </InputGroup>
 
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Sale Price</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                type="number"
-                                name="salePrice"
-                                placeholder="Sale Price"
-                                aria-label="Sale Price"
-                                value={item.salePrice || ''}
-                                onChange={this.handleItemChange}
-                            />
-                        </InputGroup>
+                    <InputGroup className="mb-3">
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Purchase Price</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            type="number"
+                            name="purchasePrice"
+                            placeholder="Purchase Price"
+                            aria-label="Purchase Price"
+                            value={item.purchasePrice || ''}
+                            onChange={this.handleItemChange}
+                        />
 
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Max. Stock</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                type="number"
-                                name="maxStock"
-                                placeholder="Max. Stock"
-                                aria-label="Max. Stock"
-                                value={item.maxStock || ''}
-                                onChange={this.handleItemChange}
-                            />
-                        </InputGroup>
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Sale Price</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            type="number"
+                            name="salePrice"
+                            placeholder="Sale Price"
+                            aria-label="Sale Price"
+                            value={item.salePrice || ''}
+                            onChange={this.handleItemChange}
+                        />
+                    </InputGroup>
 
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Min. Stock</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                type="number"
-                                name="minStock"
-                                placeholder="Min. Stock"
-                                aria-label="Min. Stock"
-                                value={item.minStock || ''}
-                                onChange={this.handleItemChange}
-                            />
-                        </InputGroup>
+                    <InputGroup className="mb-3">
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Min. Stock</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            type="number"
+                            name="minStock"
+                            placeholder="Min. Stock"
+                            aria-label="Min. Stock"
+                            value={item.minStock || ''}
+                            onChange={this.handleItemChange}
+                        />
 
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Effective Start Date</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                type="date"
-                                name="effectiveStartDate"
-                                placeholder="Effective Start Date"
-                                aria-label="Effective Start Date"
-                                onSelect={this.handleItemChange}
-                                value={item.effectiveStartDate != null ? item.effectiveStartDate.split("T")[0] : ''}
-                                required
-                                onChange={this.handleItemChange}
-                            />
-                        </InputGroup>
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Max. Stock</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            type="number"
+                            name="maxStock"
+                            placeholder="Max. Stock"
+                            aria-label="Max. Stock"
+                            value={item.maxStock || ''}
+                            onChange={this.handleItemChange}
+                        />
+                    </InputGroup>
 
-                        <InputGroup className="mb-3">
-                            <InputGroup.Prepend>
-                                <InputGroup.Text style={{ width: "180px" }}>Effective End Date</InputGroup.Text>
-                            </InputGroup.Prepend>
-                            <FormControl
-                                type="date"
-                                name="effectiveEndDate"
-                                placeholder="Effective End Date"
-                                aria-label="Effective End Date"
-                                value={item.effectiveEndDate != null ? item.effectiveEndDate.split("T")[0] : ''}
-                                onChange={this.handleItemChange}
-                            />
-                        </InputGroup>
-                        <ButtonToolbar className="m-2">
-                            <Button
-                                variant="primary"
-                                disabled={navigationDtl.first}
-                                onClick={this.firstItem}
-                                className="mr-1"
-                                active>First
+                    <InputGroup className="mb-3">
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Effective Start Date</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            type="date"
+                            name="effectiveStartDate"
+                            placeholder="Effective Start Date"
+                            aria-label="Effective Start Date"
+                            onSelect={this.handleItemChange}
+                            value={item.effectiveStartDate != null ? item.effectiveStartDate.split("T")[0] : ''}
+                            required
+                            onChange={this.handleItemChange}
+                        />
+
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Effective End Date</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            type="date"
+                            name="effectiveEndDate"
+                            placeholder="Effective End Date"
+                            aria-label="Effective End Date"
+                            value={item.effectiveEndDate != null ? item.effectiveEndDate.split("T")[0] : ''}
+                            onChange={this.handleItemChange}
+                        />
+                    </InputGroup>
+
+                    <ButtonToolbar className="m-2">
+                        <Button
+                            variant="primary"
+                            disabled={navigationDtl.first}
+                            onClick={this.firstItem}
+                            className="mr-1" style={smallButtonStyle}
+                            active>First
                             </Button>
-                            <Button
-                                variant="primary"
-                                disabled={navigationDtl.first}
-                                onClick={this.previousItem}
-                                className="mr-1"
-                                active>Previous
+
+                        <Button
+                            variant="primary"
+                            disabled={navigationDtl.first}
+                            onClick={this.previousItem}
+                            className="mr-1" style={smallButtonStyle}
+                            active>Previous
                             </Button>
-                            <Button
-                                variant="primary"
-                                disabled={navigationDtl.last}
-                                onClick={this.nextItem}
-                                className="mr-1"
-                                active>Next
+
+                        <Button
+                            variant="primary"
+                            disabled={navigationDtl.last}
+                            onClick={this.nextItem}
+                            className="mr-1" style={smallButtonStyle}
+                            active>Next
                             </Button>
-                            <Button
-                                variant="primary"
-                                disabled={navigationDtl.last}
-                                onClick={this.lastItem}
-                                className="ymr-1"
-                                active>Last
+
+                        <Button
+                            variant="primary"
+                            disabled={navigationDtl.last}
+                            onClick={this.lastItem}
+                            className="mr-1" style={smallButtonStyle}
+                            active>Last
                             </Button>
-                        </ButtonToolbar>
-                        <ButtonToolbar className="ml-2">
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={this.newItem}
-                                className="mr-1"
-                                active>Add
+
+                    </ButtonToolbar>
+
+                    <ButtonToolbar className="ml-2">
+                        <Button
+                            variant="primary"
+                            // disabled={navigationDtl.first}
+                            onClick={this.newItem}
+                            className="mr-1" style={smallButtonStyle}
+                            active>Add
                             </Button>
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={() => this.setState({ itemAlert: true })}
-                                className="mr-1"
-                                active>Delete
+
+                        <Button
+                            variant="primary"
+                            // disabled={navigationDtl.first}
+                            onClick={() => this.setState({ itemAlert: true })}
+                            className="mr-1" style={smallButtonStyle}
+                            active>Delete
                             </Button>
-                            <Button
-                                variant="primary"
-                                onClick={() => this.saveItem("Item saved successfully.")}
-                                className="mr-1"
-                                active>Save
+
+                        <Button
+                            variant="primary"
+                            onClick={() => this.saveItem("Item saved successfully.")}
+                            className="mr-1" style={smallButtonStyle}
+                            active>Save
                             </Button>
-                            <Button
-                                variant="primary"
-                                /* disabled={navigationDtl.last}
-                                onClick={this.nextItem} */
-                                className="mr-1"
-                                active>Undo
+
+                        <Button
+                            variant="primary"
+                            /* disabled={navigationDtl.last} */
+                            onClick={this.undoChanges}
+                            className="mr-1" style={smallButtonStyle}
+                            active>Undo
                             </Button>
-                            <SweetAlert
-                                show={this.state.itemAlert}
-                                warning
-                                showCancel
-                                confirmBtnText="Delete"
-                                confirmBtnBsStyle="danger"
-                                cancelBtnBsStyle="default"
-                                title="Delete Confirmation"
-                                Text="Are you sure you want to delete this item? It will also delete all stocks related to it."
-                                onConfirm={() => this.deleteItem()}
-                                onCancel={() => this.setState({ itemAlert: false })}
-                            >
-                                Delete Item
+
+                        <SweetAlert
+                            show={this.state.itemAlert}
+                            warning
+                            showCancel
+                            confirmBtnText="Delete"
+                            confirmBtnBsStyle="danger"
+                            cancelBtnBsStyle="default"
+                            title="Delete Confirmation"
+                            Text="Are you sure you want to delete this item? It will also delete all stocks related to it."
+                            onConfirm={() => this.deleteItem()}
+                            onCancel={() => this.setState({ itemAlert: false })}
+                        >
+                            Delete Item
                                 </SweetAlert>
-                        </ButtonToolbar>
-                        <ButtonGroup className="m-2">
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={this.addStock}
-                                className="mr-1"
-                                active>Add Stock
+                    </ButtonToolbar>
+
+                    <br />
+                    <center><h2>Item Stocks</h2></center>
+                    <ButtonToolbar className="m-2">
+                        <Button
+                            variant="primary"
+                            // disabled={navigationDtl.first}
+                            onClick={this.addStock}
+                            className="mr-1" style={largeButtonStyle}
+                            active>Add Stock
                                             </Button>
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={() => { this.saveItem("Stock saved successfully.") }}
-                                className="mr-1"
-                                active>Save Stock
+
+                        <Button
+                            variant="primary"
+                            // disabled={navigationDtl.first}
+                            onClick={() => { this.saveItem("Stock saved successfully.") }}
+                            className="mr-1" style={largeButtonStyle}
+                            active>Save Stock
                                             </Button>
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={() => this.setState({ stockAlert: true })}
-                                className="mr-1"
-                                active>Delete Stock
+
+                        <Button
+                            variant="primary"
+                            // disabled={navigationDtl.first}
+                            onClick={() => this.setState({ stockAlert: true })}
+                            className="mr-1" style={largeButtonStyle}
+                            active>Delete Stock
                                                     </Button>
-                            <SweetAlert
-                                show={this.state.stockAlert}
-                                warning
-                                showCancel
-                                confirmBtnText="Delete"
-                                confirmBtnBsStyle="danger"
-                                cancelBtnBsStyle="default"
-                                title="Delete Confirmation"
-                                Text="Are you sure you want to delete this stock?"
-                                onConfirm={() => this.deleteStock()}
-                                onCancel={() => this.setState({ stockAlert: false })}
-                            >
-                                Delete Stock
+
+                        <SweetAlert
+                            show={this.state.stockAlert}
+                            warning
+                            showCancel
+                            confirmBtnText="Delete"
+                            confirmBtnBsStyle="danger"
+                            cancelBtnBsStyle="default"
+                            title="Delete Confirmation"
+                            Text="Are you sure you want to delete this stock?"
+                            onConfirm={() => this.deleteStock()}
+                            onCancel={() => this.setState({ stockAlert: false })}
+                        >
+                            Delete Stock
                                                     </SweetAlert>
-                        </ButtonGroup>
-                    </Form>
+                    </ButtonToolbar>
                     <Table
                         striped
                         bordered
                         hover
                         responsive>
                         <thead>
+
                             <tr>
-                                <th>Stock Date</th>
-                                <th>Quantity</th>
-                                <th>Remarks</th>
+                                <th style={inputDateStyle}>Stock Date</th>
+                                <th style={inputDateStyle}>Quantity</th>
+                                <th style={stretchStyle}>Remarks</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -546,7 +549,7 @@ class Item extends Component {
                             }
                         </tbody>
                     </Table>
-                </div>
+                </Form>
             </>
         );
     }
