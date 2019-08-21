@@ -10,12 +10,12 @@ class PageContent extends Component {
   checkPath = () =>{
     const {pathname} = this.props;
     if(pathname === "/dashboard"){
-        return <><h1 className="h3 mb-4 text-gray-800">Dashboard</h1><Dashboard /></>;
+        return <><h1 className="text-center h3 mb-4 text-gray-800">Dashboard</h1><Dashboard /></>;
       }else if(pathname === "/item"){
-        return <><h1 className="h3 mb-4 text-gray-800">Item Management</h1><Item /></>;
+        return <><h1 className="text-center h3 mb-4 text-gray-800">Item Management</h1><Item /></>;
 
       }else{
-        return <><h1 className="h3 mb-4 text-gray-800">Party Management</h1><Party /></>;
+        return <><h1 className="text-center h3 mb-4 text-gray-800">Party Management</h1><Party /></>;
     }
   }
   render() {

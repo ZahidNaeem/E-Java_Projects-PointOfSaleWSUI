@@ -219,7 +219,6 @@ class Item extends Component {
 
         return (
             <>
-                <center><h1>Item Registrtion Form</h1></center>
                 <Form>
                     <InputGroup className="mb-3">
                         <InputGroup.Prepend>
@@ -453,7 +452,7 @@ class Item extends Component {
                     </ButtonToolbar>
 
                     <br />
-                    <center><h2>Item Stocks</h2></center>
+                    <h3 className="text-center h3 mb-4 text-gray-800">Item Stocks</h3>
                     <ButtonToolbar className="m-2">
                         <Button
                             variant="primary"

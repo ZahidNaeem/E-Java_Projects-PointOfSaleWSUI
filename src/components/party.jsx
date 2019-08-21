@@ -181,7 +181,6 @@ class Party extends Component {
 
         return (
             <>
-                {/* <center><h1>Party Registrtion Form</h1></center> */}
                 <div>
                     <Form>
                         <InputGroup className="mb-3">
@@ -448,7 +447,7 @@ class Party extends Component {
                         </ButtonToolbar>
 
                         <br />
-                        <center><h2>Party Balances</h2></center>
+                        <h3 className="text-center h3 mb-4 text-gray-800">Party Balances</h3>
                         <ButtonToolbar className="m-2">
                             <Button
                                 variant="primary"
