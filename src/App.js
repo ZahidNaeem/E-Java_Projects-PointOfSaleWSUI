@@ -19,6 +19,7 @@ class App extends Component {
             <Switch>
                 <Route path="/item" component={Main} />
                 <Route path="/party" component={Main} />
+                <Route path="/po" component={Main} />
                 <Route path="/dashboard" component={Main} />
                 <Route path="/" component={Login} />
             </Switch>
