@@ -13,6 +13,7 @@ class PO extends Component {
         invoice: {},
         navigationDtl: {},
         invoiceDetails: [],
+        partyName: null,
         invoiceAlert: false,
         invoiceDtlAlert: false,
         invoiceDtlIndex: null
@@ -32,9 +33,11 @@ class PO extends Component {
     }
 
     handleSelectChange = (name, value) => {
-        let item = { ...this.state.item };
-        item[value.name] = name.value;
-        this.setState({ item });
+
+        let invoice = { ...this.state.invoice };
+        invoice[value.name] = name.value;
+        this.setState({ invoice });
+
     }
 
     handleComboboxChange = (value, name) => {
@@ -144,19 +147,16 @@ class PO extends Component {
         return data;
     }
 
-    invoiceUOMs = () => {
-        let data = [];
-        axios.get('http://localhost:8089/invoice/po/uoms')
+    partyName = (partyCode) => {
+        console.log("Party Code: ", partyCode);
+        axios.get('http://localhost:8089/party/' + partyCode)
             .then(res => {
-                res.data.forEach(element => {
-                    data.push(element);
-                });
+                console.log("Party Name: ", res.data.party.partyName);
+                return res.data.party.partyName;
             })
             .catch(err => {
                 console.log(err);
             });
-
-        return data;
     }
 
     handleinvoiceDtlChange = (event, index) => {
@@ -205,7 +205,8 @@ class PO extends Component {
         const { invoice, navigationDtl, invoiceDetails } = this.state;
 
         const parties = this.parties();
-        const uoms = this.invoiceUOMs();
+
+        const partyName = this.partyName(invoice.party);
 
         const inputGroupTextStyle = {
             width: "180px"
@@ -287,26 +288,14 @@ class PO extends Component {
                                 name="party"
                                 placeholder="Select Party"
                                 aria-label="Select Party"
-                                selected={{ value: parties.value || '', label: parties.label || '' }}
+                                // value={{ value: invoice.party || '', label: partyName || '' }}
+                                getOptionLabel={option => option.label}
+                                getOptionValue={option => option.value}
                                 onChange={(name, value) => this.handleSelectChange(name, value)}
                                 clearable={true}
                                 options={parties}
                             />
                         </div>
-
-                        <InputGroup.Prepend>
-                            <InputGroup.Text style={inputGroupTextStyle}>Invoice U.O.M</InputGroup.Text>
-                        </InputGroup.Prepend>
-
-                        <Combobox
-                            style={stretchStyle}
-                            name="invoiceUom"
-                            placeholder="Select Invoice U.O.M"
-                            aria-label="Invoice U.O.M"
-                            data={uoms}
-                            value={invoice.invoiceUom || ''}
-                            onChange={(name) => this.handleComboboxChange(name, "invoiceUom")}
-                        />
                     </InputGroup>
 
                     <InputGroup className="mb-3">
