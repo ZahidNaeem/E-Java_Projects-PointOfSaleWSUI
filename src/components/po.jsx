@@ -5,7 +5,6 @@ import SweetAlert from 'react-bootstrap-sweetalert'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import 'react-widgets/dist/css/react-widgets.css'
-import { Combobox } from 'react-widgets'
 import Select from 'react-select'
 class PO extends Component {
 
@@ -13,7 +12,8 @@ class PO extends Component {
         invoice: {},
         navigationDtl: {},
         invoiceDetails: [],
-        partyName: null,
+        parties: [],
+        items: [],
         invoiceAlert: false,
         invoiceDtlAlert: false,
         invoiceDtlIndex: null
@@ -21,6 +21,8 @@ class PO extends Component {
 
     componentDidMount() {
         this.firstInvoice();
+        this.populateParties();
+        this.populateItems();
     }
 
     handleInvoiceChange = (event) => {
@@ -129,12 +131,12 @@ class PO extends Component {
         }
     }
 
-    parties() {
-        let data = [];
+    populateParties() {
+        let parties = [];
         axios.get('http://localhost:8089/party/all')
             .then(res => {
                 res.data.forEach(element => {
-                    data.push({
+                    parties.push({
                         value: element.partyCode,
                         label: element.partyName
                     });
@@ -144,19 +146,42 @@ class PO extends Component {
                 console.log(err);
             });
 
-        return data;
+        this.setState({ parties });
     }
 
-    partyName = (partyCode) => {
-        console.log("Party Code: ", partyCode);
-        axios.get('http://localhost:8089/party/' + partyCode)
+    populatePartyName = (partyCode) => {
+        let parties = this.state.parties;
+        const result = parties.filter(party => party.value === partyCode);
+        if (result[0] !== undefined) {
+            return result[0].label;
+        }
+    }
+
+    populateItems() {
+        let items = [];
+        axios.get('http://localhost:8089/item/all')
             .then(res => {
-                console.log("Party Name: ", res.data.party.partyName);
-                return res.data.party.partyName;
+                res.data.forEach(element => {
+                    items.push({
+                        value: element.itemCode,
+                        label: element.itemDesc,
+                        uom: element.itemUom
+                    });
+                });
             })
             .catch(err => {
                 console.log(err);
             });
+
+        this.setState({ items });
+    }
+
+    populateItemName = (itemCode) => {
+        let items = this.state.items;
+        const result = items.filter(item => item.value === itemCode);
+        if (result[0] !== undefined) {
+            return result[0].label;
+        }
     }
 
     handleinvoiceDtlChange = (event, index) => {
@@ -202,11 +227,9 @@ class PO extends Component {
 
 
     render() {
-        const { invoice, navigationDtl, invoiceDetails } = this.state;
+        const { invoice, navigationDtl, invoiceDetails, parties } = this.state;
 
-        const parties = this.parties();
-
-        const partyName = this.partyName(invoice.party);
+        const partyName = this.populatePartyName(invoice.party);
 
         const inputGroupTextStyle = {
             width: "180px"
@@ -243,113 +266,7 @@ class PO extends Component {
                             value={invoice.invNum || ''}
                             onChange={this.handleInvoiceChange}
                         />
-
-                        <InputGroup.Prepend>
-                            <InputGroup.Text style={inputGroupTextStyle}>Invoice Barcode</InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <FormControl
-                            name="invoiceBarcode"
-                            placeholder="Invoice Barcode"
-                            aria-label="Invoice Barcode"
-                            value={invoice.invoiceBarcode || ''}
-                            onChange={this.handleInvoiceChange}
-                        />
                     </InputGroup>
-
-                    <InputGroup className="mb-3">
-                        <InputGroup.Prepend>
-                            <InputGroup.Text style={inputGroupTextStyle}>Invoice Desc.</InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <FormControl
-                            name="invoiceDesc"
-                            placeholder="Invoice Desc."
-                            aria-label="Invoice Desc."
-                            value={invoice.invoiceDesc || ''}
-                            required
-                            onChange={this.handleInvoiceChange}
-                        />
-                    </InputGroup>
-
-                    <InputGroup className="mb-3">
-                        <InputGroup.Prepend>
-                            <InputGroup.Text style={inputGroupTextStyle}>Party</InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <div style={stretchStyle}>
-                            {/* <Combobox
-                            style={stretchStyle}
-                            name="party"
-                            placeholder="Select Party"
-                            aria-label="party"
-                            data={parties}
-                            value={invoice.party || ''}
-                            onChange={(name) => this.handleComboboxChange(name, "Party")}
-                        /> */}
-                            <Select
-                                name="party"
-                                placeholder="Select Party"
-                                aria-label="Select Party"
-                                // value={{ value: invoice.party || '', label: partyName || '' }}
-                                getOptionLabel={option => option.label}
-                                getOptionValue={option => option.value}
-                                onChange={(name, value) => this.handleSelectChange(name, value)}
-                                clearable={true}
-                                options={parties}
-                            />
-                        </div>
-                    </InputGroup>
-
-                    <InputGroup className="mb-3">
-                        <InputGroup.Prepend>
-                            <InputGroup.Text style={inputGroupTextStyle}>Purchase Price</InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <FormControl
-                            type="number"
-                            name="purchasePrice"
-                            placeholder="Purchase Price"
-                            aria-label="Purchase Price"
-                            value={invoice.purchasePrice || ''}
-                            onChange={this.handleInvoiceChange}
-                        />
-
-                        <InputGroup.Prepend>
-                            <InputGroup.Text style={inputGroupTextStyle}>Sale Price</InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <FormControl
-                            type="number"
-                            name="salePrice"
-                            placeholder="Sale Price"
-                            aria-label="Sale Price"
-                            value={invoice.salePrice || ''}
-                            onChange={this.handleInvoiceChange}
-                        />
-                    </InputGroup>
-
-                    <InputGroup className="mb-3">
-                        <InputGroup.Prepend>
-                            <InputGroup.Text style={inputGroupTextStyle}>Min. InvoiceDetail</InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <FormControl
-                            type="number"
-                            name="mininvoiceDtl"
-                            placeholder="Min. InvoiceDetail"
-                            aria-label="Min. InvoiceDetail"
-                            value={invoice.mininvoiceDtl || ''}
-                            onChange={this.handleInvoiceChange}
-                        />
-
-                        <InputGroup.Prepend>
-                            <InputGroup.Text style={inputGroupTextStyle}>Max. InvoiceDetail</InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <FormControl
-                            type="number"
-                            name="maxinvoiceDtl"
-                            placeholder="Max. InvoiceDetail"
-                            aria-label="Max. InvoiceDetail"
-                            value={invoice.maxinvoiceDtl || ''}
-                            onChange={this.handleInvoiceChange}
-                        />
-                    </InputGroup>
-
                     <InputGroup className="mb-3">
                         <InputGroup.Prepend>
                             <InputGroup.Text style={inputGroupTextStyle}>PO Date</InputGroup.Text>
@@ -364,16 +281,53 @@ class PO extends Component {
                             required
                             onChange={this.handleInvoiceChange}
                         />
+                    </InputGroup>
 
+                    <InputGroup className="mb-3">
                         <InputGroup.Prepend>
-                            <InputGroup.Text style={inputGroupTextStyle}>Effective End Date</InputGroup.Text>
+                            <InputGroup.Text style={inputGroupTextStyle}>Party</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <div style={stretchStyle}>
+                            <Select
+                                name="party"
+                                placeholder="Select Party"
+                                aria-label="Select Party"
+                                value={{ value: invoice.party || '', label: partyName || '' }}
+                                /* getOptionLabel={option => option.label}
+                                getOptionValue={option => option.value} */
+                                onChange={(name, value) => this.handleSelectChange(name, value)}
+                                clearable={true}
+                                options={parties}
+                            />
+                        </div>
+                    </InputGroup>
+
+
+                    <InputGroup className="mb-3">
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Advance Paid</InputGroup.Text>
                         </InputGroup.Prepend>
                         <FormControl
-                            type="date"
-                            name="effectiveEndDate"
-                            placeholder="Effective End Date"
-                            aria-label="Effective End Date"
-                            value={invoice.effectiveEndDate != null ? invoice.effectiveEndDate.split("T")[0] : ''}
+                            type="number"
+                            name="paidAmt"
+                            placeholder="Paid Amount"
+                            aria-label="Paid Amount"
+                            value={invoice.paidAmt || ''}
+                            onChange={this.handleInvoiceChange}
+                        />
+                    </InputGroup>
+
+                    <InputGroup className="mb-3">
+                        <InputGroup.Prepend>
+                            <InputGroup.Text style={inputGroupTextStyle}>Remarks</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl
+                            as="textarea"
+                            rows="3"
+                            name="remarks"
+                            placeholder="Remarks"
+                            aria-label="Remarks"
+                            value={invoice.remarks || ''}
                             onChange={this.handleInvoiceChange}
                         />
                     </InputGroup>
@@ -469,7 +423,7 @@ class PO extends Component {
                             // disabled={navigationDtl.first}
                             onClick={this.addinvoiceDtl}
                             className="mr-1" style={largeButtonStyle}
-                            active>Add InvoiceDetail
+                            active>Add Detail
                         </Button>
 
                         <Button
@@ -477,7 +431,7 @@ class PO extends Component {
                             // disabled={navigationDtl.first}
                             onClick={() => { this.saveInvoice("InvoiceDetail saved successfully.") }}
                             className="mr-1" style={largeButtonStyle}
-                            active>Save InvoiceDetail
+                            active>Save Detail
                                             </Button>
 
                         <Button
@@ -485,7 +439,7 @@ class PO extends Component {
                             // disabled={navigationDtl.first}
                             onClick={() => this.setState({ invoiceDtlAlert: true })}
                             className="mr-1" style={largeButtonStyle}
-                            active>Delete InvoiceDetail
+                            active>Delete Detail
                                                     </Button>
 
                         <SweetAlert
@@ -500,7 +454,7 @@ class PO extends Component {
                             onConfirm={() => this.deleteinvoiceDtl()}
                             onCancel={() => this.setState({ invoiceDtlAlert: false })}
                         >
-                            Delete InvoiceDetail
+                            Delete Invoice Detail
                                                     </SweetAlert>
                     </ButtonToolbar>
                     <Table
@@ -511,7 +465,7 @@ class PO extends Component {
                         <thead>
 
                             <tr>
-                                <th style={inputDateStyle}>InvoiceDetail Date</th>
+                                <th style={inputDateStyle}>Item</th>
                                 <th style={inputDateStyle}>Quantity</th>
                                 <th style={stretchStyle}>Remarks</th>
                             </tr>
