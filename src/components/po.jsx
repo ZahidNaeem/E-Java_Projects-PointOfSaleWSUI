@@ -34,7 +34,7 @@ class PO extends Component {
         this.setState({ invoice });
     }
 
-    handleSelectChange = (name, value) => {
+    handleInvoiceSelectChange = (name, value) => {
 
         let invoice = { ...this.state.invoice };
         invoice[value.name] = name.value;
@@ -42,10 +42,25 @@ class PO extends Component {
 
     }
 
-    handleComboboxChange = (value, name) => {
+    handleInvoiceComboboxChange = (value, name) => {
         let invoice = { ...this.state.invoice };
         invoice[name] = value;
         this.setState({ invoice });
+    }
+
+    handleInvoiceDetailsSelectChange = (name, value) => {
+        console.log("handleInvoiceDetailsSelectChange start");
+
+        let invoiceDetails = { ...this.state.invoiceDetails };
+        invoiceDetails[this.state.invoiceDtlIndex][value.name] = name.value;
+        this.setState({ invoiceDetails });
+        console.log("handleInvoiceDetailsSelectChange end");
+    }
+
+    handleInvoiceDetailsComboboxChange = (value, name) => {
+        let invoiceDetails = { ...this.state.invoiceDetails };
+        invoiceDetails[this.state.invoiceDtlIndex][name] = value;
+        this.setState({ invoiceDetails });
     }
 
     newInvoice = () => {
@@ -176,12 +191,17 @@ class PO extends Component {
         this.setState({ items });
     }
 
-    populateItemName = (itemCode) => {
+    populateItemDesc = (obj) => {
+        console.log("populateItemDesc start");
+        console.log("Item:", obj);
         let items = this.state.items;
-        const result = items.filter(item => item.value === itemCode);
-        if (result[0] !== undefined) {
-            return result[0].label;
+        if (null !== obj && undefined !== obj && null !== obj.item && undefined !== obj.item) {
+            const result = items.filter(item => item.value === obj.item.itemCode);
+            if (null !== result[0] && undefined !== result[0]) {
+                return result[0].label;
+            }
         }
+        console.log("populateItemDesc end");
     }
 
     handleinvoiceDtlChange = (event, index) => {
@@ -227,9 +247,11 @@ class PO extends Component {
 
 
     render() {
-        const { invoice, navigationDtl, invoiceDetails, parties } = this.state;
+        const { invoice, navigationDtl, invoiceDetails, parties, items, invoiceDtlIndex } = this.state;
 
         const partyName = this.populatePartyName(invoice.party);
+
+        const itemDesc = this.populateItemDesc(invoiceDetails[invoiceDtlIndex]);
 
         const inputGroupTextStyle = {
             width: "180px"
@@ -295,7 +317,7 @@ class PO extends Component {
                                 value={{ value: invoice.party || '', label: partyName || '' }}
                                 /* getOptionLabel={option => option.label}
                                 getOptionValue={option => option.value} */
-                                onChange={(name, value) => this.handleSelectChange(name, value)}
+                                onChange={(name, value) => this.handleInvoiceSelectChange(name, value)}
                                 clearable={true}
                                 options={parties}
                             />
@@ -476,6 +498,19 @@ class PO extends Component {
                                     <tr key={invoiceDetail.invoiceinvoiceDtlId}
                                         onFocus={() => { this.setState({ invoiceDtlIndex: index }) }}>
                                         <td>
+                                            <div style={stretchStyle}>
+                                                <Select
+                                                    name="item"
+                                                    placeholder="Select Item"
+                                                    aria-label="Select Item"
+                                                    value={{ value: invoiceDetails.item || '', label: itemDesc || '' }}
+                                                    /* getOptionLabel={option => option.label}
+                                                    getOptionValue={option => option.value} */
+                                                    onChange={(name, value) => this.handleInvoiceDetailsSelectChange(name, value)}
+                                                    clearable={true}
+                                                    options={items}
+                                                />
+                                            </div>
                                             <FormControl
                                                 type="date"
                                                 name="invoiceinvoiceDtlDate"
