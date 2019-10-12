@@ -1,20 +1,18 @@
 import React, { Component } from 'react';
-import { InputGroup, FormControl, Button, ButtonToolbar, Form, Table } from 'react-bootstrap'
+import { InputGroup, FormControl, Button, ButtonToolbar, Form } from 'react-bootstrap'
 import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import 'react-widgets/dist/css/react-widgets.css'
 import { Combobox } from 'react-widgets'
+import ItemStock from './itemStock'
 class Item extends Component {
 
     state = {
         item: {},
         navigationDtl: {},
-        stocks: [],
-        itemAlert: false,
-        stockAlert: false,
-        stockIndex: null
+        itemAlert: false
     }
 
     componentDidMount() {
@@ -37,7 +35,9 @@ class Item extends Component {
     }
 
     newItem = () => {
-        this.setState({ item: {}, navigationDtl: { first: true, last: true }, stocks: [] });
+        const item = {};
+        item.itemStocks = [];
+        this.setState({ item, navigationDtl: { first: true, last: true } });
     }
 
     saveItem = (message) => {
@@ -53,7 +53,7 @@ class Item extends Component {
                 .then(res => {
                     console.log("Post: Object received: ", res.data);
                     const { item, navigationDtl } = res.data;
-                    this.setState({ item, navigationDtl, stocks: item.itemStocks });
+                    this.setState({ item, navigationDtl });
                     toast.success(message);
                 })
                 .catch(err => {
@@ -70,7 +70,7 @@ class Item extends Component {
                 .then(res => {
                     console.log("Delete: Response: ", res);
                     const { item, navigationDtl } = res.data;
-                    this.setState({ item, navigationDtl, stocks: item.itemStocks })
+                    this.setState({ item, navigationDtl })
                 })
                 .catch(err => {
                     console.log(err);
@@ -85,7 +85,7 @@ class Item extends Component {
         axios.get(url)
             .then(res => {
                 const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, stocks: item.itemStocks })
+                this.setState({ item, navigationDtl })
                 console.log(this.state.item);
             })
             .catch(err => {
@@ -149,50 +149,14 @@ class Item extends Component {
         return data;
     }
 
-    handleStockChange = (event, index) => {
-        const { name, value } = event.target;
-        let item = this.state.item;
-        let stocks = this.state.stocks;
-        console.log("Target name", name);
-        console.log("Index: ", index);
-        console.log("Value: ", value);
-        console.log("Cell old value: ", stocks[index][name]);
-        stocks[index][name] = value;
-        item.stocks = stocks;
-        this.setState({ item, stocks });
-    }
-
-    addStock = () => {
+    addStockIntoItem = (stocks) => {
         let item = { ...this.state.item };
-        let itemCode = item.itemCode;
-        let newStock = { item: itemCode };
-        let stocks = [...this.state.stocks];
-        stocks.push(newStock);
         item.itemStocks = stocks;
-        this.setState({ item, stocks });
+        this.setState({ item });
     }
-
-    deleteStock = () => {
-        let item = { ...this.state.item };
-        let stocks = [...this.state.stocks];
-        let id = stocks[this.state.stockIndex]["itemStockId"];
-        if (id != null) {
-            axios.delete('http://localhost:8089/stock/delete/' + id)
-                .then(res => {
-                    console.log("Delete: Response: ", res);
-                })
-                .catch(err => {
-                    console.log(err);
-                });
-        }
-        stocks.splice(this.state.stockIndex, 1);
-        item.itemStocks = stocks;
-        this.setState({ item, stocks, stockAlert: false });
-    }
-
 
     render() {
-        const { item, navigationDtl, stocks } = this.state;
+        const { item, navigationDtl } = this.state;
 
         const cats = this.itemCategories();
         const uoms = this.itemUOMs();
@@ -207,14 +171,6 @@ class Item extends Component {
 
         const smallButtonStyle = {
             width: "7%"
-        }
-
-        const largeButtonStyle = {
-            width: "15%"
-        }
-
-        const inputDateStyle = {
-            width: "15%"
         }
 
         return (
@@ -450,104 +406,7 @@ class Item extends Component {
                             Delete Item
                                 </SweetAlert>
                     </ButtonToolbar>
-
-                    <br />
-                    <h3 className="text-center h3 mb-4 text-gray-800">Item Stocks</h3>
-                    <ButtonToolbar className="m-2">
-                        <Button
-                            variant="primary"
-                            // disabled={navigationDtl.first}
-                            onClick={this.addStock}
-                            className="mr-1" style={largeButtonStyle}
-                            active>Add Stock
-                                            </Button>
-
-                        <Button
-                            variant="primary"
-                            // disabled={navigationDtl.first}
-                            onClick={() => { this.saveItem("Stock saved successfully.") }}
-                            className="mr-1" style={largeButtonStyle}
-                            active>Save Stock
-                                            </Button>
-
-                        <Button
-                            variant="primary"
-                            // disabled={navigationDtl.first}
-                            onClick={() => this.setState({ stockAlert: true })}
-                            className="mr-1" style={largeButtonStyle}
-                            active>Delete Stock
-                                                    </Button>
-
-                        <SweetAlert
-                            show={this.state.stockAlert}
-                            warning
-                            showCancel
-                            confirmBtnText="Delete"
-                            confirmBtnBsStyle="danger"
-                            cancelBtnBsStyle="default"
-                            title="Delete Confirmation"
-                            Text="Are you sure you want to delete this stock?"
-                            onConfirm={() => this.deleteStock()}
-                            onCancel={() => this.setState({ stockAlert: false })}
-                        >
-                            Delete Stock
-                                                    </SweetAlert>
-                    </ButtonToolbar>
-                    <Table
-                        striped
-                        bordered
-                        hover
-                        responsive>
-                        <thead>
-
-                            <tr>
-                                <th style={inputDateStyle}>Stock Date</th>
-                                <th style={inputDateStyle}>Quantity</th>
-                                <th style={stretchStyle}>Remarks</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {
-                                stocks && stocks.map((stock, index) => (
-                                    <tr key={stock.itemStockId}
-                                        onFocus={() => { this.setState({ stockIndex: index }) }}>
-                                        <td>
-                                            <FormControl
-                                                type="date"
-                                                name="itemStockDate"
-                                                placeholder="Stock Date"
-                                                aria-label="Stock Date"
-                                                value={stock.itemStockDate != null ? stock.itemStockDate.split("T")[0] : ''}
-                                                required
-                                                onChange={e => this.handleStockChange(e, index)}
-                                            />
-                                        </td>
-                                        <td>
-                                            <FormControl
-                                                type="number"
-                                                name="qnty"
-                                                placeholder="Stock Quantity"
-                                                aria-label="Stock Quantity"
-                                                value={stock.qnty || ''}
-                                                required
-                                                onChange={e => this.handleStockChange(e, index)}
-                                            />
-                                        </td>
-                                        <td>
-                                            <FormControl
-                                                type="text"
-                                                name="remarks"
-                                                placeholder="Remarks"
-                                                aria-label="Remarks"
-                                                value={stock.remarks || ''}
-                                                onChange={e => this.handleStockChange(e, index)}
-                                            />
-                                        </td>
-                                    </tr>
-                                ))
-                            }
-                        </tbody>
-                    </Table>
+                    <ItemStock item={item} saveItem={() => this.saveItem("Item saved successfully.")} addStockIntoItem={this.addStockIntoItem} />
                 </Form>
             </>
         );
