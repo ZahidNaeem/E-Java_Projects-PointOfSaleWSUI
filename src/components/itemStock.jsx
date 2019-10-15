@@ -47,11 +47,11 @@ class ItemStock extends Component {
         this.setState({ item });
     }
 
-    saveStock = () => {
+/*     saveStock = () => {
         console.log("Item at save: ", this.state.item);
         this.props.saveItem("Stock saved successfully.");
         
-    }
+    } */
 
     deleteStock = async () => {
         let item = { ...this.state.item };
@@ -96,13 +96,13 @@ class ItemStock extends Component {
                         active>Add Stock
                                             </Button>
 
-                    <Button
+                    {/* <Button
                         variant="primary"
                         // disabled={navigationDtl.first}
                         onClick={this.saveStock}
                         className="mr-1" style={largeButtonStyle}
                         active>Save Stock
-                                            </Button>
+                                            </Button> */}
 
                     <Button
                         variant="primary"

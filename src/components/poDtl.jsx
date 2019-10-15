@@ -7,7 +7,7 @@ import 'react-widgets/dist/css/react-widgets.css'
 import Select from 'react-select'
 class PoDtl extends Component {
     state = {
-        invoiceDetails: [],
+        invoice: {},
         items: [],
         invoiceDtlAlert: false,
         invoiceDtlIndex: 0
@@ -19,24 +19,38 @@ class PoDtl extends Component {
 
     componentWillReceiveProps(props) {
         // You don't have to do this check first, but it can help prevent an unneeded render
-        if (props.invoiceDetails !== this.state.invoiceDetails) {
-            this.setState({ invoiceDetails: props.invoiceDetails });
+        if (props.invoice !== this.state.invoice) {
+            const { invoice } = props;
+            console.log("Invoice", invoice);
+
+            this.setState({ invoice });
         }
     }
 
-    handleInvoiceDetailsSelectChange = (name, value) => {
+    handleInvoiceDetailsSelectChange = async (name, value) => {
         console.log("handleInvoiceDetailsSelectChange start");
 
-        let invoiceDetails = { ...this.state.invoiceDetails };
+        const invoice = { ...this.state.invoice };
+        const invoiceDetails = invoice.invoiceDtls;
         invoiceDetails[this.state.invoiceDtlIndex][value.name] = name.value;
-        this.setState({ invoiceDetails });
+        const currRow = invoiceDetails[this.state.invoiceDtlIndex];
+        const itemPrice = await this.populateItemPrice(currRow['item']);
+        console.log("Item Price:", itemPrice);
+        if (null !== itemPrice) {
+            currRow['itemPrice'] = itemPrice;
+        }
+        invoice.invoiceDtls = invoiceDetails;
+        await this.props.addDetailsIntoInvoice(invoiceDetails);
+        this.setState({ invoice });
         console.log("handleInvoiceDetailsSelectChange end");
     }
 
     handleInvoiceDetailsComboboxChange = (value, name) => {
-        let invoiceDetails = { ...this.state.invoiceDetails };
+        const invoice = { ...this.state.invoice };
+        const invoiceDetails = invoice.invoiceDtls;
         invoiceDetails[this.state.invoiceDtlIndex][name] = value;
-        this.setState({ invoiceDetails });
+        invoice.invoiceDtls = invoiceDetails;
+        this.setState({ invoice });
     }
 
     async populateItems() {
@@ -46,7 +60,8 @@ class PoDtl extends Component {
             items.push({
                 value: element.itemCode,
                 label: element.itemDesc,
-                uom: element.itemUom
+                uom: element.itemUom,
+                salePrice: element.salePrice
             });
         });
 
@@ -64,53 +79,81 @@ class PoDtl extends Component {
         if (result[0] !== undefined) {
             return result[0].label;
         }
+        console.log("populateItemDesc end");
     }
 
-    handleinvoiceDtlChange = (event, index) => {
+    populateItemUOM(itemCode) {
+        console.log("populateItemUOM start");
+        console.log("Item Code:", itemCode);
+
+        let items = [...this.state.items];
+        const result = items.filter(item => item.value === itemCode);
+        if (result[0] !== undefined) {
+            return result[0].uom;
+        }
+        console.log("populateItemUOM end");
+    }
+
+    populateItemPrice(itemCode) {
+        console.log("populateItemPrice start");
+        console.log("Item Code:", itemCode);
+
+        let items = [...this.state.items];
+        const result = items.filter(item => item.value === itemCode);
+        if (result[0] !== undefined) {
+            return result[0].salePrice;
+        }
+        console.log("populateItemPrice end");
+    }
+
+    handleinvoiceDtlChange = async (event, index) => {
         const { name, value } = event.target;
-        let invoice = this.state.invoice;
-        let invoiceDetails = this.state.invoiceDetails;
+        const invoice = this.state.invoice;
+        const invoiceDetails = invoice.invoiceDtls;
         console.log("Target name", name);
         console.log("Index: ", index);
         console.log("Value: ", value);
         console.log("Cell old value: ", invoiceDetails[index][name]);
         invoiceDetails[index][name] = value;
-        invoice.invoiceDetails = invoiceDetails;
-        this.setState({ invoice, invoiceDetails });
+        invoice.invoiceDtls = invoiceDetails;
+        await this.props.addDetailsIntoInvoice(invoiceDetails);
+        this.setState({ invoice });
     }
 
-    addinvoiceDtl = () => {
+    addinvoiceDtl = async () => {
         let invoice = { ...this.state.invoice };
         let newinvoiceDtl = {};
-        let invoiceDetails = [...this.state.invoiceDetails];
+        let invoiceDetails = invoice.invoiceDtls;
         invoiceDetails.push(newinvoiceDtl);
         invoice.invoiceDtls = invoiceDetails;
-        this.setState({ invoice, invoiceDetails });
+        await this.props.addDetailsIntoInvoice(invoiceDetails);
+        this.setState({ invoice });
     }
 
-    deleteinvoiceDtl = () => {
+    deleteinvoiceDtl = async () => {
         let invoice = { ...this.state.invoice };
-        let invoiceDetails = [...this.state.invoiceDetails];
+        let invoiceDetails = invoice.invoiceDtls;
         let id = invoiceDetails[this.state.invoiceDtlIndex]["invoiceinvoiceDtlId"];
         if (id != null) {
-            axios.delete('http://localhost:8089/invoiceDetail/delete/' + id)
-                .then(res => {
-                    console.log("Delete: Response: ", res);
-                })
-                .catch(err => {
-                    console.log(err);
-                });
+            const res = await axios.delete('http://localhost:8089/invoiceDetail/delete/' + id);
+            console.log("Delete: Response: ", res);
         }
         invoiceDetails.splice(this.state.invoiceDtlIndex, 1);
         invoice.invoiceDtls = invoiceDetails;
-        this.setState({ invoice, invoiceDetails, invoiceDtlAlert: false });
+        await this.props.addDetailsIntoInvoice(invoiceDetails);
+        this.setState({ invoice, invoiceDtlAlert: false });
+    }
+
+    validateRow = (invoiceDetail) => {
+        console.log("validateRow start");
+        console.log("Row:", invoiceDetail);
+        console.log("validateRow end");
+
     }
 
 
     render() {
-        const { invoiceDetails, items, invoiceDtlIndex } = this.state;
-
-        // const itemDesc = this.populateItemDesc(invoiceDetails[invoiceDtlIndex]);
+        const { invoice, items } = this.state;
 
 
         const stretchStyle = {
@@ -141,7 +184,7 @@ class PoDtl extends Component {
                     <Button
                         variant="primary"
                         // disabled={navigationDtl.first}
-                        onClick={() => { this.saveInvoice("InvoiceDetail saved successfully.") }}
+                        onClick={() => { this.props.saveInvoice("InvoiceDetail saved successfully.") }}
                         className="mr-1" style={largeButtonStyle}
                         active>Save Detail
                                             </Button>
@@ -162,7 +205,7 @@ class PoDtl extends Component {
                         confirmBtnBsStyle="danger"
                         cancelBtnBsStyle="default"
                         title="Delete Confirmation"
-                        Text="Are you sure you want to delete this invoiceDetail?"
+                        Text="Are you sure you want to delete this invoice detail?"
                         onConfirm={() => this.deleteinvoiceDtl()}
                         onCancel={() => this.setState({ invoiceDtlAlert: false })}
                     >
@@ -178,15 +221,17 @@ class PoDtl extends Component {
 
                         <tr>
                             <th style={inputDateStyle}>Item</th>
+                            <th style={inputDateStyle}>U.O.M</th>
                             <th style={stretchStyle}>Price</th>
                             <th style={inputDateStyle}>Quantity</th>
                         </tr>
                     </thead>
                     <tbody>
                         {
-                            invoiceDetails && invoiceDetails.map((invoiceDetail, index) => (
+                            invoice.invoiceDtls && invoice.invoiceDtls.map((invoiceDetail, index) => (
                                 <tr key={invoiceDetail.invoiceDtlId}
-                                    /* onFocus={() => { this.setState({ invoiceDtlIndex: index }) }} */>
+                                    onFocus={() => { this.setState({ invoiceDtlIndex: index }) }}
+                                    onfocusout={this.validateRow(invoiceDetail)} >
                                     <td>
                                         <div style={stretchStyle}>
                                             <Select
@@ -204,11 +249,20 @@ class PoDtl extends Component {
                                     </td>
                                     <td>
                                         <FormControl
+                                            name="uom"
+                                            placeholder="U.O.M"
+                                            aria-label="U.O.M"
+                                            value={this.populateItemUOM(invoiceDetail.item) || ''}
+                                            readOnly
+                                        />
+                                    </td>
+                                    <td>
+                                        <FormControl
                                             type="number"
                                             name="itemPrice"
                                             placeholder="Item Price"
                                             aria-label="Item Price"
-                                            value={invoiceDetail.itemPrice || ''}
+                                            value={invoiceDetail.itemPrice || this.populateItemPrice(invoiceDetail.item) || ''}
                                             required
                                             onChange={e => this.handleinvoiceDtlChange(e, index)}
                                         />

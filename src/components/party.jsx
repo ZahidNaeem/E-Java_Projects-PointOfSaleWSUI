@@ -1,21 +1,19 @@
 import React, { Component } from 'react';
-import { InputGroup, FormControl, Button, ButtonToolbar, Form, Table } from 'react-bootstrap'
+import { InputGroup, FormControl, Button, ButtonToolbar, Form } from 'react-bootstrap'
 import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import 'react-widgets/dist/css/react-widgets.css'
 import { Combobox } from 'react-widgets'
+import PartyBalance from './partyBalance'
 
 class Party extends Component {
 
     state = {
         party: {},
         navigationDtl: {},
-        balances: [],
-        partyAlert: false,
-        balanceAlert: false,
-        balanceIndex: null
+        partyAlert: false
     }
 
     componentDidMount() {
@@ -38,7 +36,7 @@ class Party extends Component {
     }
 
     newParty = () => {
-        this.setState({ party: {}, navigationDtl: { first: true, last: true }, balances: [] });
+        this.setState({ party: {}, navigationDtl: { first: true, last: true } });
     }
 
     saveParty = (message) => {
@@ -47,7 +45,7 @@ class Party extends Component {
             .then(res => {
                 console.log("Post: Object received: ", res.data);
                 const { party, navigationDtl } = res.data;
-                this.setState({ party, navigationDtl, balances: party.partyBalances });
+                this.setState({ party, navigationDtl });
                 toast.success(message);
             })
             .catch(err => {
@@ -63,7 +61,7 @@ class Party extends Component {
                 .then(res => {
                     console.log("Delete: Response: ", res);
                     const { party, navigationDtl } = res.data;
-                    this.setState({ party, navigationDtl, balances: party.partyBalances })
+                    this.setState({ party, navigationDtl })
                 })
                 .catch(err => {
                     console.log(err);
@@ -78,7 +76,7 @@ class Party extends Component {
         axios.get(url)
             .then(res => {
                 const { party, navigationDtl } = res.data;
-                this.setState({ party, navigationDtl, balances: party.partyBalances })
+                this.setState({ party, navigationDtl })
                 console.log(this.state.party);
             })
             .catch(err => {
@@ -112,50 +110,15 @@ class Party extends Component {
         }
     }
 
-    handleBalanceChange = (event, index) => {
-        const { name, value } = event.target;
-        let party = this.state.party;
-        let balances = this.state.balances;
-        console.log("Target name", name);
-        console.log("Index: ", index);
-        console.log("Value: ", value);
-        console.log("Cell old value: ", balances[index][name]);
-        balances[index][name] = value;
-        party.balances = balances;
-        this.setState({ party, balances });
-    }
-
-    addBalance = () => {
+    addBalanceIntoParty = (balances) => {
         let party = { ...this.state.party };
-        let partyCode = party.partyCode;
-        let newBalance = { party: partyCode };
-        let balances = [...this.state.balances];
-        balances.push(newBalance);
         party.partyBalances = balances;
-        this.setState({ party, balances });
-    }
-
-    deleteBalance = () => {
-        let party = { ...this.state.party };
-        let balances = [...this.state.balances];
-        let id = balances[this.state.balanceIndex]["partyBalanceId"];
-        if (id != null) {
-            axios.delete('http://localhost:8089/balance/delete/' + id)
-                .then(res => {
-                    console.log("Delete: Response: ", res);
-                })
-                .catch(err => {
-                    console.log(err);
-                });
-        }
-        balances.splice(this.state.balanceIndex, 1);
-        party.partyBalances = balances;
-        this.setState({ party, balances, balanceAlert: false });
+        this.setState({ party });
     }
 
 
     render() {
-        const { party, navigationDtl, balances } = this.state;
+        const { party, navigationDtl } = this.state;
 
         const partyTypes = ['Supplier', 'Buyer'];
 
@@ -169,14 +132,6 @@ class Party extends Component {
 
         const smallButtonStyle = {
             width: "80px"
-        }
-
-        const largeButtonStyle = {
-            width: "130px"
-        }
-
-        const inputDateStyle = {
-            width: "200px"
         }
 
         return (
@@ -447,98 +402,7 @@ class Party extends Component {
                         </ButtonToolbar>
 
                         <br />
-                        <h3 className="text-center h3 mb-4 text-gray-800">Party Balances</h3>
-                        <ButtonToolbar className="m-2">
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={this.addBalance}
-                                className="mr-1" style={largeButtonStyle}
-                                active>Add Balance
-                                            </Button>
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={() => { this.saveParty("Balance saved successfully.") }}
-                                className="mr-1" style={largeButtonStyle}
-                                active>Save Balance
-                                            </Button>
-                            <Button
-                                variant="primary"
-                                // disabled={navigationDtl.first}
-                                onClick={() => this.setState({ balanceAlert: true })}
-                                className="mr-1" style={largeButtonStyle}
-                                active>Delete Balance
-                                                    </Button>
-                            <SweetAlert
-                                show={this.state.balanceAlert}
-                                warning
-                                showCancel
-                                confirmBtnText="Delete"
-                                confirmBtnBsStyle="danger"
-                                cancelBtnBsStyle="default"
-                                title="Delete Confirmation"
-                                Text="Are you sure you want to delete this balance?"
-                                onConfirm={() => this.deleteBalance()}
-                                onCancel={() => this.setState({ balanceAlert: false })}
-                            >
-                                Delete Balance
-                                                    </SweetAlert>
-                        </ButtonToolbar>
-                        <Table
-                            striped
-                            bordered
-                            hover
-                            responsive>
-                            <thead>
-                                <tr>
-                                    <th style={inputDateStyle}>Balance Date</th>
-                                    <th style={inputDateStyle}>Quantity</th>
-                                    <th style={stretchStyle}>Remarks</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {
-                                    balances && balances.map((balance, index) => (
-                                        <tr key={balance.partyBalanceId}
-                                            onFocus={() => { this.setState({ balanceIndex: index }) }}>
-                                            <td>
-                                                <FormControl
-                                                    type="date"
-                                                    name="partyBalanceDate"
-                                                    placeholder="Balance Date"
-                                                    aria-label="Balance Date"
-                                                    value={balance.partyBalanceDate != null ? balance.partyBalanceDate.split("T")[0] : ''}
-                                                    required
-                                                    onChange={e => this.handleBalanceChange(e, index)}
-                                                />
-                                            </td>
-                                            <td>
-                                                <FormControl
-                                                    type="number"
-                                                    name="amount"
-                                                    placeholder="Amount"
-                                                    aria-label="Amount"
-                                                    value={balance.amount || ''}
-                                                    required
-                                                    onChange={e => this.handleBalanceChange(e, index)}
-                                                />
-                                            </td>
-                                            <td>
-                                                <FormControl
-                                                    type="text"
-                                                    name="remarks"
-                                                    placeholder="Remarks"
-                                                    aria-label="Remarks"
-                                                    value={balance.remarks || ''}
-                                                    onChange={e => this.handleBalanceChange(e, index)}
-                                                />
-                                            </td>
-                                        </tr>
-                                    ))
-                                }
-                            </tbody>
-                        </Table>
+                        <PartyBalance party={party} addBalanceIntoParty={this.addBalanceIntoParty} />
                     </Form>
                 </div>
             </>

@@ -68,11 +68,10 @@ class PO extends Component {
     }
 
     handleInvoiceSelectChange = (name, value) => {
-
         let invoice = { ...this.state.invoice };
         invoice[value.name] = name.value;
         this.setState({ invoice });
-
+        this.populatePartyName(invoice.party);
     }
 
     handleInvoiceComboboxChange = (value, name) => {
@@ -82,16 +81,16 @@ class PO extends Component {
     }
 
     newInvoice = () => {
-        this.setState({ invoice: {}, navigationDtl: { first: true, last: true }, invoiceDetails: [] });
+        const invoice = {invType: 'PO'};
+        invoice.invoiceDtls = [];
+        this.setState({ invoice, navigationDtl: { first: true, last: true } });
     }
 
     saveInvoice = async (message) => {
-        if (this.state.invoice.invoiceDesc === undefined || this.state.invoice.invoiceDesc === null || this.state.invoice.invoiceDesc === '') {
-            toast.error("Invoice Desc. is required field");
-        } else if (this.state.invoice.invoiceUom === undefined || this.state.invoice.invoiceUom === null || this.state.invoice.invoiceUom === '') {
-            toast.error("Invoice U.O.M is required field");
-        } else if (this.state.invoice.effectiveStartDate === undefined || this.state.invoice.effectiveStartDate === null || this.state.invoice.effectiveStartDate === '') {
-            toast.error("Eff. start date is required field");
+        if (this.state.invoice.invDate === undefined || this.state.invoice.invDate === null || this.state.invoice.invDate === '') {
+            toast.error("PO date is required field");
+        } else if (this.state.invoice.party === undefined || this.state.invoice.party === null || this.state.invoice.party === '') {
+            toast.error("Party is required field");
         } else {
             console.log("Post: Object sent: ", this.state.invoice);
             const res = await axios.post('http://localhost:8089/invoice/po/save', this.state.invoice);
@@ -139,6 +138,12 @@ class PO extends Component {
         } else {
             this.lastInvoice();
         }
+    }
+
+    addDetailsIntoInvoice = (details) => {
+        let invoice = { ...this.state.invoice };
+        invoice.invoiceDtls = details;
+        this.setState({ invoice });
     }
 
     render() {
@@ -322,7 +327,7 @@ class PO extends Component {
                     </ButtonToolbar>
                     <br />
 
-                    <PoDtl invoiceDetails={invoice.invoiceDtls} />
+                    <PoDtl invoice={invoice} addDetailsIntoInvoice={this.addDetailsIntoInvoice} saveInvoice={this.saveInvoice} />
                 </Form>
             </>
         );

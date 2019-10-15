@@ -12,7 +12,8 @@ class Item extends Component {
     state = {
         item: {},
         navigationDtl: {},
-        itemAlert: false
+        itemAlert: false,
+        saveDisabled: true
     }
 
     componentDidMount() {
@@ -23,15 +24,31 @@ class Item extends Component {
         const { name, value } = event.target;
         console.log("Target name", name);
         console.log(value);
-        let item = { ...this.state.item };
-        item[name] = value;
-        this.setState({ item });
+        const item = { ...this.state.item };
+        item[name] = name === 'itemDesc' ? value.toUpperCase() : value;
+        let saveDisabled = { ...this.state.saveDisabled };
+        if (item.itemDesc === undefined || item.itemDesc === null || item.itemDesc === ''
+            || item.itemUom === undefined || item.itemUom === null || item.itemUom === ''
+            || item.effectiveStartDate === undefined || item.effectiveStartDate === null || item.effectiveStartDate === '') {
+            saveDisabled = true;
+        } else {
+            saveDisabled = false;
+        }
+        this.setState({ item, saveDisabled });
     }
 
     handleComboboxChange = (value, name) => {
         let item = { ...this.state.item };
-        item[name] = value;
-        this.setState({ item });
+        item[name] = value.toUpperCase();
+        let saveDisabled = { ...this.state.saveDisabled };
+        if (item.itemDesc === undefined || item.itemDesc === null || item.itemDesc === ''
+            || item.itemUom === undefined || item.itemUom === null || item.itemUom === ''
+            || item.effectiveStartDate === undefined || item.effectiveStartDate === null || item.effectiveStartDate === '') {
+            saveDisabled = true;
+        } else {
+            saveDisabled = false;
+        }
+        this.setState({ item, saveDisabled });
     }
 
     newItem = () => {
@@ -40,7 +57,7 @@ class Item extends Component {
         this.setState({ item, navigationDtl: { first: true, last: true } });
     }
 
-    saveItem = (message) => {
+    saveItem = async (message) => {
         if (this.state.item.itemDesc === undefined || this.state.item.itemDesc === null || this.state.item.itemDesc === '') {
             toast.error("Item Desc. is required field");
         } else if (this.state.item.itemUom === undefined || this.state.item.itemUom === null || this.state.item.itemUom === '') {
@@ -49,17 +66,12 @@ class Item extends Component {
             toast.error("Eff. start date is required field");
         } else {
             console.log("Post: Object sent: ", this.state.item);
-            axios.post('http://localhost:8089/item/save', this.state.item)
-                .then(res => {
-                    console.log("Post: Object received: ", res.data);
-                    const { item, navigationDtl } = res.data;
-                    this.setState({ item, navigationDtl });
-                    toast.success(message);
-                })
-                .catch(err => {
-                    console.log(err);
-                    toast.error("There is an error:\n" + err);
-                });
+            const res = await axios.post('http://localhost:8089/item/save', this.state.item);
+            console.log("Post: Object received: ", res.data);
+            const { item, navigationDtl } = res.data;
+            const saveDisabled = true;
+            this.setState({ item, navigationDtl, saveDisabled });
+            toast.success(message);
         }
     }
 
@@ -70,7 +82,8 @@ class Item extends Component {
                 .then(res => {
                     console.log("Delete: Response: ", res);
                     const { item, navigationDtl } = res.data;
-                    this.setState({ item, navigationDtl })
+                    const saveDisabled = true;
+                    this.setState({ item, navigationDtl, saveDisabled })
                 })
                 .catch(err => {
                     console.log(err);
@@ -81,11 +94,16 @@ class Item extends Component {
         });
     }
 
-    navigateItem(url) {
+    async navigateItem(url) {
+        const {saveDisabled} = this.state;
+        if(!saveDisabled){
+            await this.saveItem();
+        }
         axios.get(url)
             .then(res => {
                 const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl })
+                const saveDisabled = true;
+                this.setState({ item, navigationDtl, saveDisabled })
                 console.log(this.state.item);
             })
             .catch(err => {
@@ -109,10 +127,12 @@ class Item extends Component {
         this.navigateItem('http://localhost:8089/item/last');
     }
 
-    undoChanges = () => {
-        if (this.state.item.itemCode != null) {
-            console.log("Item Code: ", this.state.item.itemCode);
-            let url = 'http://localhost:8089/item/' + this.state.item.itemCode;
+    undoChanges = async () => {
+        const item = {...this.state.item};        
+        console.log("Item Code: ", item.itemCode);
+        await this.setState({saveDisabled: true});
+        if (item.itemCode != null) {
+            let url = 'http://localhost:8089/item/' + item.itemCode;
             this.navigateItem(url);
         } else {
             this.lastItem();
@@ -240,6 +260,7 @@ class Item extends Component {
                             aria-label="Item U.O.M"
                             data={uoms}
                             value={item.itemUom || ''}
+                            required
                             onChange={(name) => this.handleComboboxChange(name, "itemUom")}
                         />
                     </InputGroup>
@@ -380,6 +401,7 @@ class Item extends Component {
                             variant="primary"
                             onClick={() => this.saveItem("Item saved successfully.")}
                             className="mr-1" style={smallButtonStyle}
+                            disabled={this.state.saveDisabled}
                             active>Save
                             </Button>
 
