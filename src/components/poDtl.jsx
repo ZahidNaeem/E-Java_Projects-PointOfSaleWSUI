@@ -215,8 +215,7 @@ class PoDtl extends Component {
                 <Table
                     striped
                     bordered
-                    hover
-                    responsive>
+                    hover>
                     <thead>
 
                         <tr>
@@ -231,7 +230,7 @@ class PoDtl extends Component {
                             invoice.invoiceDtls && invoice.invoiceDtls.map((invoiceDetail, index) => (
                                 <tr key={invoiceDetail.invoiceDtlId}
                                     onFocus={() => { this.setState({ invoiceDtlIndex: index }) }}
-                                    onfocusout={this.validateRow(invoiceDetail)} >
+                                    onBlur={this.validateRow(invoiceDetail)} >
                                     <td>
                                         <div style={stretchStyle}>
                                             <Select

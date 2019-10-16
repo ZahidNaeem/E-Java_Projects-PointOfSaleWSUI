@@ -6,6 +6,7 @@ import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import 'react-widgets/dist/css/react-widgets.css'
 import Select from 'react-select'
+import Moment from 'moment'
 import PoDtl from './poDtl'
 class PO extends Component {
 
@@ -81,7 +82,11 @@ class PO extends Component {
     }
 
     newInvoice = () => {
-        const invoice = {invType: 'PO'};
+        const currDate = this.getCurrentDate();
+        const party = this.state.parties[0].value;
+        console.log("Party:", party);
+        this.populatePartyName(party);
+        const invoice = { invType: 'PO', invDate: currDate, party };
         invoice.invoiceDtls = [];
         this.setState({ invoice, navigationDtl: { first: true, last: true } });
     }
@@ -146,9 +151,20 @@ class PO extends Component {
         this.setState({ invoice });
     }
 
+    getCurrentDate = () => {
+        const curr = new Date();
+        /* const jsonDate = await curr.toJSON().slice(0,10);
+        console.log("Current Date:", jsonDate);
+        return jsonDate; */
+        const currDate = Moment(curr).format('YYYY-MM-DD');
+        console.log("Current Date:", currDate);
+        return currDate;
+        // const currDate = curr.toISOString().substr(0, 10);
+    }
+
     render() {
         const { invoice, navigationDtl, parties, partyName } = this.state;
-
+        
 
         const inputGroupTextStyle = {
             width: "180px"
