@@ -181,13 +181,13 @@ class PoDtl extends Component {
                         active>Add Detail
                         </Button>
 
-                    <Button
+                    {/* <Button
                         variant="primary"
                         // disabled={navigationDtl.first}
                         onClick={() => { this.props.saveInvoice("InvoiceDetail saved successfully.") }}
                         className="mr-1" style={largeButtonStyle}
                         active>Save Detail
-                                            </Button>
+                                            </Button> */}
 
                     <Button
                         variant="primary"

@@ -106,7 +106,7 @@ class Party extends Component {
             let url = 'http://localhost:8089/party/' + this.state.party.partyCode;
             this.navigateParty(url);
         } else {
-            this.lastParty();
+            this.firstParty();
         }
     }
 

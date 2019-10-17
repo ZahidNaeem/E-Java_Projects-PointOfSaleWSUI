@@ -141,7 +141,7 @@ class PO extends Component {
             let url = 'http://localhost:8089/invoice/po/' + this.state.invoice.invoiceCode;
             this.navigateInvoice(url);
         } else {
-            this.lastInvoice();
+            this.firstInvoice();
         }
     }
 
@@ -343,7 +343,7 @@ class PO extends Component {
                     </ButtonToolbar>
                     <br />
 
-                    <PoDtl invoice={invoice} addDetailsIntoInvoice={this.addDetailsIntoInvoice} saveInvoice={this.saveInvoice} />
+                    <PoDtl invoice={invoice} addDetailsIntoInvoice={this.addDetailsIntoInvoice} />
                 </Form>
             </>
         );

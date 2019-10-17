@@ -135,7 +135,7 @@ class Item extends Component {
             let url = 'http://localhost:8089/item/' + item.itemCode;
             this.navigateItem(url);
         } else {
-            this.lastItem();
+            this.firstItem();
         }
     }
 
