@@ -50,7 +50,7 @@ class PartyBalance extends Component {
         let balances = party.partyBalances;
         let id = balances[this.state.balanceIndex]["partyBalanceId"];
         if (id != null) {
-            axios.delete('http://localhost:8089/balance/delete/' + id)
+            axios.delete('http://localhost:8089/api/balance/delete/' + id)
                 .then(res => {
                     console.log("Delete: Response: ", res);
                 })

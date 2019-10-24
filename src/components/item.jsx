@@ -66,7 +66,7 @@ class Item extends Component {
             toast.error("Eff. start date is required field");
         } else {
             console.log("Post: Object sent: ", this.state.item);
-            const res = await axios.post('http://localhost:8089/item/save', this.state.item);
+            const res = await axios.post('http://localhost:8089/api/item/save', this.state.item);
             console.log("Post: Object received: ", res.data);
             const { item, navigationDtl } = res.data;
             const saveDisabled = true;
@@ -78,7 +78,7 @@ class Item extends Component {
     deleteItem = () => {
         if (this.state.item.itemCode != null) {
             console.log("Delete: Item Code sent: ", this.state.item.itemCode);
-            axios.delete('http://localhost:8089/item/delete/' + this.state.item.itemCode)
+            axios.delete('http://localhost:8089/api/item/delete/' + this.state.item.itemCode)
                 .then(res => {
                     console.log("Delete: Response: ", res);
                     const { item, navigationDtl } = res.data;
@@ -112,19 +112,19 @@ class Item extends Component {
     }
 
     firstItem = () => {
-        this.navigateItem('http://localhost:8089/item/first');
+        this.navigateItem('http://localhost:8089/api/item/first');
     }
 
     previousItem = () => {
-        this.navigateItem('http://localhost:8089/item/previous');
+        this.navigateItem('http://localhost:8089/api/item/previous');
     }
 
     nextItem = () => {
-        this.navigateItem('http://localhost:8089/item/next');
+        this.navigateItem('http://localhost:8089/api/item/next');
     }
 
     lastItem = () => {
-        this.navigateItem('http://localhost:8089/item/last');
+        this.navigateItem('http://localhost:8089/api/item/last');
     }
 
     undoChanges = async () => {
@@ -132,7 +132,7 @@ class Item extends Component {
         console.log("Item Code: ", item.itemCode);
         await this.setState({saveDisabled: true});
         if (item.itemCode != null) {
-            let url = 'http://localhost:8089/item/' + item.itemCode;
+            let url = 'http://localhost:8089/api/item/' + item.itemCode;
             this.navigateItem(url);
         } else {
             this.firstItem();
@@ -141,7 +141,7 @@ class Item extends Component {
 
     itemCategories() {
         let data = [];
-        axios.get('http://localhost:8089/item/cats')
+        axios.get('http://localhost:8089/api/item/cats')
             .then(res => {
                 res.data.forEach(element => {
                     data.push(element);
@@ -156,7 +156,7 @@ class Item extends Component {
 
     itemUOMs = () => {
         let data = [];
-        axios.get('http://localhost:8089/item/uoms')
+        axios.get('http://localhost:8089/api/item/uoms')
             .then(res => {
                 res.data.forEach(element => {
                     data.push(element);

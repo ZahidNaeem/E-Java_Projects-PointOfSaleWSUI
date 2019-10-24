@@ -58,7 +58,7 @@ class ItemStock extends Component {
         let stocks = [...this.state.item.itemStocks];
         let id = stocks[this.state.stockIndex]["itemStockId"];
         if (id != null) {
-            const res = await axios.delete('http://localhost:8089/stock/delete/' + id);
+            const res = await axios.delete('http://localhost:8089/api/stock/delete/' + id);
             console.log("Delete: Response: ", res);
         }
         stocks.splice(this.state.stockIndex, 1);

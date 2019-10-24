@@ -27,7 +27,7 @@ class PO extends Component {
         console.log("Start populate parties");
 
         let parties = [];
-        const res = await axios.get('http://localhost:8089/party/all');
+        const res = await axios.get('http://localhost:8089/api/party/all');
         console.log("Stop populate parties");
         res.data.forEach(element => {
             parties.push({
@@ -98,7 +98,7 @@ class PO extends Component {
             toast.error("Party is required field");
         } else {
             console.log("Post: Object sent: ", this.state.invoice);
-            const res = await axios.post('http://localhost:8089/invoice/po/save', this.state.invoice);
+            const res = await axios.post('http://localhost:8089/api/invoice/po/save', this.state.invoice);
             console.log("Post: Object received: ", res.data);
             const { invoice, navigationDtl } = res.data;
             this.setState({ invoice, navigationDtl, invoiceDetails: invoice.invoiceDtls });
@@ -109,7 +109,7 @@ class PO extends Component {
     deleteInvoice = async () => {
         if (this.state.invoice.invoiceCode != null) {
             console.log("Delete: Invoice Code sent: ", this.state.invoice.invoiceCode);
-            const res = await axios.delete('http://localhost:8089/invoice/po/delete/' + this.state.invoice.invoiceCode)
+            const res = await axios.delete('http://localhost:8089/api/invoice/po/delete/' + this.state.invoice.invoiceCode)
             console.log("Delete: Response: ", res);
             const { invoice, navigationDtl } = res.data;
             this.setState({ invoice, navigationDtl, invoiceDetails: invoice.invoiceDtls });
@@ -120,25 +120,25 @@ class PO extends Component {
     }
 
     firstInvoice = () => {
-        this.navigateInvoice('http://localhost:8089/invoice/po/first');
+        this.navigateInvoice('http://localhost:8089/api/invoice/po/first');
     }
 
     previousInvoice = () => {
-        this.navigateInvoice('http://localhost:8089/invoice/po/previous');
+        this.navigateInvoice('http://localhost:8089/api/invoice/po/previous');
     }
 
     nextInvoice = () => {
-        this.navigateInvoice('http://localhost:8089/invoice/po/next');
+        this.navigateInvoice('http://localhost:8089/api/invoice/po/next');
     }
 
     lastInvoice = () => {
-        this.navigateInvoice('http://localhost:8089/invoice/po/last');
+        this.navigateInvoice('http://localhost:8089/api/invoice/po/last');
     }
 
     undoChanges = () => {
         if (this.state.invoice.invoiceCode != null) {
             console.log("Invoice Code: ", this.state.invoice.invoiceCode);
-            let url = 'http://localhost:8089/invoice/po/' + this.state.invoice.invoiceCode;
+            let url = 'http://localhost:8089/api/invoice/po/' + this.state.invoice.invoiceCode;
             this.navigateInvoice(url);
         } else {
             this.firstInvoice();

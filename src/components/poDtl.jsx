@@ -55,7 +55,7 @@ class PoDtl extends Component {
 
     async populateItems() {
         let items = [];
-        const res = await axios.get('http://localhost:8089/item/all');
+        const res = await axios.get('http://localhost:8089/api/item/all');
         res.data.forEach(element => {
             items.push({
                 value: element.itemCode,
@@ -135,7 +135,7 @@ class PoDtl extends Component {
         let invoiceDetails = invoice.invoiceDtls;
         let id = invoiceDetails[this.state.invoiceDtlIndex]["invoiceinvoiceDtlId"];
         if (id != null) {
-            const res = await axios.delete('http://localhost:8089/invoiceDetail/delete/' + id);
+            const res = await axios.delete('http://localhost:8089/api/invoiceDetail/delete/' + id);
             console.log("Delete: Response: ", res);
         }
         invoiceDetails.splice(this.state.invoiceDtlIndex, 1);

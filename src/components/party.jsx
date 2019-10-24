@@ -41,7 +41,7 @@ class Party extends Component {
 
     saveParty = (message) => {
         console.log("Post: Object sent: ", this.state.party);
-        axios.post('http://localhost:8089/party/save', this.state.party)
+        axios.post('http://localhost:8089/api/party/save', this.state.party)
             .then(res => {
                 console.log("Post: Object received: ", res.data);
                 const { party, navigationDtl } = res.data;
@@ -57,7 +57,7 @@ class Party extends Component {
     deleteParty = () => {
         if (this.state.party.partyCode != null) {
             console.log("Delete: Party Code sent: ", this.state.party.partyCode);
-            axios.delete('http://localhost:8089/party/delete/' + this.state.party.partyCode)
+            axios.delete('http://localhost:8089/api/party/delete/' + this.state.party.partyCode)
                 .then(res => {
                     console.log("Delete: Response: ", res);
                     const { party, navigationDtl } = res.data;
@@ -85,25 +85,25 @@ class Party extends Component {
     }
 
     firstParty = () => {
-        this.navigateParty('http://localhost:8089/party/first');
+        this.navigateParty('http://localhost:8089/api/party/first');
     }
 
     previousParty = () => {
-        this.navigateParty('http://localhost:8089/party/previous');
+        this.navigateParty('http://localhost:8089/api/party/previous');
     }
 
     nextParty = () => {
-        this.navigateParty('http://localhost:8089/party/next');
+        this.navigateParty('http://localhost:8089/api/party/next');
     }
 
     lastParty = () => {
-        this.navigateParty('http://localhost:8089/party/last');
+        this.navigateParty('http://localhost:8089/api/party/last');
     }
 
     undoChanges = () => {
         if (this.state.party.partyCode != null) {
             console.log("Party Code: ", this.state.party.partyCode);
-            let url = 'http://localhost:8089/party/' + this.state.party.partyCode;
+            let url = 'http://localhost:8089/api/party/' + this.state.party.partyCode;
             this.navigateParty(url);
         } else {
             this.firstParty();
