@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
 import { InputGroup, FormControl, Button, ButtonToolbar, Form } from 'react-bootstrap'
-import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import 'react-widgets/dist/css/react-widgets.css'
 import { Combobox } from 'react-widgets'
 import ItemStock from './itemStock'
+import { request } from './util/APIUtils'
+import { API_ITEM_URL, ACCESS_TOKEN } from './constant'
+
 class Item extends Component {
 
     state = {
@@ -66,7 +68,12 @@ class Item extends Component {
             toast.error("Eff. start date is required field");
         } else {
             console.log("Post: Object sent: ", this.state.item);
-            const res = await axios.post('http://localhost:8089/api/item/save', this.state.item);
+            const options = {
+                url: API_ITEM_URL + 'save',
+                method: 'POST',
+                data: this.state.item
+            };
+            const res = await request(options);
             console.log("Post: Object received: ", res.data);
             const { item, navigationDtl } = res.data;
             const saveDisabled = true;
@@ -75,96 +82,92 @@ class Item extends Component {
         }
     }
 
-    deleteItem = () => {
+    deleteItem = async () => {
         if (this.state.item.itemCode != null) {
             console.log("Delete: Item Code sent: ", this.state.item.itemCode);
-            axios.delete('http://localhost:8089/api/item/delete/' + this.state.item.itemCode)
-                .then(res => {
-                    console.log("Delete: Response: ", res);
-                    const { item, navigationDtl } = res.data;
-                    const saveDisabled = true;
-                    this.setState({ item, navigationDtl, saveDisabled })
-                })
-                .catch(err => {
-                    console.log(err);
-                });
+            const options = {
+                url: API_ITEM_URL + 'delete/' + this.state.item.itemCode,
+                method: 'DELETE'
+            };
+            const res = await request(options);
+            console.log("Delete: Response: ", res);
+            const { item, navigationDtl } = res.data;
+            const saveDisabled = true;
+            this.setState({ item, navigationDtl, saveDisabled });
         }
         this.setState({
             itemAlert: false
         });
     }
 
-    async navigateItem(url) {
-        const {saveDisabled} = this.state;
-        if(!saveDisabled){
+    async navigateItem(operation) {
+        let { saveDisabled } = this.state;
+        if (!saveDisabled) {
             await this.saveItem();
         }
-        axios.get(url)
-            .then(res => {
-                const { item, navigationDtl } = res.data;
-                const saveDisabled = true;
-                this.setState({ item, navigationDtl, saveDisabled })
-                console.log(this.state.item);
-            })
-            .catch(err => {
-                console.log(err);
-            });
+        const options = {
+            url: API_ITEM_URL + operation,
+            method: 'GET'
+        };
+        const res = await request(options);
+        const { item, navigationDtl } = res.data;
+        saveDisabled = true;
+        this.setState({ item, navigationDtl, saveDisabled })
+        console.log(this.state.item);
     }
 
     firstItem = () => {
-        this.navigateItem('http://localhost:8089/api/item/first');
+        this.navigateItem('first');
     }
 
     previousItem = () => {
-        this.navigateItem('http://localhost:8089/api/item/previous');
+        this.navigateItem('previous');
     }
 
     nextItem = () => {
-        this.navigateItem('http://localhost:8089/api/item/next');
+        this.navigateItem('next');
     }
 
     lastItem = () => {
-        this.navigateItem('http://localhost:8089/api/item/last');
+        this.navigateItem('last');
     }
 
     undoChanges = async () => {
-        const item = {...this.state.item};        
+        const item = { ...this.state.item };
         console.log("Item Code: ", item.itemCode);
-        await this.setState({saveDisabled: true});
+        await this.setState({ saveDisabled: true });
         if (item.itemCode != null) {
-            let url = 'http://localhost:8089/api/item/' + item.itemCode;
-            this.navigateItem(url);
+            const operation = item.itemCode;
+            this.navigateItem(operation);
         } else {
             this.firstItem();
         }
     }
 
-    itemCategories() {
-        let data = [];
-        axios.get('http://localhost:8089/api/item/cats')
-            .then(res => {
-                res.data.forEach(element => {
-                    data.push(element);
-                });
-            })
-            .catch(err => {
-                console.log(err);
-            });
+    itemCategories = async () => {
+        const data = [];
+        const options = {
+            url: API_ITEM_URL + 'cats',
+            method: 'GET'
+        };
+        const res = await request(options);
+        res.data.forEach(element => {
+            data.push(element);
+        });
 
         return data;
     }
 
-    itemUOMs = () => {
-        let data = [];
-        axios.get('http://localhost:8089/api/item/uoms')
-            .then(res => {
-                res.data.forEach(element => {
-                    data.push(element);
-                });
-            })
-            .catch(err => {
-                console.log(err);
-            });
+    itemUOMs = async () => {
+        const data = [];
+        const options = {
+            url: API_ITEM_URL + 'uoms',
+            method: 'GET'
+        };
+        const res = await request(options);
+        res.data.forEach(element => {
+            data.push(element);
+        });
 
         return data;
     }
