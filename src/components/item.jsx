@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { InputGroup, FormControl, Button, ButtonToolbar, Form } from 'react-bootstrap'
+import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -144,32 +145,42 @@ class Item extends Component {
         }
     }
 
-    itemCategories = async () => {
+    itemCategories = () => {
         const data = [];
         const options = {
             url: API_ITEM_URL + 'cats',
             method: 'GET'
         };
-        const res = await request(options);
-        res.data.forEach(element => {
-            data.push(element);
+        request(options)
+        .then(res => {
+            res.data.forEach(element => {
+                data.push(element);
+            });
+        })
+        .catch(err => {
+            console.log(err);
         });
 
-        return data;
+    return data;
     }
 
-    itemUOMs = async () => {
+    itemUOMs = () => {
         const data = [];
         const options = {
             url: API_ITEM_URL + 'uoms',
             method: 'GET'
         };
-        const res = await request(options);
-        res.data.forEach(element => {
-            data.push(element);
+        request(options)
+        .then(res => {
+            res.data.forEach(element => {
+                data.push(element);
+            });
+        })
+        .catch(err => {
+            console.log(err);
         });
 
-        return data;
+    return data;
     }
 
     addStockIntoItem = (stocks) => {

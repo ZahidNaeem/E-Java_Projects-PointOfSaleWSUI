@@ -15,9 +15,10 @@ export async function request(options) {
     console.log("Options:", options);
 
     try {
-        const response = await axios(options);
-        console.log("Status:", response.status);
-        return response;
+        const res = await axios(options);
+        console.log("Status:", res.status);
+        console.log("Response:", res);
+        return res;
     } catch (error) {
         console.log(error);
 
