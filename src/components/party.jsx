@@ -1,19 +1,21 @@
 import React, { Component } from 'react';
 import { InputGroup, FormControl, Button, ButtonToolbar, Form } from 'react-bootstrap'
-import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import 'react-widgets/dist/css/react-widgets.css'
 import { Combobox } from 'react-widgets'
 import PartyBalance from './partyBalance'
+import { request } from './util/APIUtils'
+import { API_PARTY_URL, ACCESS_TOKEN } from './constant'
 
 class Party extends Component {
 
     state = {
         party: {},
         navigationDtl: {},
-        partyAlert: false
+        partyAlert: false,
+        saveDisabled: true
     }
 
     componentDidMount() {
@@ -24,87 +26,147 @@ class Party extends Component {
         const { name, value } = event.target;
         console.log("Target name", name);
         console.log(value);
-        let party = { ...this.state.party };
-        party[name] = value;
-        this.setState({ party });
+        const party = { ...this.state.party };
+        party[name] = name === 'partyName' ? value.toUpperCase() : value;
+        let saveDisabled = { ...this.state.saveDisabled };
+        const { partyName, contactPerson, effectiveStartDate } = party;
+        if (partyName === undefined || partyName === null || partyName === '' ||
+            contactPerson === undefined || contactPerson === null || contactPerson === '' ||
+            effectiveStartDate === undefined || effectiveStartDate === null || effectiveStartDate === '') {
+            saveDisabled = true;
+        } else {
+            saveDisabled = false;
+        }
+        this.setState({ party, saveDisabled });
     }
 
     handleComboboxChange = (value, name) => {
-        let party = { ...this.state.party };
-        party[name] = value;
-        this.setState({ party });
+        const party = { ...this.state.party };
+        party[name] = name === 'partyName' ? value.toUpperCase() : value;
+        let saveDisabled = { ...this.state.saveDisabled };
+        const { partyName, contactPerson, effectiveStartDate } = party;
+        if (partyName === undefined || partyName === null || partyName === '' ||
+            contactPerson === undefined || contactPerson === null || contactPerson === '' ||
+            effectiveStartDate === undefined || effectiveStartDate === null || effectiveStartDate === '') {
+            saveDisabled = true;
+        } else {
+            saveDisabled = false;
+        }
+        this.setState({ party, saveDisabled });
     }
 
     newParty = () => {
         this.setState({ party: {}, navigationDtl: { first: true, last: true } });
     }
 
-    saveParty = (message) => {
-        console.log("Post: Object sent: ", this.state.party);
-        axios.post('http://localhost:8089/api/party/save', this.state.party)
-            .then(res => {
+    saveParty = async () => {
+        const { partyName, contactPerson, effectiveStartDate } = this.state.party;
+        if (partyName === undefined || partyName === null || partyName === '') {
+            toast.error("Party Name is required field");
+        } else if (contactPerson === undefined || contactPerson === null || contactPerson === '') {
+            toast.error("Contact Person is required field");
+        } else if (effectiveStartDate === undefined || effectiveStartDate === null || effectiveStartDate === '') {
+            toast.error("Eff. start date is required field");
+        } else {
+            console.log("Post: Object sent: ", this.state.party);
+            const options = {
+                url: API_PARTY_URL + 'save',
+                method: 'POST',
+                data: this.state.party
+            };
+            try {
+                const res = await request(options);
                 console.log("Post: Object received: ", res.data);
                 const { party, navigationDtl } = res.data;
-                this.setState({ party, navigationDtl });
-                toast.success(message);
-            })
-            .catch(err => {
-                console.log(err);
-                toast.error("There is an error:\n" + err);
-            });
+                this.setState({ party, navigationDtl, saveDisabled: true });
+            } catch (error) {
+                console.log(error);
+            }
+        }
     }
 
-    deleteParty = () => {
+    savePartyShowMessage = async (message) => {
+        try {
+            await this.saveParty();
+        } catch (error) {
+            console.log(error);
+        }
+        toast.success(message);
+    }
+
+    deleteParty = async () => {
         if (this.state.party.partyCode != null) {
             console.log("Delete: Party Code sent: ", this.state.party.partyCode);
-            axios.delete('http://localhost:8089/api/party/delete/' + this.state.party.partyCode)
-                .then(res => {
-                    console.log("Delete: Response: ", res);
-                    const { party, navigationDtl } = res.data;
-                    this.setState({ party, navigationDtl })
-                })
-                .catch(err => {
-                    console.log(err);
-                });
+            const options = {
+                url: API_PARTY_URL + 'delete',
+                method: 'DELETE'
+            };
+            try {
+                const res = await request(options);
+                console.log("Delete: Response: ", res);
+                const { party, navigationDtl } = res.data;
+                this.setState({ party, navigationDtl, saveDisabled: true });
+            } catch (error) {
+                console.log(error);
+            }
         }
         this.setState({
             partyAlert: false
         });
     }
 
-    navigateParty(url) {
-        axios.get(url)
-            .then(res => {
-                const { party, navigationDtl } = res.data;
-                this.setState({ party, navigationDtl })
-                console.log(this.state.party);
-            })
-            .catch(err => {
-                console.log(err);
-            });
+    navigateParty = async (operation) => {
+        const options = {
+            url: API_PARTY_URL + operation,
+            method: 'GET'
+        };
+        try {
+            const res = await request(options);
+            const { party, navigationDtl } = res.data;
+            this.setState({ party, navigationDtl })
+            console.log(this.state.party);
+        } catch (error) {
+            console.log(error);
+
+        }
+    }
+
+    saveAndNavigateParty = async (operation) => {
+        const { saveDisabled } = this.state;
+        if (!saveDisabled) {
+            try {
+                await this.saveParty();
+            } catch (error) {
+                console.log(error);
+            }
+            this.navigateParty(operation);
+        } else {
+            this.navigateParty(operation);
+        }
     }
 
     firstParty = () => {
-        this.navigateParty('http://localhost:8089/api/party/first');
+        this.saveAndNavigateParty('first');
     }
 
     previousParty = () => {
-        this.navigateParty('http://localhost:8089/api/party/previous');
+        this.saveAndNavigateParty('previous');
     }
 
     nextParty = () => {
-        this.navigateParty('http://localhost:8089/api/party/next');
+        this.saveAndNavigateParty('next');
     }
 
     lastParty = () => {
-        this.navigateParty('http://localhost:8089/api/party/last');
+        this.saveAndNavigateParty('last');
     }
 
     undoChanges = () => {
+        this.setState({ saveDisabled: true });
         if (this.state.party.partyCode != null) {
             console.log("Party Code: ", this.state.party.partyCode);
-            let url = 'http://localhost:8089/api/party/' + this.state.party.partyCode;
-            this.navigateParty(url);
+            const operation = this.state.party.partyCode;
+            this.saveAndNavigateParty(operation);
         } else {
             this.firstParty();
         }
@@ -374,8 +436,9 @@ class Party extends Component {
                             </Button>
                             <Button
                                 variant="primary"
-                                onClick={() => this.saveParty("Party saved successfully.")}
+                                onClick={() => this.savePartyShowMessage("Party saved successfully.")}
                                 className="mr-1" style={smallButtonStyle}
+                                disabled={this.state.saveDisabled}
                                 active>Save
                             </Button>
                             <Button

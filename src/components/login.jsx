@@ -1,14 +1,40 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import { FormControl, Button } from 'react-bootstrap';
 
 class Login extends Component {
-    state = {}
+    state = {
+        loginRequest: {
+            usernameOrEmail: '',
+            password: ''
+        },
+        loginDisabled: true
+    }
+
+    handleChanges = (event) => {
+        const { name, value } = event.target;
+        let { loginRequest, loginDisabled } = this.state;
+        loginRequest[name] = value;
+
+        if (loginRequest.usernameOrEmail.length > 3 && loginRequest.password.length > 3) {
+            loginDisabled = false;
+        } else {
+            loginDisabled = true;
+        }
+        this.setState({ loginRequest, loginDisabled });
+    }
+
+    handleLogin = (e) => {
+        e.preventDefault();
+        this.props.handleLogin(this.state.loginRequest);
+    }
+
     render() {
         const windowsHeight = {
             height: window.innerHeight + "px"
         }
         return (<>
-            <div className="bg-gradient-primary" style={windowsHeight}>
+            <div className="bg-gradient-primary"
+                style={windowsHeight}>
                 <div className="container">
                     <div className="row justify-content-center">
                         <div className="col-xl-10 col-lg-12 col-md-9">
@@ -21,24 +47,49 @@ class Login extends Component {
                                                 <div className="text-center">
                                                     <h1 className="h4 text-gray-900 mb-4">Administration</h1>
                                                 </div>
-                                                <form className="user">
+                                                <form className="user"
+                                                    onSubmit={this.handleLogin}>
                                                     <div className="form-group">
-                                                        <input type="email" className="form-control form-control-user" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Enter Email Address..." />
+                                                        <FormControl
+                                                            // type="email"
+                                                            className="form-control form-control-user"
+                                                            name="usernameOrEmail"
+                                                            placeholder="Enter Username/Email..."
+                                                            aria-label="Enter Username/Email..."
+                                                            value={this.state.loginRequest.usernameOrEmail || ''}
+                                                            onChange={this.handleChanges}
+                                                        />
                                                     </div>
                                                     <div className="form-group">
-                                                        <input type="password" className="form-control form-control-user" id="exampleInputPassword" placeholder="Password" />
+                                                        <FormControl
+                                                            type="password"
+                                                            className="form-control form-control-user"
+                                                            name="password"
+                                                            placeholder="Password"
+                                                            aria-label="Password"
+                                                            value={this.state.loginRequest.password || ''}
+                                                            onChange={this.handleChanges}
+                                                        />
                                                     </div>
                                                     <div className="form-group">
                                                         <div className="custom-control custom-checkbox small">
-                                                            <input type="checkbox" className="custom-control-input" id="customCheck" />
-                                                            <label className="custom-control-label" htmlFor="customCheck">Remember Me</label>
+                                                            <input type="checkbox"
+                                                                className="custom-control-input"
+                                                                id="customCheck"
+                                                            />
+                                                            <label className="custom-control-label"
+                                                                htmlFor="customCheck">Remember Me</label>
                                                         </div>
                                                     </div>
-                                                    <Link className="btn btn-primary btn-user btn-block" to="/item">Login</Link>
+                                                    <Button className="btn btn-primary btn-user btn-block"
+                                                        disabled={this.state.loginDisabled}
+                                                        type="submit">Login
+                                                    </Button>
                                                 </form>
                                                 <hr />
                                                 <div className="text-center">
-                                                    <a className="small" href="forgot-password.html">Forgot Password?</a>
+                                                    <a className="small"
+                                                        href="forgot-password.html">Forgot Password?</a>
                                                 </div>
                                             </div>
                                         </div>

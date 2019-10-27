@@ -4,6 +4,8 @@ import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 import 'react-toastify/dist/ReactToastify.css'
 import 'react-widgets/dist/css/react-widgets.css'
+import { request } from './util/APIUtils'
+import { API_PARTY_BALANCE_URL, ACCESS_TOKEN } from './constant'
 
 class PartyBalance extends Component {
 
@@ -31,8 +33,12 @@ class PartyBalance extends Component {
         console.log("Cell old value: ", balances[index][name]);
         balances[index][name] = value;
         party.partyBalances = balances;
-        await this.props.addBalanceIntoParty(balances);
-        this.setState({ party });
+        try {
+            await this.props.addBalanceIntoParty(balances);
+            this.setState({ party });
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     addBalance = async () => {
@@ -41,8 +47,12 @@ class PartyBalance extends Component {
         let balances = party.partyBalances;
         balances.push(newBalance);
         party.partyBalances = balances;
-        await this.props.addBalanceIntoParty(balances);
-        this.setState({ party });
+        try {
+            await this.props.addBalanceIntoParty(balances);
+            this.setState({ party });
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     deleteBalance = async () => {
@@ -50,18 +60,25 @@ class PartyBalance extends Component {
         let balances = party.partyBalances;
         let id = balances[this.state.balanceIndex]["partyBalanceId"];
         if (id != null) {
-            axios.delete('http://localhost:8089/api/balance/delete/' + id)
-                .then(res => {
-                    console.log("Delete: Response: ", res);
-                })
-                .catch(err => {
-                    console.log(err);
-                });
+            const options = {
+                url: API_PARTY_BALANCE_URL + 'delete/' + id,
+                method: 'DELETE'
+            };
+            try {
+                const res = await request(options);
+                console.log("Delete: Response: ", res);
+            } catch (error) {
+                console.log(error);
+            }
         }
         balances.splice(this.state.balanceIndex, 1);
         party.partyBalances = balances;
-        await this.props.addBalanceIntoParty(balances);
-        this.setState({ party, balanceAlert: false });
+        try {
+            await this.props.addBalanceIntoParty(balances);
+            this.setState({ party, balanceAlert: false });
+        } catch (error) {
+            console.log(error);
+        }
     }
 
 

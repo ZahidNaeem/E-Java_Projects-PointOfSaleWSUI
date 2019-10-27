@@ -4,6 +4,9 @@ import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 import 'react-toastify/dist/ReactToastify.css'
 import 'react-widgets/dist/css/react-widgets.css'
+import { request } from './util/APIUtils'
+import { API_ITEM_STOCK_URL, ACCESS_TOKEN } from './constant'
+
 class ItemStock extends Component {
 
     state = {
@@ -30,7 +33,11 @@ class ItemStock extends Component {
         console.log("Cell old value: ", stocks[index][name]);
         stocks[index][name] = value;
         item.itemStocks = stocks;
-        await this.props.addStockIntoItem(stocks);
+        try {
+            await this.props.addStockIntoItem(stocks);
+        } catch (error) {
+            console.log(error);
+        }
         this.setState({ item });
     }
 
@@ -43,7 +50,11 @@ class ItemStock extends Component {
         let stocks = [...this.state.item.itemStocks];
         stocks.push(newStock);
         item.itemStocks = stocks;
-        await this.props.addStockIntoItem(stocks);
+        try {
+            await this.props.addStockIntoItem(stocks);
+        } catch (error) {
+            console.log(error);
+        }
         this.setState({ item });
     }
 
@@ -58,13 +69,25 @@ class ItemStock extends Component {
         let stocks = [...this.state.item.itemStocks];
         let id = stocks[this.state.stockIndex]["itemStockId"];
         if (id != null) {
-            const res = await axios.delete('http://localhost:8089/api/stock/delete/' + id);
-            console.log("Delete: Response: ", res);
+            const options = {
+                url: API_ITEM_STOCK_URL + 'delete/' + id,
+                method: 'DELETE'
+            };
+            try {
+                const res = await request(options);
+                console.log("Delete: Response: ", res);
+            } catch (error) {
+                console.log(error);
+            }
         }
         stocks.splice(this.state.stockIndex, 1);
         item.itemStocks = stocks;
-        await this.props.addStockIntoItem(stocks);
-        this.setState({ item, stockAlert: false });
+        try {
+            await this.props.addStockIntoItem(stocks);
+            this.setState({ item, stockAlert: false });
+        } catch (error) {
+            console.log(error);
+        }
     }
 
 

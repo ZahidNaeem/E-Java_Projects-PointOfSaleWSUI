@@ -5,6 +5,9 @@ import SweetAlert from 'react-bootstrap-sweetalert'
 import 'react-toastify/dist/ReactToastify.css'
 import 'react-widgets/dist/css/react-widgets.css'
 import Select from 'react-select'
+import { request } from './util/APIUtils'
+import { API_ITEM_URL, API_INVOICE_DTL_URL, ACCESS_TOKEN } from './constant'
+
 class PoDtl extends Component {
     state = {
         invoice: {},
@@ -14,7 +17,11 @@ class PoDtl extends Component {
     }
 
     async componentDidMount() {
-        await this.populateItems();
+        try {
+            await this.populateItems();
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     componentWillReceiveProps(props) {
@@ -34,15 +41,23 @@ class PoDtl extends Component {
         const invoiceDetails = invoice.invoiceDtls;
         invoiceDetails[this.state.invoiceDtlIndex][value.name] = name.value;
         const currRow = invoiceDetails[this.state.invoiceDtlIndex];
-        const itemPrice = await this.populateItemPrice(currRow['item']);
-        console.log("Item Price:", itemPrice);
-        if (null !== itemPrice) {
-            currRow['itemPrice'] = itemPrice;
+        try {
+            const itemPrice = await this.populateItemPrice(currRow['item']);
+            console.log("Item Price:", itemPrice);
+            if (null !== itemPrice) {
+                currRow['itemPrice'] = itemPrice;
+            }
+        } catch (error) {
+            console.log(error);
         }
         invoice.invoiceDtls = invoiceDetails;
-        await this.props.addDetailsIntoInvoice(invoiceDetails);
-        this.setState({ invoice });
-        console.log("handleInvoiceDetailsSelectChange end");
+        try {
+            await this.props.addDetailsIntoInvoice(invoiceDetails);
+            this.setState({ invoice });
+            console.log("handleInvoiceDetailsSelectChange end");
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     handleInvoiceDetailsComboboxChange = (value, name) => {
@@ -55,16 +70,23 @@ class PoDtl extends Component {
 
     async populateItems() {
         let items = [];
-        const res = await axios.get('http://localhost:8089/api/item/all');
-        res.data.forEach(element => {
-            items.push({
-                value: element.itemCode,
-                label: element.itemDesc,
-                uom: element.itemUom,
-                salePrice: element.salePrice
+        const options = {
+            url: API_ITEM_URL + 'all',
+            method: 'GET'
+        };
+        try {
+            const res = await request(options);
+            res.data.forEach(element => {
+                items.push({
+                    value: element.itemCode,
+                    label: element.itemDesc,
+                    uom: element.itemUom,
+                    salePrice: element.salePrice
+                });
             });
-        });
-
+        } catch (error) {
+            console.log(error);
+        }
         this.setState({ items });
         console.log("Items: ", items);
 
@@ -116,8 +138,12 @@ class PoDtl extends Component {
         console.log("Cell old value: ", invoiceDetails[index][name]);
         invoiceDetails[index][name] = value;
         invoice.invoiceDtls = invoiceDetails;
-        await this.props.addDetailsIntoInvoice(invoiceDetails);
-        this.setState({ invoice });
+        try {
+            await this.props.addDetailsIntoInvoice(invoiceDetails);
+            this.setState({ invoice });
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     addinvoiceDtl = async () => {
@@ -126,22 +152,38 @@ class PoDtl extends Component {
         let invoiceDetails = invoice.invoiceDtls;
         invoiceDetails.push(newinvoiceDtl);
         invoice.invoiceDtls = invoiceDetails;
-        await this.props.addDetailsIntoInvoice(invoiceDetails);
-        this.setState({ invoice });
+        try {
+            await this.props.addDetailsIntoInvoice(invoiceDetails);
+            this.setState({ invoice });
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     deleteinvoiceDtl = async () => {
         let invoice = { ...this.state.invoice };
         let invoiceDetails = invoice.invoiceDtls;
-        let id = invoiceDetails[this.state.invoiceDtlIndex]["invoiceinvoiceDtlId"];
+        let id = invoiceDetails[this.state.invoiceDtlIndex]["invoiceDtlId"];
         if (id != null) {
-            const res = await axios.delete('http://localhost:8089/api/invoiceDetail/delete/' + id);
-            console.log("Delete: Response: ", res);
+            const options = {
+                url: API_INVOICE_DTL_URL + 'delete/' + id,
+                method: 'DELETE'
+            };
+            try {
+                const res = await request(options);
+                console.log("Delete: Response: ", res);
+            } catch (error) {
+                console.log(error);
+            }
         }
         invoiceDetails.splice(this.state.invoiceDtlIndex, 1);
         invoice.invoiceDtls = invoiceDetails;
-        await this.props.addDetailsIntoInvoice(invoiceDetails);
-        this.setState({ invoice, invoiceDtlAlert: false });
+        try {
+            await this.props.addDetailsIntoInvoice(invoiceDetails);
+            this.setState({ invoice, invoiceDtlAlert: false });
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     validateRow = (invoiceDetail) => {

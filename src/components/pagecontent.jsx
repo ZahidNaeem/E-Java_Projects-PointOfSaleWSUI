@@ -10,7 +10,9 @@ class PageContent extends Component {
 
   checkPath = () => {
     const { pathname } = this.props;
-    if (pathname === "/dashboard") {
+    console.log("Path", pathname);
+
+    if (pathname === "/" || pathname === "/dashboard") {
       return <><h1 className="text-center h3 mb-4 text-gray-800">Dashboard</h1><Dashboard /></>;
     } else if (pathname === "/item") {
       return <><h1 className="text-center h3 mb-4 text-gray-800">Item Management</h1><Item /></>;
@@ -23,7 +25,7 @@ class PageContent extends Component {
   render() {
     return (
       <div id="content-wrapper" className="d-flex flex-column">
-        <Navbar />
+        <Navbar  {...this.props}/>
         <div id="content">
           <div className="container-fluid">
             {this.checkPath()}

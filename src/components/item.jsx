@@ -8,7 +8,7 @@ import { Combobox } from 'react-widgets'
 import ItemStock from './itemStock'
 import { request } from './util/APIUtils'
 import { API_ITEM_URL, ACCESS_TOKEN } from './constant'
-import { async } from 'q';
+import { async } from 'q'
 
 class Item extends Component {
 
@@ -61,11 +61,12 @@ class Item extends Component {
     }
 
     saveItem = async () => {
-        if (this.state.item.itemDesc === undefined || this.state.item.itemDesc === null || this.state.item.itemDesc === '') {
+        const { itemDesc, itemUom, effectiveStartDate } = this.state.item;
+        if (itemDesc === undefined || itemDesc === null || itemDesc === '') {
             toast.error("Item Desc. is required field");
-        } else if (this.state.item.itemUom === undefined || this.state.item.itemUom === null || this.state.item.itemUom === '') {
+        } else if (itemUom === undefined || itemUom === null || itemUom === '') {
             toast.error("Item U.O.M is required field");
-        } else if (this.state.item.effectiveStartDate === undefined || this.state.item.effectiveStartDate === null || this.state.item.effectiveStartDate === '') {
+        } else if (effectiveStartDate === undefined || effectiveStartDate === null || effectiveStartDate === '') {
             toast.error("Eff. start date is required field");
         } else {
             console.log("Post: Object sent: ", this.state.item);
@@ -74,84 +75,73 @@ class Item extends Component {
                 method: 'POST',
                 data: this.state.item
             };
-            request(options)
-                .then(res => {
-                    console.log("Post: Object received: ", res.data);
-                    const { item, navigationDtl } = res.data;
-                    const saveDisabled = true;
-                    this.setState({ item, navigationDtl, saveDisabled });
-                })
-                .catch(err => {
-                    console.log(err);
+            try {
+                const res = await request(options);
+                console.log("Post: Object received: ", res.data);
+                const { item, navigationDtl } = res.data;
+                this.setState({ item, navigationDtl, saveDisabled: true });
+            } catch (error) {
+                console.log(error);
 
-                });
+            }
         }
     }
 
-    saveItemShowMessage = (message) => {
-        if (this.state.item.itemDesc === undefined || this.state.item.itemDesc === null || this.state.item.itemDesc === '') {
-            toast.error("Item Desc. is required field");
-        } else if (this.state.item.itemUom === undefined || this.state.item.itemUom === null || this.state.item.itemUom === '') {
-            toast.error("Item U.O.M is required field");
-        } else if (this.state.item.effectiveStartDate === undefined || this.state.item.effectiveStartDate === null || this.state.item.effectiveStartDate === '') {
-            toast.error("Eff. start date is required field");
-        } else {
-            this.saveItem();
-            toast.success(message);
+    saveItemShowMessage = async (message) => {
+        try {
+            await this.saveItem();
+        } catch (error) {
+            console.log(error);
         }
+        toast.success(message);
     }
 
-    deleteItem = () => {
+    deleteItem = async () => {
         if (this.state.item.itemCode != null) {
             console.log("Delete: Item Code sent: ", this.state.item.itemCode);
             const options = {
                 url: API_ITEM_URL + 'delete/' + this.state.item.itemCode,
                 method: 'DELETE'
             };
-            request(options)
-                .then(res => {
-                    console.log("Delete: Response: ", res);
-                    const { item, navigationDtl } = res.data;
-                    const saveDisabled = true;
-                    this.setState({ item, navigationDtl, saveDisabled });
-                })
-                .catch(err => {
-                    console.log(err);
-                })
+            try {
+                const res = await request(options);
+                console.log("Delete: Response: ", res);
+                const { item, navigationDtl } = res.data;
+                this.setState({ item, navigationDtl, saveDisabled: true });
+            } catch (error) {
+                console.log(error);
+
+            }
         }
         this.setState({
             itemAlert: false
         });
     }
 
-    navigateItem = (operation) => {
+    navigateItem = async (operation) => {
         const options = {
             url: API_ITEM_URL + operation,
             method: 'GET'
         };
-        request(options)
-            .then(res => {
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl })
-                console.log(this.state.item);
-            })
-            .catch(err => {
-                console.log(err);
-
-            });
+        try {
+            const res = await request(options);
+            const { item, navigationDtl } = res.data;
+            this.setState({ item, navigationDtl })
+            console.log(this.state.item);
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     saveAndNavigateItem = async (operation) => {
         const { saveDisabled } = this.state;
         if (!saveDisabled) {
-            this.saveItem()
-                .then(() => {
-                    this.navigateItem(operation);
-                })
-                .catch(err => {
-                    console.log(err);
-
-                });
+            try {
+                await this.saveItem();
+            } catch (error) {
+                console.log(error);
+            }
+            this.navigateItem(operation);
         } else {
             this.navigateItem(operation);
         }

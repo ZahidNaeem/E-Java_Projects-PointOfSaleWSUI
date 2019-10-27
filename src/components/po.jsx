@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { InputGroup, FormControl, Button, ButtonToolbar, Form } from 'react-bootstrap'
-import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -8,6 +7,9 @@ import 'react-widgets/dist/css/react-widgets.css'
 import Select from 'react-select'
 import Moment from 'moment'
 import PoDtl from './poDtl'
+import { request } from './util/APIUtils'
+import { API_PO_INVOICE_URL, API_PARTY_URL, ACCESS_TOKEN } from './constant'
+
 class PO extends Component {
 
     state = {
@@ -15,26 +17,39 @@ class PO extends Component {
         navigationDtl: {},
         parties: [],
         partyName: "",
-        invoiceAlert: false
+        invoiceAlert: false,
+        saveDisabled: true
     }
 
     async componentDidMount() {
-        await this.populateParties();
-        this.firstInvoice();
+        try {
+            await this.populateParties();
+            this.firstInvoice();
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     async populateParties() {
         console.log("Start populate parties");
 
-        let parties = [];
-        const res = await axios.get('http://localhost:8089/api/party/all');
-        console.log("Stop populate parties");
-        res.data.forEach(element => {
-            parties.push({
-                value: element.partyCode,
-                label: element.partyName
+        const parties = [];
+        const options = {
+            url: API_PARTY_URL + 'all',
+            method: 'GET'
+        };
+        try {
+            const res = await request(options);
+            console.log("Stop populate parties");
+            res.data.forEach(element => {
+                parties.push({
+                    value: element.partyCode,
+                    label: element.partyName
+                });
             });
-        });
+        } catch (error) {
+            console.log(error);
+        }
         this.setState({ parties });
     }
 
@@ -52,11 +67,33 @@ class PO extends Component {
 
     }
 
-    async navigateInvoice(url) {
-        const res = await axios.get(url);
-        const { invoice, navigationDtl } = res.data;
-        this.populatePartyName(invoice.party);
-        this.setState({ invoice, navigationDtl });
+    navigateInvoice = async (operation) => {
+        const options = {
+            url: API_PO_INVOICE_URL + operation,
+            method: 'GET'
+        };
+        try {
+            const res = await request(options);
+            const { invoice, navigationDtl } = res.data;
+            this.populatePartyName(invoice.party);
+            this.setState({ invoice, navigationDtl });
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    saveAndNavigateInvoice = async (operation) => {
+        const { saveDisabled } = this.state;
+        if (!saveDisabled) {
+            try {
+                await this.saveInvoice();
+            } catch (error) {
+                console.log(error);
+            }
+            this.navigateInvoice(operation);
+        } else {
+            this.navigateInvoice(operation);
+        }
     }
 
     handleInvoiceChange = (event) => {
@@ -65,20 +102,44 @@ class PO extends Component {
         console.log(value);
         let invoice = { ...this.state.invoice };
         invoice[name] = value;
-        this.setState({ invoice });
+        let saveDisabled = { ...this.state.saveDisabled };
+        const {invDate, party} = invoice;
+        if (invDate === undefined || invDate === null || invDate === '' ||
+        party === undefined || party === null || party === '') {
+            saveDisabled = true;
+        } else {
+            saveDisabled = false;
+        }
+        this.setState({ invoice, saveDisabled });
     }
 
     handleInvoiceSelectChange = (name, value) => {
         let invoice = { ...this.state.invoice };
         invoice[value.name] = name.value;
-        this.setState({ invoice });
+        let saveDisabled = { ...this.state.saveDisabled };
+        const {invDate, party} = invoice;
+        if (invDate === undefined || invDate === null || invDate === '' ||
+        party === undefined || party === null || party === '') {
+            saveDisabled = true;
+        } else {
+            saveDisabled = false;
+        }
+        this.setState({ invoice, saveDisabled });
         this.populatePartyName(invoice.party);
     }
 
     handleInvoiceComboboxChange = (value, name) => {
         let invoice = { ...this.state.invoice };
         invoice[name] = value;
-        this.setState({ invoice });
+        let saveDisabled = { ...this.state.saveDisabled };
+        const {invDate, party} = invoice;
+        if (invDate === undefined || invDate === null || invDate === '' ||
+        party === undefined || party === null || party === '') {
+            saveDisabled = true;
+        } else {
+            saveDisabled = false;
+        }
+        this.setState({ invoice, saveDisabled });
     }
 
     newInvoice = () => {
@@ -91,28 +152,55 @@ class PO extends Component {
         this.setState({ invoice, navigationDtl: { first: true, last: true } });
     }
 
-    saveInvoice = async (message) => {
-        if (this.state.invoice.invDate === undefined || this.state.invoice.invDate === null || this.state.invoice.invDate === '') {
+    saveInvoice = async () => {
+		const {invDate, party} = this.state.invoice;
+        if (invDate === undefined || invDate === null || invDate === '') {
             toast.error("PO date is required field");
-        } else if (this.state.invoice.party === undefined || this.state.invoice.party === null || this.state.invoice.party === '') {
+        } else if (party === undefined || party === null || party === '') {
             toast.error("Party is required field");
         } else {
             console.log("Post: Object sent: ", this.state.invoice);
-            const res = await axios.post('http://localhost:8089/api/invoice/po/save', this.state.invoice);
-            console.log("Post: Object received: ", res.data);
-            const { invoice, navigationDtl } = res.data;
-            this.setState({ invoice, navigationDtl, invoiceDetails: invoice.invoiceDtls });
-            toast.success(message);
+            const options = {
+                url: API_PO_INVOICE_URL + 'save',
+                method: 'POST',
+                data: this.state.invoice
+            };
+            try {
+                const res = await request(options);
+                console.log("Post: Object received: ", res.data);
+                const { invoice, navigationDtl } = res.data;
+                this.setState({ invoice, navigationDtl, invoiceDetails: invoice.invoiceDtls, saveDisabled: true });
+            } catch (error) {
+                console.log(error);
+            }
         }
     }
+
+    saveInvoiceShowMessage = async (message) => {
+        try {
+            await this.saveInvoice();
+        } catch (error) {
+            console.log(error);
+            
+        }
+            toast.success(message);
+        }
 
     deleteInvoice = async () => {
         if (this.state.invoice.invoiceCode != null) {
             console.log("Delete: Invoice Code sent: ", this.state.invoice.invoiceCode);
-            const res = await axios.delete('http://localhost:8089/api/invoice/po/delete/' + this.state.invoice.invoiceCode)
-            console.log("Delete: Response: ", res);
-            const { invoice, navigationDtl } = res.data;
-            this.setState({ invoice, navigationDtl, invoiceDetails: invoice.invoiceDtls });
+            const options = {
+                url: API_PO_INVOICE_URL + 'delete/' + this.state.invoice.invoiceCode,
+                method: 'DELETE'
+            };
+            try {
+                const res = await request(options);
+                console.log("Delete: Response: ", res);
+                const { invoice, navigationDtl } = res.data;
+                this.setState({ invoice, navigationDtl, invoiceDetails: invoice.invoiceDtls, saveDisabled: true });
+            } catch (error) {
+                console.log(error);
+            }
         }
         this.setState({
             invoiceAlert: false
@@ -120,25 +208,26 @@ class PO extends Component {
     }
 
     firstInvoice = () => {
-        this.navigateInvoice('http://localhost:8089/api/invoice/po/first');
+        this.navigateInvoice('first');
     }
 
     previousInvoice = () => {
-        this.navigateInvoice('http://localhost:8089/api/invoice/po/previous');
+        this.navigateInvoice('previous');
     }
 
     nextInvoice = () => {
-        this.navigateInvoice('http://localhost:8089/api/invoice/po/next');
+        this.navigateInvoice('next');
     }
 
     lastInvoice = () => {
-        this.navigateInvoice('http://localhost:8089/api/invoice/po/last');
+        this.navigateInvoice('last');
     }
 
     undoChanges = () => {
+        this.setState({saveDisabled: true});
         if (this.state.invoice.invoiceCode != null) {
             console.log("Invoice Code: ", this.state.invoice.invoiceCode);
-            let url = 'http://localhost:8089/api/invoice/po/' + this.state.invoice.invoiceCode;
+            let url = '' + this.state.invoice.invoiceCode;
             this.navigateInvoice(url);
         } else {
             this.firstInvoice();
@@ -313,8 +402,9 @@ class PO extends Component {
 
                         <Button
                             variant="primary"
-                            onClick={() => this.saveInvoice("Invoice saved successfully.")}
+                            onClick={() => this.saveInvoiceShowMessage("Invoice saved successfully.")}
                             className="mr-1" style={smallButtonStyle}
+                            disabled={this.state.saveDisabled}
                             active>Save
                             </Button>
 

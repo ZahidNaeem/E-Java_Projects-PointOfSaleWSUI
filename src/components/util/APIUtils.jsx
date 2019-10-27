@@ -1,16 +1,17 @@
 import { API_BASE_URL, ACCESS_TOKEN } from '../constant';
+import { toast } from 'react-toastify';
 import axios from 'axios';
 
 export async function request(options) {
-    const headers = new Headers({
-        'Content-Type': 'application/json',
-    })
+    const headers = {'Content-Type': 'application/json'};
 
     if (localStorage.getItem(ACCESS_TOKEN)) {
-        headers.append('Authorization', 'Bearer ' + localStorage.getItem(ACCESS_TOKEN))
+        headers['Authorization'] = 'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
+        console.log('Access Token:', localStorage.getItem(ACCESS_TOKEN));
+        
     }
 
-    const defaults = { headers };
+    const defaults = {headers};
     options = Object.assign({}, defaults, options);
     console.log("Options:", options);
 
@@ -21,6 +22,9 @@ export async function request(options) {
         return res;
     } catch (error) {
         console.log(error);
+        if(error.response.status === 401){
+            toast.error("You are not authorized to see data or your session is expired.");
+        }
 
     }
 };
@@ -44,16 +48,17 @@ export function createPoll(pollData) {
 } */
 
 export function login(loginRequest) {
-    return request({
-        url: API_BASE_URL + "/auth/signin",
+    const options = {
+        url: API_BASE_URL + "auth/signin",
         method: 'POST',
-        body: JSON.stringify(loginRequest)
-    });
+        data: loginRequest
+    }
+    return request(options);
 }
 
 export function signup(signupRequest) {
     return request({
-        url: API_BASE_URL + "/auth/signup",
+        url: API_BASE_URL + "auth/signup",
         method: 'POST',
         body: JSON.stringify(signupRequest)
     });
@@ -61,35 +66,44 @@ export function signup(signupRequest) {
 
 export function checkUsernameAvailability(username) {
     return request({
-        url: API_BASE_URL + "/user/checkUsernameAvailability?username=" + username,
+        url: API_BASE_URL + "user/checkUsernameAvailability?username=" + username,
         method: 'GET'
     });
 }
 
 export function checkEmailAvailability(email) {
     return request({
-        url: API_BASE_URL + "/user/checkEmailAvailability?email=" + email,
+        url: API_BASE_URL + "user/checkEmailAvailability?email=" + email,
         method: 'GET'
     });
 }
 
 
-export function getCurrentUser() {
+export async function getCurrentUser() {
     if (!localStorage.getItem(ACCESS_TOKEN)) {
         return Promise.reject("No access token set.");
     }
 
-    return request({
-        url: API_BASE_URL + "/user/me",
+    return await request({
+        url: API_BASE_URL + "user/me",
         method: 'GET'
     });
 }
 
 export function getUserProfile(username) {
     return request({
-        url: API_BASE_URL + "/users/" + username,
+        url: API_BASE_URL + "users/" + username,
         method: 'GET'
     });
+}
+
+export function changePassword(changePasswordRequest) {
+    const options = {
+        url: API_BASE_URL + "user/changePassword",
+        method: 'POST',
+        data: changePasswordRequest
+    }
+    return request(options);
 }
 
 /* export function getUserCreatedPolls(username, page, size) {
