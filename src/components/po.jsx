@@ -7,8 +7,8 @@ import 'react-widgets/dist/css/react-widgets.css'
 import Select from 'react-select'
 import Moment from 'moment'
 import PoDtl from './poDtl'
-import { request } from './util/APIUtils'
-import { API_PO_INVOICE_URL, API_PARTY_URL, ACCESS_TOKEN } from './constant'
+import { request, isSuccessfullResponse } from './util/APIUtils'
+import { API_PO_INVOICE_URL, API_PARTY_URL } from './constant'
 
 class PO extends Component {
 
@@ -40,13 +40,15 @@ class PO extends Component {
         };
         try {
             const res = await request(options);
-            console.log("Stop populate parties");
-            res.data.forEach(element => {
-                parties.push({
-                    value: element.partyCode,
-                    label: element.partyName
+            if(isSuccessfullResponse(res)){
+                console.log("Stop populate parties");
+                res.data.forEach(element => {
+                    parties.push({
+                        value: element.partyCode,
+                        label: element.partyName
+                    });
                 });
-            });
+            }
         } catch (error) {
             console.log(error);
         }
@@ -74,9 +76,11 @@ class PO extends Component {
         };
         try {
             const res = await request(options);
-            const { invoice, navigationDtl } = res.data;
-            this.populatePartyName(invoice.party);
-            this.setState({ invoice, navigationDtl });
+            if(isSuccessfullResponse(res)){
+                const { invoice, navigationDtl } = res.data;
+                this.populatePartyName(invoice.party);
+                this.setState({ invoice, navigationDtl });
+            }
         } catch (error) {
             console.log(error);
         }
@@ -167,9 +171,11 @@ class PO extends Component {
             };
             try {
                 const res = await request(options);
-                console.log("Post: Object received: ", res.data);
-                const { invoice, navigationDtl } = res.data;
-                this.setState({ invoice, navigationDtl, invoiceDetails: invoice.invoiceDtls, saveDisabled: true });
+                if(isSuccessfullResponse(res)){
+                    console.log("Post: Object received: ", res.data);
+                    const { invoice, navigationDtl } = res.data;
+                    this.setState({ invoice, navigationDtl, invoiceDetails: invoice.invoiceDtls, saveDisabled: true });
+                }
             } catch (error) {
                 console.log(error);
             }
@@ -195,9 +201,11 @@ class PO extends Component {
             };
             try {
                 const res = await request(options);
-                console.log("Delete: Response: ", res);
-                const { invoice, navigationDtl } = res.data;
-                this.setState({ invoice, navigationDtl, invoiceDetails: invoice.invoiceDtls, saveDisabled: true });
+                if(isSuccessfullResponse(res)){
+                    console.log("Delete: Response: ", res);
+                    const { invoice, navigationDtl } = res.data;
+                    this.setState({ invoice, navigationDtl, invoiceDetails: invoice.invoiceDtls, saveDisabled: true });
+                }
             } catch (error) {
                 console.log(error);
             }

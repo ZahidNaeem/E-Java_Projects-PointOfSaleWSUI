@@ -4,7 +4,7 @@ import { Route, withRouter, Switch } from "react-router-dom";
 import { toast } from 'react-toastify';
 import Main from './components/main';
 import Login from './components/login';
-import { login, changePassword, getCurrentUser } from './components/util/APIUtils';
+import { login, changePassword, getCurrentUser, isSuccessfullResponse } from './components/util/APIUtils';
 import { ACCESS_TOKEN } from './components/constant';
 import { async } from 'q';
 
@@ -21,12 +21,14 @@ class App extends Component {
             isLoading: true
         });
         try {
-            const res = await getCurrentUser();
-            this.setState({
-                currentUser: res.data,
-                isAuthenticated: true,
-                isLoading: false
-            });
+                const res = await getCurrentUser();
+                if (isSuccessfullResponse(res)) {
+                    this.setState({
+                        currentUser: res.data,
+                        isAuthenticated: true,
+                        isLoading: false
+                    });
+                }
         } catch (error) {
             this.setState({
                 isLoading: false
@@ -39,11 +41,12 @@ class App extends Component {
         if (usernameOrEmail.length > 0 && password.length > 0) {
             try {
                 const res = await login(loginRequest);
-                localStorage.setItem(ACCESS_TOKEN, res.data.accessToken);
-                await this.loadCurrentUser();
-
-                this.props.history.push(this.props.location.pathname);
-                // this.context.router.push('/item');
+                if (isSuccessfullResponse(res)) {
+                    localStorage.setItem(ACCESS_TOKEN, res.data.accessToken);
+                    await this.loadCurrentUser();
+                    this.props.history.push(this.props.location.pathname);
+                    // this.context.router.push('/item');
+                }
             } catch (error) {
                 console.log(error);
             }
@@ -64,10 +67,12 @@ class App extends Component {
     handleChangePassword = async (changePasswordRequest) => {
         try {
             const res = await changePassword(changePasswordRequest);
-            if (res) {
-                toast.success("Password changed successfully.");
+            if (isSuccessfullResponse(res)) {
+                if (res) {
+                    toast.success("Password changed successfully.");
+                }
             } else {
-                toast.error("There is an error. Please contact support");
+                console.log("Save item response code", res.status);
             }
         } catch (error) {
             console.log(error.response.data);

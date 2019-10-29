@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import { FormControl, Button, ButtonToolbar, Table } from 'react-bootstrap'
-import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 import 'react-toastify/dist/ReactToastify.css'
 import 'react-widgets/dist/css/react-widgets.css'
 import Select from 'react-select'
-import { request } from './util/APIUtils'
-import { API_ITEM_URL, API_INVOICE_DTL_URL, ACCESS_TOKEN } from './constant'
+import { request, isSuccessfullResponse } from './util/APIUtils'
+import { API_ITEM_URL, API_INVOICE_DTL_URL } from './constant'
 
 class PoDtl extends Component {
     state = {
@@ -76,14 +75,16 @@ class PoDtl extends Component {
         };
         try {
             const res = await request(options);
-            res.data.forEach(element => {
-                items.push({
-                    value: element.itemCode,
-                    label: element.itemDesc,
-                    uom: element.itemUom,
-                    salePrice: element.salePrice
+            if(isSuccessfullResponse(res)){
+                res.data.forEach(element => {
+                    items.push({
+                        value: element.itemCode,
+                        label: element.itemDesc,
+                        uom: element.itemUom,
+                        salePrice: element.salePrice
+                    });
                 });
-            });
+            }
         } catch (error) {
             console.log(error);
         }
@@ -171,7 +172,9 @@ class PoDtl extends Component {
             };
             try {
                 const res = await request(options);
-                console.log("Delete: Response: ", res);
+                if(isSuccessfullResponse(res)){
+                    console.log("Delete: Response: ", res);
+                }
             } catch (error) {
                 console.log(error);
             }

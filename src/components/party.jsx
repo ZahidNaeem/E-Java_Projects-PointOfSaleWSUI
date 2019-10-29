@@ -6,8 +6,8 @@ import 'react-toastify/dist/ReactToastify.css'
 import 'react-widgets/dist/css/react-widgets.css'
 import { Combobox } from 'react-widgets'
 import PartyBalance from './partyBalance'
-import { request } from './util/APIUtils'
-import { API_PARTY_URL, ACCESS_TOKEN } from './constant'
+import { request, isSuccessfullResponse } from './util/APIUtils'
+import { API_PARTY_URL } from './constant'
 
 class Party extends Component {
 
@@ -76,9 +76,11 @@ class Party extends Component {
             };
             try {
                 const res = await request(options);
-                console.log("Post: Object received: ", res.data);
-                const { party, navigationDtl } = res.data;
-                this.setState({ party, navigationDtl, saveDisabled: true });
+                if(isSuccessfullResponse(res)){
+                    console.log("Post: Object received: ", res.data);
+                    const { party, navigationDtl } = res.data;
+                    this.setState({ party, navigationDtl, saveDisabled: true });
+                }
             } catch (error) {
                 console.log(error);
             }
@@ -103,9 +105,11 @@ class Party extends Component {
             };
             try {
                 const res = await request(options);
-                console.log("Delete: Response: ", res);
-                const { party, navigationDtl } = res.data;
-                this.setState({ party, navigationDtl, saveDisabled: true });
+                if(isSuccessfullResponse(res)){
+                    console.log("Delete: Response: ", res);
+                    const { party, navigationDtl } = res.data;
+                    this.setState({ party, navigationDtl, saveDisabled: true });
+                }
             } catch (error) {
                 console.log(error);
             }
@@ -122,9 +126,11 @@ class Party extends Component {
         };
         try {
             const res = await request(options);
-            const { party, navigationDtl } = res.data;
-            this.setState({ party, navigationDtl })
-            console.log(this.state.party);
+            if(isSuccessfullResponse(res)){
+                const { party, navigationDtl } = res.data;
+                this.setState({ party, navigationDtl })
+                console.log(this.state.party);
+            }
         } catch (error) {
             console.log(error);
 

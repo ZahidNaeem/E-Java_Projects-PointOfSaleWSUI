@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
 import { FormControl, Button, ButtonToolbar, Table } from 'react-bootstrap'
-import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 import 'react-toastify/dist/ReactToastify.css'
 import 'react-widgets/dist/css/react-widgets.css'
-import { request } from './util/APIUtils'
-import { API_PARTY_BALANCE_URL, ACCESS_TOKEN } from './constant'
+import { request, isSuccessfullResponse } from './util/APIUtils'
+import { API_PARTY_BALANCE_URL } from './constant'
 
 class PartyBalance extends Component {
 
@@ -66,7 +65,9 @@ class PartyBalance extends Component {
             };
             try {
                 const res = await request(options);
-                console.log("Delete: Response: ", res);
+                if(isSuccessfullResponse(res)){
+                    console.log("Delete: Response: ", res);
+                }
             } catch (error) {
                 console.log(error);
             }

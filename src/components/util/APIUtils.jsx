@@ -3,26 +3,24 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 
 export async function request(options) {
-    const headers = {'Content-Type': 'application/json'};
+    const headers = { 'Content-Type': 'application/json' };
 
     if (localStorage.getItem(ACCESS_TOKEN)) {
         headers['Authorization'] = 'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
         console.log('Access Token:', localStorage.getItem(ACCESS_TOKEN));
-        
+
     }
 
-    const defaults = {headers};
+    const defaults = { headers };
     options = Object.assign({}, defaults, options);
     console.log("Options:", options);
 
     try {
         const res = await axios(options);
-        console.log("Status:", res.status);
-        console.log("Response:", res);
         return res;
     } catch (error) {
         console.log(error);
-        if(error.response.status === 401){
+        if (error.response.status === 401) {
             toast.error("You are not authorized to see data or your session is expired.");
         }
 
@@ -104,6 +102,31 @@ export function changePassword(changePasswordRequest) {
         data: changePasswordRequest
     }
     return request(options);
+}
+
+export function isSuccessfullResponse(res) {
+    var callerName;
+    let re = /([^(]+)@|at ([^(]+) \(/g;
+    let aRegexResult = re.exec(new Error().stack);
+    let result = aRegexResult[1] || aRegexResult[2];
+    let arr = result.split("/");
+
+    callerName = arr[arr.length - 1];
+    console.log("Function:", callerName, "Response status:", res.status);
+    if (res.status > 199 && res.status < 300) {
+        return true;
+    } else {
+        return false;
+    }
+    /* try {
+        throw new Error();
+    } catch (e) {
+        // console.log("Log1", e.stack.split('at ')[3].split(' ')[0]);
+        // console.log("Log2", e.stack.split('at ')[3]);
+        console.log("Log3", );
+        return true;
+    } */
+    // }
 }
 
 /* export function getUserCreatedPolls(username, page, size) {

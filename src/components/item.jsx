@@ -6,8 +6,8 @@ import 'react-toastify/dist/ReactToastify.css'
 import 'react-widgets/dist/css/react-widgets.css'
 import { Combobox } from 'react-widgets'
 import ItemStock from './itemStock'
-import { request } from './util/APIUtils'
-import { API_ITEM_URL, ACCESS_TOKEN } from './constant'
+import { request, isSuccessfullResponse } from './util/APIUtils'
+import { API_ITEM_URL } from './constant'
 import { async } from 'q'
 
 class Item extends Component {
@@ -77,9 +77,11 @@ class Item extends Component {
             };
             try {
                 const res = await request(options);
-                console.log("Post: Object received: ", res.data);
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, saveDisabled: true });
+                if(isSuccessfullResponse(res)){
+                    console.log("Post: Object received: ", res.data);
+                    const { item, navigationDtl } = res.data;
+                    this.setState({ item, navigationDtl, saveDisabled: true });
+                }
             } catch (error) {
                 console.log(error);
 
@@ -105,9 +107,11 @@ class Item extends Component {
             };
             try {
                 const res = await request(options);
-                console.log("Delete: Response: ", res);
-                const { item, navigationDtl } = res.data;
-                this.setState({ item, navigationDtl, saveDisabled: true });
+                if(isSuccessfullResponse(res)){
+                    console.log("Delete: Response: ", res);
+                    const { item, navigationDtl } = res.data;
+                    this.setState({ item, navigationDtl, saveDisabled: true });
+                }
             } catch (error) {
                 console.log(error);
 
@@ -125,9 +129,11 @@ class Item extends Component {
         };
         try {
             const res = await request(options);
-            const { item, navigationDtl } = res.data;
-            this.setState({ item, navigationDtl })
-            console.log(this.state.item);
+            if(isSuccessfullResponse(res)){
+                const { item, navigationDtl } = res.data;
+                this.setState({ item, navigationDtl })
+                console.log(this.state.item);
+            }
         } catch (error) {
             console.log(error);
         }

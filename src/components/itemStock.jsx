@@ -4,8 +4,8 @@ import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 import 'react-toastify/dist/ReactToastify.css'
 import 'react-widgets/dist/css/react-widgets.css'
-import { request } from './util/APIUtils'
-import { API_ITEM_STOCK_URL, ACCESS_TOKEN } from './constant'
+import { request, isSuccessfullResponse } from './util/APIUtils'
+import { API_ITEM_STOCK_URL } from './constant'
 
 class ItemStock extends Component {
 
@@ -75,7 +75,9 @@ class ItemStock extends Component {
             };
             try {
                 const res = await request(options);
-                console.log("Delete: Response: ", res);
+                if(isSuccessfullResponse(res)){
+                    console.log("Delete: Response: ", res);
+                }
             } catch (error) {
                 console.log(error);
             }
