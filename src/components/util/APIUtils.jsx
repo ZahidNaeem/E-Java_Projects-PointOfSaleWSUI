@@ -1,13 +1,16 @@
 import { API_BASE_URL, ACCESS_TOKEN } from '../constant';
+import { AsyncStorage } from 'AsyncStorage';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { async } from 'q';
 
 export async function request(options) {
     const headers = { 'Content-Type': 'application/json' };
 
-    if (localStorage.getItem(ACCESS_TOKEN)) {
-        headers['Authorization'] = 'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
-        console.log('Access Token:', localStorage.getItem(ACCESS_TOKEN));
+    const accessToken = await retrieveDataFromAsyncStorage(ACCESS_TOKEN);
+    if (accessToken) {
+        headers['Authorization'] = 'Bearer ' + accessToken;
+        console.log('Access Token:', accessToken);
 
     }
 
@@ -78,7 +81,8 @@ export function checkEmailAvailability(email) {
 
 
 export async function getCurrentUser() {
-    if (!localStorage.getItem(ACCESS_TOKEN)) {
+    const accessToken = await retrieveDataFromAsyncStorage(ACCESS_TOKEN);
+    if (!accessToken) {
         return Promise.reject("No access token set.");
     }
 
@@ -129,22 +133,43 @@ export function isSuccessfullResponse(res) {
     // }
 }
 
-/* export function getUserCreatedPolls(username, page, size) {
-    page = page || 0;
-    size = size || POLL_LIST_SIZE;
+export async function storeDataIntoAsyncStorage(key, value) {
+    try {
+        await AsyncStorage.setItem(key, value);
+        console.log("Data successfully stored in AsyncStorage");
 
-    return request({
-        url: API_BASE_URL + "/users/" + username + "/polls?page=" + page + "&size=" + size,
-        method: 'GET'
-    });
-}
+    } catch (error) {
+        console.log("Error storing date into AsyncStorage", error);
 
-export function getUserVotedPolls(username, page, size) {
-    page = page || 0;
-    size = size || POLL_LIST_SIZE;
+    }
+};
 
-    return request({
-        url: API_BASE_URL + "/users/" + username + "/votes?page=" + page + "&size=" + size,
-        method: 'GET'
-    });
-} */
+export async function retrieveDataFromAsyncStorage(key) {
+    try {
+        const value = await AsyncStorage.getItem(key);
+        if (value !== null) {
+            return value;
+        }
+    } catch (error) {
+        console.log("Error retrieving data from AsyncStorage", error);
+        return null;
+    }
+};
+
+export async function removeDataFromAsyncStorage(key) {
+    try {
+        await AsyncStorage.removeItem(key);
+        console.log("Data successfully removed from AsyncStorage");
+    } catch (error) {
+        console.log("Error removing data from AsyncStorage", error);
+    }
+};
+
+export async function clearAsyncStorage() {
+    try {
+        await AsyncStorage.clear();
+        console.log("AsyncStorage cleared successfully.");
+    } catch (error) {
+        console.log("Error clearing AsyncStorage", error);
+    }
+};

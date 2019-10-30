@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 // import { Route, Switch, Redirect } from "react-router-dom";
+import {AsyncStorage} from 'AsyncStorage';
 import { Route, withRouter, Switch } from "react-router-dom";
 import { toast } from 'react-toastify';
 import Main from './components/main';
 import Login from './components/login';
-import { login, changePassword, getCurrentUser, isSuccessfullResponse } from './components/util/APIUtils';
+import { login, changePassword, getCurrentUser, isSuccessfullResponse, storeDataIntoAsyncStorage, removeDataFromAsyncStorage } from './components/util/APIUtils';
 import { ACCESS_TOKEN } from './components/constant';
 import { async } from 'q';
 
@@ -42,7 +43,7 @@ class App extends Component {
             try {
                 const res = await login(loginRequest);
                 if (isSuccessfullResponse(res)) {
-                    localStorage.setItem(ACCESS_TOKEN, res.data.accessToken);
+                    await storeDataIntoAsyncStorage(ACCESS_TOKEN, res.data.accessToken);
                     await this.loadCurrentUser();
                     this.props.history.push(this.props.location.pathname);
                     // this.context.router.push('/item');
@@ -53,8 +54,8 @@ class App extends Component {
         }
     }
 
-    handleLogout = (redirectTo = "/") => {
-        localStorage.removeItem(ACCESS_TOKEN);
+    handleLogout = async (redirectTo = "/") => {
+        await removeDataFromAsyncStorage(ACCESS_TOKEN);
 
         this.setState({
             currentUser: null,
@@ -90,7 +91,7 @@ class App extends Component {
             pauseOnHover: true,
             draggable: true
         });
-        // if (localStorage.getItem(ACCESS_TOKEN)) {
+        // if (AsyncStorage.getItem(ACCESS_TOKEN)) {
         if (this.state.currentUser !== null) {
             return (
                 <Switch>
