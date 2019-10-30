@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 // import { Route, Switch, Redirect } from "react-router-dom";
-import {AsyncStorage} from 'AsyncStorage';
+import { AsyncStorage } from 'AsyncStorage';
 import { Route, withRouter, Switch } from "react-router-dom";
 import { toast } from 'react-toastify';
 import Main from './components/main';
 import Login from './components/login';
 import { login, changePassword, getCurrentUser, isSuccessfullResponse, storeDataIntoAsyncStorage, removeDataFromAsyncStorage } from './components/util/APIUtils';
 import { ACCESS_TOKEN } from './components/constant';
+import { PrivateRoute } from './components/common/PrivateRoute';
 import { async } from 'q';
 
 class App extends Component {
@@ -22,14 +23,14 @@ class App extends Component {
             isLoading: true
         });
         try {
-                const res = await getCurrentUser();
-                if (isSuccessfullResponse(res)) {
-                    this.setState({
-                        currentUser: res.data,
-                        isAuthenticated: true,
-                        isLoading: false
-                    });
-                }
+            const res = await getCurrentUser();
+            if (isSuccessfullResponse(res)) {
+                this.setState({
+                    currentUser: res.data,
+                    isAuthenticated: true,
+                    isLoading: false
+                });
+            }
         } catch (error) {
             this.setState({
                 isLoading: false
@@ -91,8 +92,32 @@ class App extends Component {
             pauseOnHover: true,
             draggable: true
         });
+
+        const privateRoute = () => {
+            if (this.state.isAuthenticated) {
+                return <Route exact path="(/|/item|/party|/po|/dashboard)"
+                    render={(props) =>
+                        <Main {...props}
+                            handleLogout={this.handleLogout}
+                            currentUser={this.state.currentUser}
+                            handleChangePassword={this.handleChangePassword} />} />
+            } else {
+                return <Route path="/"
+                    render={(props) =>
+                        <Login {...props}
+                            handleLogin={this.handleLogin} />} />
+            }
+        }
+
+        return (
+            <Switch>
+                <privateRoute />
+            </Switch>
+        );
+
+
         // if (AsyncStorage.getItem(ACCESS_TOKEN)) {
-        if (this.state.currentUser !== null) {
+        if (this.state.isAuthenticated) {
             return (
                 <Switch>
                     {/* <Route exact path="/" render={(props) => <Main {...props} handleLogout={this.handleLogout} />} /> */}
@@ -110,6 +135,12 @@ class App extends Component {
         } else {
             return (<Login handleLogin={this.handleLogin} />);
         }
+        {/* <Route path="/login" render={(props) => <Login onLogin={this.handleLogin} {...props} />}></Route>
+        <PrivateRoute authenticated={this.state.isAuthenticated} path="(/|/item|/party|/po|/dashboard)" component={Main}
+            {...props}
+            handleLogout={this.handleLogout}
+            currentUser={this.state.currentUser}
+            handleChangePassword={this.handleChangePassword}></PrivateRoute> */}
     }
 }
 

@@ -7,7 +7,8 @@ class Login extends Component {
             usernameOrEmail: '',
             password: ''
         },
-        loginDisabled: true
+        loginDisabled: true,
+        rememberMe: false
     }
 
     handleChanges = (event) => {
