@@ -7,7 +7,7 @@ import Main from './components/main';
 import Login from './components/login';
 import { login, changePassword, getCurrentUser, isSuccessfullResponse, storeDataIntoAsyncStorage, removeDataFromAsyncStorage } from './components/util/APIUtils';
 import { ACCESS_TOKEN } from './components/constant';
-import { PrivateRoute } from './components/common/PrivateRoute';
+import NotFound from './components/common/NotFound'
 import { async } from 'q';
 
 class App extends Component {
@@ -46,7 +46,14 @@ class App extends Component {
                 if (isSuccessfullResponse(res)) {
                     await storeDataIntoAsyncStorage(ACCESS_TOKEN, res.data.accessToken);
                     await this.loadCurrentUser();
-                    this.props.history.push(this.props.location.pathname);
+                    let { pathname } = this.props.location;
+                    console.log("Path before change", pathname);
+
+                    if (pathname === '/login') {
+                        pathname = '/';
+                    }
+                    console.log("Path after change", pathname);
+                    this.props.history.push(pathname);
                     // this.context.router.push('/item');
                 }
             } catch (error) {
@@ -92,32 +99,8 @@ class App extends Component {
             pauseOnHover: true,
             draggable: true
         });
-
-        const privateRoute = () => {
-            if (this.state.isAuthenticated) {
-                return <Route exact path="(/|/item|/party|/po|/dashboard)"
-                    render={(props) =>
-                        <Main {...props}
-                            handleLogout={this.handleLogout}
-                            currentUser={this.state.currentUser}
-                            handleChangePassword={this.handleChangePassword} />} />
-            } else {
-                return <Route path="/"
-                    render={(props) =>
-                        <Login {...props}
-                            handleLogin={this.handleLogin} />} />
-            }
-        }
-
-        return (
-            <Switch>
-                <privateRoute />
-            </Switch>
-        );
-
-
         // if (AsyncStorage.getItem(ACCESS_TOKEN)) {
-        if (this.state.isAuthenticated) {
+        if (this.state.currentUser !== null) {
             return (
                 <Switch>
                     {/* <Route exact path="/" render={(props) => <Main {...props} handleLogout={this.handleLogout} />} /> */}
@@ -127,6 +110,7 @@ class App extends Component {
                                 handleLogout={this.handleLogout}
                                 currentUser={this.state.currentUser}
                                 handleChangePassword={this.handleChangePassword} />} />
+                    <Route component={NotFound}></Route>
                     {/* <Route path="/party" render={(props) => <Main {...props} handleLogout={this.handleLogout} />} />
                     <Route path="/po" render={(props) => <Main {...props} handleLogout={this.handleLogout} />} />
                     <Route path="/dashboard" render={(props) => <Main {...props} handleLogout={this.handleLogout} />} /> */}
@@ -135,12 +119,6 @@ class App extends Component {
         } else {
             return (<Login handleLogin={this.handleLogin} />);
         }
-        {/* <Route path="/login" render={(props) => <Login onLogin={this.handleLogin} {...props} />}></Route>
-        <PrivateRoute authenticated={this.state.isAuthenticated} path="(/|/item|/party|/po|/dashboard)" component={Main}
-            {...props}
-            handleLogout={this.handleLogout}
-            currentUser={this.state.currentUser}
-            handleChangePassword={this.handleChangePassword}></PrivateRoute> */}
     }
 }
 
