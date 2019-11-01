@@ -13,11 +13,10 @@ export const API_SRI_INVOICE_URL = API_INVOICE_URL + 'sri/';
 export const API_INVOICE_DTL_URL = API_BASE_URL + 'invoiceDtl/';
 
 export const ACCESS_TOKEN = 'accessToken';
-
-export const POLL_LIST_SIZE = 30;
-export const MAX_CHOICES = 6;
-export const POLL_QUESTION_MAX_LENGTH = 140;
-export const POLL_CHOICE_MAX_LENGTH = 40;
+export const LOGIN_REQUEST = 'loginRequest';
+export const USERNAME_OR_EMAIL = 'usernameOrEmail';
+export const PASSWORD = 'password';
+export const REMEMBER_ME = 'rememberMe';
 
 export const NAME_MIN_LENGTH = 4;
 export const NAME_MAX_LENGTH = 40;

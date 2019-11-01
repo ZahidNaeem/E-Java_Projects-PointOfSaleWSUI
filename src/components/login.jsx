@@ -1,7 +1,14 @@
 import React, { Component } from 'react';
 import { FormControl, Button } from 'react-bootstrap';
+import { storeDataIntoLocalStorage, retrieveDataFromLocalStorage, removeDataFromLocalStorage } from './util/APIUtils';
+import { USERNAME_OR_EMAIL, PASSWORD, REMEMBER_ME } from './constant'
 
 class Login extends Component {
+    constructor(props) {
+        super(props);
+        this.usernameOrEmailInput = React.createRef();
+    }
+
     state = {
         loginRequest: {
             usernameOrEmail: '',
@@ -11,22 +18,83 @@ class Login extends Component {
         rememberMe: false
     }
 
+    componentDidMount() {
+        console.log("Current Object", this.usernameOrEmailInput.current);
+
+        this.focusUsernameOrEmailInput();
+        const rememberMe = retrieveDataFromLocalStorage(REMEMBER_ME);
+        console.log("Remember Me", rememberMe);
+        if (rememberMe) {
+            const usernameOrEmail = retrieveDataFromLocalStorage(USERNAME_OR_EMAIL);
+            const password = retrieveDataFromLocalStorage(PASSWORD);
+
+            const { loginRequest } = this.state;
+            if (usernameOrEmail) {
+                loginRequest[USERNAME_OR_EMAIL] = usernameOrEmail;
+            }
+            if (usernameOrEmail) {
+                loginRequest[PASSWORD] = password;
+            }
+            console.log("Login request", loginRequest);
+
+            this.setState({ loginRequest, rememberMe: true }, () => {
+                this.loginButtonStatus();
+            });
+            console.log("State", this.state.loginRequest);
+        } else {
+            this.setState({ rememberMe: false });
+        }
+    }
+
+    focusUsernameOrEmailInput = () => {
+        this.usernameOrEmailInput.current.focus();
+    }
+
+    handleRememberMeChanges = (event) => {
+        const rememberMe = event.target.checked;
+        console.log("handleRememberMeChanges", rememberMe);
+        this.setState({ rememberMe });
+    }
+
+    toggleRememberMe = () => {
+        const { rememberMe } = this.state;
+        if (rememberMe) {
+            const { usernameOrEmail, password } = this.state.loginRequest;
+            storeDataIntoLocalStorage(REMEMBER_ME, true);
+            storeDataIntoLocalStorage(USERNAME_OR_EMAIL, usernameOrEmail);
+            storeDataIntoLocalStorage(PASSWORD, password);
+        } else {
+            removeDataFromLocalStorage(USERNAME_OR_EMAIL);
+            removeDataFromLocalStorage(PASSWORD);
+            storeDataIntoLocalStorage(REMEMBER_ME, false);
+        }
+    }
+
     handleChanges = (event) => {
         const { name, value } = event.target;
-        let { loginRequest, loginDisabled } = this.state;
+        let { loginRequest } = this.state;
         loginRequest[name] = value;
+        this.setState({ loginRequest }, () => {
+            this.loginButtonStatus();
+        });
+    }
+
+
+    handleLogin = async (e) => {
+        e.preventDefault();
+        await this.props.handleLogin(this.state.loginRequest);
+        this.toggleRememberMe();
+    }
+
+    loginButtonStatus = () => {
+        let { loginRequest, loginDisabled } = this.state;
 
         if (loginRequest.usernameOrEmail.length > 3 && loginRequest.password.length > 3) {
             loginDisabled = false;
         } else {
             loginDisabled = true;
         }
-        this.setState({ loginRequest, loginDisabled });
-    }
-
-    handleLogin = (e) => {
-        e.preventDefault();
-        this.props.handleLogin(this.state.loginRequest);
+        this.setState({ loginDisabled });
     }
 
     render() {
@@ -52,11 +120,13 @@ class Login extends Component {
                                                     onSubmit={this.handleLogin}>
                                                     <div className="form-group">
                                                         <FormControl
+                                                            type="text"
                                                             // type="email"
                                                             className="form-control form-control-user"
                                                             name="usernameOrEmail"
                                                             placeholder="Enter Username/Email..."
                                                             aria-label="Enter Username/Email..."
+                                                            ref={this.usernameOrEmailInput}
                                                             value={this.state.loginRequest.usernameOrEmail || ''}
                                                             onChange={this.handleChanges}
                                                         />
@@ -76,10 +146,12 @@ class Login extends Component {
                                                         <div className="custom-control custom-checkbox small">
                                                             <input type="checkbox"
                                                                 className="custom-control-input"
-                                                                id="customCheck"
+                                                                checked={this.state.rememberMe}
+                                                                onChange={this.handleRememberMeChanges}
+                                                                id="rememberMe"
                                                             />
                                                             <label className="custom-control-label"
-                                                                htmlFor="customCheck">Remember Me</label>
+                                                                htmlFor="rememberMe">Remember Me</label>
                                                         </div>
                                                     </div>
                                                     <Button className="btn btn-primary btn-user btn-block"

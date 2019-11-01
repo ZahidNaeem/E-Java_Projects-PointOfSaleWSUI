@@ -8,7 +8,6 @@ import { Combobox } from 'react-widgets'
 import ItemStock from './itemStock'
 import { request, isSuccessfullResponse } from './util/APIUtils'
 import { API_ITEM_URL } from './constant'
-import { async } from 'q'
 
 class Item extends Component {
 

@@ -1,13 +1,11 @@
 import { API_BASE_URL, ACCESS_TOKEN } from '../constant';
-import { AsyncStorage } from 'AsyncStorage';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { async } from 'q';
 
 export async function request(options) {
     const headers = { 'Content-Type': 'application/json' };
 
-    const accessToken = await retrieveDataFromAsyncStorage(ACCESS_TOKEN);
+    const accessToken = retrieveDataFromLocalStorage(ACCESS_TOKEN);
     if (accessToken) {
         headers['Authorization'] = 'Bearer ' + accessToken;
         console.log('Access Token:', accessToken);
@@ -29,24 +27,6 @@ export async function request(options) {
 
     }
 };
-
-/* export function getAllPolls(page, size) {
-    page = page || 0;
-    size = size || POLL_LIST_SIZE;
-
-    return request({
-        url: API_BASE_URL + "/polls?page=" + page + "&size=" + size,
-        method: 'GET'
-    });
-}
-
-export function createPoll(pollData) {
-    return request({
-        url: API_BASE_URL + "/polls",
-        method: 'POST',
-        body: JSON.stringify(pollData)         
-    });
-} */
 
 export function login(loginRequest) {
     const options = {
@@ -81,7 +61,7 @@ export function checkEmailAvailability(email) {
 
 
 export async function getCurrentUser() {
-    const accessToken = await retrieveDataFromAsyncStorage(ACCESS_TOKEN);
+    const accessToken = retrieveDataFromLocalStorage(ACCESS_TOKEN);
     if (!accessToken) {
         return Promise.reject("No access token set.");
     }
@@ -133,20 +113,20 @@ export function isSuccessfullResponse(res) {
     // }
 }
 
-export async function storeDataIntoAsyncStorage(key, value) {
+export function storeDataIntoLocalStorage(key, value) {
     try {
-        await AsyncStorage.setItem(key, value);
-        console.log("Data successfully stored in AsyncStorage");
+        localStorage.setItem(key, value);
+        console.log("Data successfully stored in localStorage");
 
     } catch (error) {
-        console.log("Error storing date into AsyncStorage", error);
+        console.log("Error storing date into localStorage", error);
 
     }
-};
+}
 
-export async function retrieveDataFromAsyncStorage(key) {
+export function retrieveDataFromLocalStorage(key) {
     try {
-        const value = await AsyncStorage.getItem(key);
+        const value = localStorage.getItem(key);
         if (value !== null) {
             return value;
         }
@@ -154,22 +134,27 @@ export async function retrieveDataFromAsyncStorage(key) {
         console.log("Error retrieving data from AsyncStorage", error);
         return null;
     }
-};
+}
 
-export async function removeDataFromAsyncStorage(key) {
+export function removeDataFromLocalStorage(key) {
     try {
-        await AsyncStorage.removeItem(key);
-        console.log("Data successfully removed from AsyncStorage");
+        localStorage.removeItem(key);
+
+        console.log("Data successfully removed from localStorage");
+        return true;
     } catch (error) {
-        console.log("Error removing data from AsyncStorage", error);
+        console.log("Error removing data from localStorage", error);
+        return false;
     }
 };
 
-export async function clearAsyncStorage() {
+export function clearLocalStorage() {
     try {
-        await AsyncStorage.clear();
-        console.log("AsyncStorage cleared successfully.");
+        localStorage.clear();
+        console.log("localStorage cleared successfully.");
+        return true;
     } catch (error) {
-        console.log("Error clearing AsyncStorage", error);
+        console.log("Error clearing localStorage", error);
+        return false;
     }
 };

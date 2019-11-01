@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { FormControl, Button, ButtonToolbar, Table } from 'react-bootstrap'
-import axios from 'axios'
 import SweetAlert from 'react-bootstrap-sweetalert'
 import 'react-toastify/dist/ReactToastify.css'
 import 'react-widgets/dist/css/react-widgets.css'

@@ -1,14 +1,12 @@
 import React, { Component } from 'react';
 // import { Route, Switch, Redirect } from "react-router-dom";
-import { AsyncStorage } from 'AsyncStorage';
 import { Route, withRouter, Switch } from "react-router-dom";
 import { toast } from 'react-toastify';
 import Main from './components/main';
 import Login from './components/login';
-import { login, changePassword, getCurrentUser, isSuccessfullResponse, storeDataIntoAsyncStorage, removeDataFromAsyncStorage } from './components/util/APIUtils';
+import { login, changePassword, getCurrentUser, isSuccessfullResponse, storeDataIntoLocalStorage, removeDataFromLocalStorage } from './components/util/APIUtils';
 import { ACCESS_TOKEN } from './components/constant';
 import NotFound from './components/common/NotFound'
-import { async } from 'q';
 
 class App extends Component {
 
@@ -44,7 +42,7 @@ class App extends Component {
             try {
                 const res = await login(loginRequest);
                 if (isSuccessfullResponse(res)) {
-                    await storeDataIntoAsyncStorage(ACCESS_TOKEN, res.data.accessToken);
+                    storeDataIntoLocalStorage(ACCESS_TOKEN, res.data.accessToken);
                     await this.loadCurrentUser();
                     let { pathname } = this.props.location;
                     console.log("Path before change", pathname);
@@ -63,7 +61,8 @@ class App extends Component {
     }
 
     handleLogout = async (redirectTo = "/") => {
-        await removeDataFromAsyncStorage(ACCESS_TOKEN);
+        const isRemoved = removeDataFromLocalStorage(ACCESS_TOKEN);
+        console.log("Item removed", isRemoved);
 
         this.setState({
             currentUser: null,
