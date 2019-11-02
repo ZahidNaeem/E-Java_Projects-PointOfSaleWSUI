@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { FormControl, Button } from 'react-bootstrap';
 import { storeDataIntoLocalStorage, retrieveDataFromLocalStorage, removeDataFromLocalStorage } from './util/APIUtils';
-import { USERNAME_OR_EMAIL, PASSWORD, REMEMBER_ME } from './constant'
+import { USERNAME_OR_EMAIL, PASSWORD, REMEMBER_ME, LOGIN_REQUEST } from './constant'
 
 class Login extends Component {
     constructor(props) {
@@ -20,27 +20,20 @@ class Login extends Component {
 
     componentDidMount() {
         console.log("Current Object", this.usernameOrEmailInput.current);
-
         this.focusUsernameOrEmailInput();
         const rememberMe = retrieveDataFromLocalStorage(REMEMBER_ME);
         console.log("Remember Me", rememberMe);
-        if (rememberMe) {
-            const usernameOrEmail = retrieveDataFromLocalStorage(USERNAME_OR_EMAIL);
-            const password = retrieveDataFromLocalStorage(PASSWORD);
-
-            const { loginRequest } = this.state;
-            if (usernameOrEmail) {
-                loginRequest[USERNAME_OR_EMAIL] = usernameOrEmail;
-            }
-            if (usernameOrEmail) {
-                loginRequest[PASSWORD] = password;
-            }
+        if (rememberMe === 'true') {
+            const loginRequest = JSON.parse(retrieveDataFromLocalStorage(LOGIN_REQUEST));
             console.log("Login request", loginRequest);
 
-            this.setState({ loginRequest, rememberMe: true }, () => {
-                this.loginButtonStatus();
-            });
-            console.log("State", this.state.loginRequest);
+            if (loginRequest) {
+                this.setState({ loginRequest, rememberMe: true }, () => {
+                    this.loginButtonStatus();
+                });
+                console.log("State", this.state.loginRequest);
+            }
+
         } else {
             this.setState({ rememberMe: false });
         }
@@ -59,13 +52,11 @@ class Login extends Component {
     toggleRememberMe = () => {
         const { rememberMe } = this.state;
         if (rememberMe) {
-            const { usernameOrEmail, password } = this.state.loginRequest;
+            const { loginRequest } = this.state;
             storeDataIntoLocalStorage(REMEMBER_ME, true);
-            storeDataIntoLocalStorage(USERNAME_OR_EMAIL, usernameOrEmail);
-            storeDataIntoLocalStorage(PASSWORD, password);
+            storeDataIntoLocalStorage(LOGIN_REQUEST, JSON.stringify(loginRequest));
         } else {
-            removeDataFromLocalStorage(USERNAME_OR_EMAIL);
-            removeDataFromLocalStorage(PASSWORD);
+            removeDataFromLocalStorage(LOGIN_REQUEST);
             storeDataIntoLocalStorage(REMEMBER_ME, false);
         }
     }
