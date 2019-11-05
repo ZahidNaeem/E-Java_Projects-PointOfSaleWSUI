@@ -3,10 +3,6 @@ import React, { Component } from 'react';
 import { FormControl, Button } from 'react-bootstrap';
 import { sendRecoveryEmail } from './util/APIUtils'
 
-const title = {
-  pageTitle: 'Forgot Password Screen',
-};
-
 class ForgotPassword extends Component {
   state = {
     email: '',
@@ -47,23 +43,24 @@ class ForgotPassword extends Component {
             showOtherError: false
           });
         }
-      } catch (error) {
-        console.error(error.response.data);
-        if (error.response.data === 'Email not registered') {
+        else if (res.data === 'Email not registered') {
           this.setState({
             messageFromServer: 'Email not registered',
             showNullError: false,
             showEmailNotFoundError: true,
             showOtherError: false
           });
+          console.log("State", this.state);
         } else {
           this.setState({
-            messageFromServer: error.response.data,
+            messageFromServer: res.data,
             showNullError: false,
             showEmailNotFoundError: false,
             showOtherError: true
           });
         }
+      } catch (error) {
+        console.error(error.response.data);
       }
     }
   };
@@ -112,12 +109,12 @@ class ForgotPassword extends Component {
                             type="submit">Reset Password
                                               </Button>
                         </form>
-                        {showNullError == true && (
+                        {showNullError && (
                           <div>
                             <p>Email address cannot be null.</p>
                           </div>
                         )}
-                        {showEmailNotFoundError == true && (
+                        {showEmailNotFoundError && (
                           <div>
                             <p>
                               That email address isn&apos;t recognized. Please try again or
@@ -128,7 +125,7 @@ class ForgotPassword extends Component {
                             >Register</a>
                           </div>
                         )}
-                        {showOtherError == true && (
+                        {showOtherError && (
                           <div>
                             <p>{messageFromServer}</p>
                           </div>
