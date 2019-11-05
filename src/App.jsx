@@ -4,14 +4,14 @@ import { Route, withRouter, Switch } from "react-router-dom";
 import { toast } from 'react-toastify';
 import Main from './components/main';
 import Login from './components/login';
-import { login, changePassword, getCurrentUser, isSuccessfullResponse, storeDataIntoLocalStorage, removeDataFromLocalStorage } from './components/util/APIUtils';
-import { ACCESS_TOKEN } from './components/constant';
+import { login, changePassword, getCurrentUser, isSuccessfullResponse, storeDataIntoLocalStorage, removeDataFromLocalStorage, retrieveDataFromLocalStorage } from './components/util/APIUtils';
+import { ACCESS_TOKEN, CURRENT_USER } from './components/constant';
 import NotFound from './components/common/NotFound'
+import ForgotPassword from './components/forgotPassword';
 
 class App extends Component {
 
     state = {
-        currentUser: null,
         isAuthenticated: false,
         isLoading: false
     }
@@ -23,8 +23,8 @@ class App extends Component {
         try {
             const res = await getCurrentUser();
             if (isSuccessfullResponse(res)) {
+                storeDataIntoLocalStorage(CURRENT_USER, JSON.stringify(res.data));
                 this.setState({
-                    currentUser: res.data,
                     isAuthenticated: true,
                     isLoading: false
                 });
@@ -61,11 +61,10 @@ class App extends Component {
     }
 
     handleLogout = async (redirectTo = "/") => {
-        const isRemoved = removeDataFromLocalStorage(ACCESS_TOKEN);
-        console.log("Item removed", isRemoved);
+        removeDataFromLocalStorage(ACCESS_TOKEN);
+        removeDataFromLocalStorage(CURRENT_USER);
 
         this.setState({
-            currentUser: null,
             isAuthenticated: false
         });
 
@@ -98,16 +97,22 @@ class App extends Component {
             pauseOnHover: true,
             draggable: true
         });
-        // if (AsyncStorage.getItem(ACCESS_TOKEN)) {
-        if (this.state.currentUser !== null) {
+
+        const currentUserSaved = retrieveDataFromLocalStorage(CURRENT_USER);
+
+        const currentUser = currentUserSaved !== null && currentUserSaved !== undefined ? JSON.parse(currentUserSaved) : null;
+        console.log("Current user", currentUser);
+
+
+        if (currentUser !== null) {
             return (
                 <Switch>
                     {/* <Route exact path="/" render={(props) => <Main {...props} handleLogout={this.handleLogout} />} /> */}
                     <Route exact path="(/|/item|/party|/po|/dashboard)"
                         render={(props) =>
                             <Main {...props}
+                                currentUser={currentUser}
                                 handleLogout={this.handleLogout}
-                                currentUser={this.state.currentUser}
                                 handleChangePassword={this.handleChangePassword} />} />
                     <Route component={NotFound}></Route>
                     {/* <Route path="/party" render={(props) => <Main {...props} handleLogout={this.handleLogout} />} />
@@ -116,7 +121,12 @@ class App extends Component {
                 </Switch>
             )
         } else {
-            return (<Login handleLogin={this.handleLogin} />);
+            return (
+                <Switch>
+                    <Route path="/forgotPassword" render={(props) => <ForgotPassword {...props} handleLogin={this.handleLogin} />} />
+                    <Route path="/" render={(props) => <Login {...props} handleLogin={this.handleLogin} />} />
+                </Switch>
+            )
         }
     }
 }

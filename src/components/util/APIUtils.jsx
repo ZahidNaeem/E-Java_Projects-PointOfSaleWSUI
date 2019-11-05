@@ -52,6 +52,13 @@ export function checkUsernameAvailability(username) {
     });
 }
 
+export function sendRecoveryEmail(email) {
+    return request({
+        url: API_BASE_URL + "auth/recoverPassword?email=" + email,
+        method: 'GET'
+    });
+}
+
 export function checkEmailAvailability(email) {
     return request({
         url: API_BASE_URL + "user/checkEmailAvailability?email=" + email,

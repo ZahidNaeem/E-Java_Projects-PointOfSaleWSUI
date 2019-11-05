@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { FormControl, Button } from 'react-bootstrap';
 import { storeDataIntoLocalStorage, retrieveDataFromLocalStorage, removeDataFromLocalStorage } from './util/APIUtils';
-import { USERNAME_OR_EMAIL, PASSWORD, REMEMBER_ME, LOGIN_REQUEST } from './constant'
+import { REMEMBER_ME, LOGIN_REQUEST } from './constant'
 
 class Login extends Component {
     constructor(props) {
@@ -153,7 +153,7 @@ class Login extends Component {
                                                 <hr />
                                                 <div className="text-center">
                                                     <a className="small"
-                                                        href="forgot-password.html">Forgot Password?</a>
+                                                        href="/forgotPassword">Forgot Password?</a>
                                                 </div>
                                             </div>
                                         </div>

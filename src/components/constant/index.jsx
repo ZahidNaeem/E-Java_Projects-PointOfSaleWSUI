@@ -14,6 +14,7 @@ export const API_INVOICE_DTL_URL = API_BASE_URL + 'invoiceDtl/';
 
 export const ACCESS_TOKEN = 'accessToken';
 export const LOGIN_REQUEST = 'loginRequest';
+export const CURRENT_USER = 'currentUser';
 export const USERNAME_OR_EMAIL = 'usernameOrEmail';
 export const PASSWORD = 'password';
 export const REMEMBER_ME = 'rememberMe';

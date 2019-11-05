@@ -5,7 +5,6 @@ class UserInformation extends Component {
   render() {
     const currentUser = this.props.currentUser;
     const userName = currentUser !== null ? currentUser.name : 'Unknown';
-    console.log(currentUser !== null ? currentUser.name : 'Unknown');
 
     return (<li className="nav-item dropdown no-arrow">
       <Link className="nav-link dropdown-toggle" to="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
