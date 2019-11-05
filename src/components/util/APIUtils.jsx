@@ -1,6 +1,7 @@
 import { API_BASE_URL, ACCESS_TOKEN } from '../constant';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import HttpStatus from 'http-status-codes';
 
 export async function request(options) {
     const headers = { 'Content-Type': 'application/json' };
@@ -21,9 +22,11 @@ export async function request(options) {
         return res;
     } catch (error) {
         console.log(error);
-        if (error.response.status === 401) {
-            toast.error("You are not authorized to see data or your session is expired.");
-        }
+        return Promise.reject(error);
+        // return error.response;
+        // if (error.response.status === HttpStatus.UNAUTHORIZED) {
+        //     toast.error("You are not authorized to see data or your session is expired.");
+        // }
 
     }
 };
@@ -104,7 +107,7 @@ export function isSuccessfullResponse(res) {
 
     callerName = arr[arr.length - 1];
     console.log("Function:", callerName, "Response status:", res.status);
-    if (res.status > 199 && res.status < 300) {
+    if (res.status === HttpStatus.OK) {
         return true;
     } else {
         return false;

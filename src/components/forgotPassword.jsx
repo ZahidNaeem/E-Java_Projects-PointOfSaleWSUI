@@ -1,16 +1,13 @@
 /* eslint-disable no-console */
 import React, { Component } from 'react';
 import { FormControl, Button } from 'react-bootstrap';
-import { sendRecoveryEmail } from './util/APIUtils'
+import { sendRecoveryEmail } from './util/APIUtils';
+import HttpStatus from 'http-status-codes';
 
 class ForgotPassword extends Component {
   state = {
     email: '',
-    showError: false,
-    messageFromServer: '',
-    showNullError: false,
-    showEmailNotFoundError: false,
-    showOtherError: false
+    message: ''
   };
 
   handleChange = (event) => {
@@ -27,54 +24,37 @@ class ForgotPassword extends Component {
     const { email } = this.state;
     if (email === '') {
       this.setState({
-        showError: false,
-        messageFromServer: '',
-        showNullError: true,
+        message: 'Email cannot be empty'
       });
     } else {
       try {
         const res = await sendRecoveryEmail(email);
-        console.log(res.data);
-        if (res.data === 'Recovery email sent') {
+        if (res.status === HttpStatus.OK) {
           this.setState({
-            messageFromServer: 'Recovery email sent',
-            showNullError: false,
-            showEmailNotFoundError: false,
-            showOtherError: false
-          });
-        }
-        else if (res.data === 'Email not registered') {
-          this.setState({
-            messageFromServer: 'Email not registered',
-            showNullError: false,
-            showEmailNotFoundError: true,
-            showOtherError: false
-          });
-          console.log("State", this.state);
-        } else {
-          this.setState({
-            messageFromServer: res.data,
-            showNullError: false,
-            showEmailNotFoundError: false,
-            showOtherError: true
+            message: res.data
           });
         }
       } catch (error) {
-        console.error(error.response.data);
+        console.error(error);
+        if (error.response !== undefined) {
+          this.setState({
+            message: error.response.data.message
+          });
+        } else {
+          this.setState({
+            message: 'Unknow error occurred. Please contact support'
+          });
+        }
       }
     }
   };
 
   render() {
-    console.log("Forgot Password");
-
     const windowsHeight = {
       height: window.innerHeight + "px"
     }
 
-    const {
-      email, messageFromServer, showNullError, showEmailNotFoundError, showOtherError
-    } = this.state;
+    const { email, message } = this.state;
 
     return (<>
       <div className="bg-gradient-primary"
@@ -99,6 +79,7 @@ class ForgotPassword extends Component {
                               // type="email"
                               className="form-control form-control-user"
                               name="email"
+                              autoFocus
                               placeholder="Enter Registered Email..."
                               aria-label="Enter Registered Email..."
                               value={email}
@@ -109,32 +90,10 @@ class ForgotPassword extends Component {
                             type="submit">Reset Password
                                               </Button>
                         </form>
-                        {showNullError && (
-                          <div>
-                            <p>Email address cannot be null.</p>
-                          </div>
-                        )}
-                        {showEmailNotFoundError && (
-                          <div>
-                            <p>
-                              That email address isn&apos;t recognized. Please try again or
-                              register for a new account.
-            </p>
-                            <a
-                              href="/register"
-                            >Register</a>
-                          </div>
-                        )}
-                        {showOtherError && (
-                          <div>
-                            <p>{messageFromServer}</p>
-                          </div>
-                        )}
-                        {messageFromServer === 'recovery email sent' && (
-                          <div>
-                            <h3>Password Reset Email Successfully Sent!</h3>
-                          </div>
-                        )}
+                        <br />
+                        <div>
+                          <p>{message}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
