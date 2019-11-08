@@ -8,6 +8,7 @@ import { login, changePassword, getCurrentUser, isSuccessfullResponse, storeData
 import { ACCESS_TOKEN, CURRENT_USER } from './components/constant';
 import NotFound from './components/common/NotFound'
 import ForgotPassword from './components/forgotPassword';
+import Signup from './components/Signup';
 
 class App extends Component {
 
@@ -124,6 +125,7 @@ class App extends Component {
             return (
                 <Switch>
                     <Route path="/forgotPassword" render={(props) => <ForgotPassword {...props} handleLogin={this.handleLogin} />} />
+                    <Route path="/signup" render={(props) => <Signup {...props} handleLogin={this.handleLogin} />} />
                     <Route path="/" render={(props) => <Login {...props} handleLogin={this.handleLogin} />} />
                 </Switch>
             )
