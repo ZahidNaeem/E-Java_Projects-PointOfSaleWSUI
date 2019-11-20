@@ -11,6 +11,7 @@ import {
 
 import { Form, Input, Button, notification } from 'antd';
 import { async } from 'q';
+
 const FormItem = Form.Item;
 
 class Signup extends Component {
@@ -55,11 +56,13 @@ class Signup extends Component {
             username: this.state.username.value,
             email: this.state.email.value,
             password: this.state.password.value,
-            organization: this.state.organization.value,
+            organization: 1,
             role: [...this.state.role]
         };
         try {
             const res = await signup(signupRequest);
+            console.log("Response:", res);
+
             if (isSuccessfullResponse(res)) {
                 notification.success({
                     message: 'Point of Sale App',
@@ -250,8 +253,9 @@ class Signup extends Component {
 
         try {
             const res = await checkUsernameAvailability(usernameValue);
+
             if (isSuccessfullResponse(res)) {
-                if (res.available) {
+                if (res.data === true) {
                     this.setState({
                         username: {
                             value: usernameValue,
@@ -306,7 +310,7 @@ class Signup extends Component {
         try {
             const res = await checkEmailAvailability(emailValue);
             if (isSuccessfullResponse(res)) {
-                if (res.available) {
+                if (res.data === true) {
                     this.setState({
                         email: {
                             value: emailValue,

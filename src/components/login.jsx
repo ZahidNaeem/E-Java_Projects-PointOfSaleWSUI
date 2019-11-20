@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { FormControl, Button } from 'react-bootstrap';
 import { storeDataIntoLocalStorage, retrieveDataFromLocalStorage, removeDataFromLocalStorage } from './util/APIUtils';
 import { REMEMBER_ME, LOGIN_REQUEST } from './constant'
+import FormItem from 'antd/lib/form/FormItem';
 
 class Login extends Component {
     constructor(props) {
@@ -154,6 +155,13 @@ class Login extends Component {
                                                 <div className="text-center">
                                                     <a className="small"
                                                         href="/forgotPassword">Forgot Password?</a>
+                                                </div>
+                                                <div className="text-center">
+                                                    <br />
+                                                    <FormItem className="small">
+                                                        Not a member?&nbsp;
+                                                        <a href="/signup">Register</a>
+                                                    </FormItem>
                                                 </div>
                                             </div>
                                         </div>

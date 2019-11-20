@@ -44,7 +44,8 @@ export function signup(signupRequest) {
     return request({
         url: API_BASE_URL + "auth/signup",
         method: 'POST',
-        body: JSON.stringify(signupRequest)
+        // body: JSON.stringify(signupRequest)
+        data: signupRequest
     });
 }
 
@@ -107,7 +108,7 @@ export function isSuccessfullResponse(res) {
 
     callerName = arr[arr.length - 1];
     console.log("Function:", callerName, "Response status:", res.status);
-    if (res.status === HttpStatus.OK) {
+    if (res.status === HttpStatus.OK || res.status === HttpStatus.CREATED) {
         return true;
     } else {
         return false;
