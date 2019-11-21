@@ -3,6 +3,8 @@ import { FormControl, Button } from 'react-bootstrap';
 import { storeDataIntoLocalStorage, retrieveDataFromLocalStorage, removeDataFromLocalStorage } from './util/APIUtils';
 import { REMEMBER_ME, LOGIN_REQUEST } from './constant'
 import FormItem from 'antd/lib/form/FormItem';
+import Popup from './common/popup';
+import Modal from './popup/model';
 
 class Login extends Component {
     constructor(props) {
@@ -162,6 +164,7 @@ class Login extends Component {
                                                         Not a member?&nbsp;
                                                         <a href="/signup">Register</a>
                                                     </FormItem>
+                                                    {this.handleRegisterPopup()}
                                                 </div>
                                             </div>
                                         </div>
@@ -174,6 +177,37 @@ class Login extends Component {
                 </div>
             </div>
         </>);
+    }
+
+    modalHeader = () => {
+        console.log('Entered in modelHeader');
+
+        return <Modal.Title><p>Login</p></Modal.Title>;
+    }
+
+    modalBody = () => {
+        return '';
+    }
+
+    /* modalFooter = () => {
+        return <Button
+            btnStyle="default"
+            onClick={() => this.handleRegisterPopup(false)}
+        >
+            Close
+    </Button>;
+    } */
+
+    handleRegisterPopup = () => {
+
+        return <Popup
+            modalHeader={this.modalHeader}
+            modalBody={this.modalBody}
+            // modalFooter={this.modalFooter}
+            show
+            showCloseButton
+            closeButtonTitle="Close 2"
+        />
     }
 }
 
