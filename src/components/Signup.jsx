@@ -10,7 +10,6 @@ import {
 } from './constant';
 
 import { Form, Input, Button, notification } from 'antd';
-import { async } from 'q';
 
 const FormItem = Form.Item;
 

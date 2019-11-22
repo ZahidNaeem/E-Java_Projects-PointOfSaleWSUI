@@ -21,8 +21,7 @@ class Popup extends Component {
 
     showCloseButton = (show) => {
         const {
-            closeButtonTitle,
-            ...props
+            closeButtonTitle
         } = this.props;
         if (show === true) {
             return <Button
@@ -41,8 +40,7 @@ class Popup extends Component {
             modalHeader,
             modalBody,
             modalFooter,
-            showCloseButton,
-            ...props
+            showCloseButton
         } = this.props;
         if (this.state.show === true) {
             return <Modal onClose={this.hidePopup}>
@@ -52,7 +50,7 @@ class Popup extends Component {
                 </Modal.Body>
                 <Modal.Footer>
                     {modalFooter !== undefined ? modalFooter() : ''}
-                    {this.showCloseButton(showCloseButton)};
+                    {this.showCloseButton(showCloseButton)}
     </Modal.Footer>
             </Modal>;
         } else {

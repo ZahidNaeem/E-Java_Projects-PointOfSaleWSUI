@@ -1,5 +1,4 @@
 import { API_BASE_URL, ACCESS_TOKEN } from '../constant';
-import { toast } from 'react-toastify';
 import axios from 'axios';
 import HttpStatus from 'http-status-codes';
 

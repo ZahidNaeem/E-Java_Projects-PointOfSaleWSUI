@@ -5,20 +5,21 @@ import { REMEMBER_ME, LOGIN_REQUEST } from './constant'
 import FormItem from 'antd/lib/form/FormItem';
 import Popup from './common/popup';
 import Modal from './popup/model';
+import { Link } from 'react-router-dom';
 
 class Login extends Component {
     constructor(props) {
         super(props);
         this.usernameOrEmailInput = React.createRef();
-    }
-
-    state = {
-        loginRequest: {
-            usernameOrEmail: '',
-            password: ''
-        },
-        loginDisabled: true,
-        rememberMe: false
+        this.state = {
+            loginRequest: {
+                usernameOrEmail: '',
+                password: ''
+            },
+            loginDisabled: true,
+            rememberMe: false,
+            showPopup: false
+        }
     }
 
     componentDidMount() {
@@ -95,6 +96,20 @@ class Login extends Component {
         const windowsHeight = {
             height: window.innerHeight + "px"
         }
+
+        const { showPopup } = this.state;
+
+        const registerPopup = showPopup === true ? (<Popup
+            modalHeader={this.modalHeader}
+            modalBody={this.modalBody}
+            // modalFooter={this.modalFooter}
+            show
+            showCloseButton={false}
+            closeButtonTitle="Close Button"
+        />) : null;
+
+        const showRegisterPopup = () => this.showRegisterPopup(true);
+
         return (<>
             <div className="bg-gradient-primary"
                 style={windowsHeight}>
@@ -162,9 +177,13 @@ class Login extends Component {
                                                     <br />
                                                     <FormItem className="small">
                                                         Not a member?&nbsp;
-                                                        <a href="/signup">Register</a>
+                                                        <Link
+                                                            // to="/signup"
+                                                            onClick={showRegisterPopup}>
+                                                            Register
+                                                            </Link>
+                                                        {registerPopup}
                                                     </FormItem>
-                                                    {this.handleRegisterPopup()}
                                                 </div>
                                             </div>
                                         </div>
@@ -186,7 +205,10 @@ class Login extends Component {
     }
 
     modalBody = () => {
-        return '';
+        return <Link
+            to="/signup">
+            Register as Buyer
+        </Link>;
     }
 
     /* modalFooter = () => {
@@ -198,17 +220,11 @@ class Login extends Component {
     </Button>;
     } */
 
-    handleRegisterPopup = () => {
-
-        return <Popup
-            modalHeader={this.modalHeader}
-            modalBody={this.modalBody}
-            // modalFooter={this.modalFooter}
-            show
-            showCloseButton
-            closeButtonTitle="Close 2"
-        />
+    showRegisterPopup = (bool) => {
+        this.setState({ showPopup: bool })
     }
+
+
 }
 
 export default Login;
